@@ -58,7 +58,7 @@ autoc_complete((K - N_corr + 1):K) = temp(1:length(temp)-1);
 
 
 % CORRELOGRAM
-window_correlogram = bartlett(2*N_corr + 1); % window centered around N_corr
+window_correlogram = kaiser(2*N_corr + 1, 5.65); % window centered around N_corr
 window_complete = zeros(K, 1);
 window_complete(1:N_corr + 1) = window_correlogram(N_corr + 1 : 2*N_corr + 1);
 window_complete(K - N_corr + 1 : K) = window_correlogram(1 : N_corr);
@@ -97,30 +97,47 @@ row1(1) = conj(row1(1));
 R = toeplitz(row1(1:N));
 
 a = -inv(R)*autoc(2:N+1);
-sigma_w = autoc(1) + autoc(2:N+1)'*a;
+sigma_w = abs(autoc(1) + autoc(2:N+1)'*a);  % Abs to correct rounding errors
 
 [H, omega] = freqz(1, [1; a], 'whole');
 
 figure
 plot((1:K)/K, 10*log10(P_welch), 'Color', 'r', 'LineWidth', 2)
 hold on
-plot((1:K)/K, 10*log10(correlogram), 'Color', 'b', 'LineWidth', 1)
+plot((1:K)/K, 10*log10(abs(correlogram)), 'Color', 'b', 'LineWidth', 1)
 hold on
 plot((1:K)/K, 10*log10(periodogram_1), 'c:')
 hold on
 plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
 hold off
-axis([0, 1, -5, 40])
+axis([0, 1, -10, 40])
 legend('Welch', 'Correlogram', 'Periodogram', 'AR(3)', 'Location', 'SouthEast')
 title('Spectral analysis')
 
+%%%%%%%%%%%
+% Filtering
+%%%%%%%%%%%
 
-continuousz1 = filter(fir_bs_1, 1, z1);
-% PERIODOGRAM pg 84
+firbs = fir_bs_1;
+firbp = -firbs;
+firbp((length(firbs)+1)/2) = firbp((length(firbs)+1)/2) + 1;    % Bandpass
+continuousz1 = filter(firbs, 1, z1);
+% Periodogram of the continuous spectrum
 CZ = fft(continuousz1);
 period_continuous = abs(CZ).^2/K;
+
+% Plotting
 figure
-plot((1:K)/K, 10*log10(period_continuous), 'c:')
+subplot(2,1,1);
+plot((1:K)/K, 10*log10(period_continuous))
+title('Continuous spectrum');
 axis([0, 1, -5, 40])
 
-
+% Plot the periodogram of the spectral lines
+lines = filter(firbp, 1, z1);
+LZ = fft(lines);
+period_lines = abs(LZ).^2/K;
+subplot(2,1,2);
+plot((1:K)/K, 10*log10(period_lines))
+title('Spectral lines');
+axis([0, 1, -5, 40])
