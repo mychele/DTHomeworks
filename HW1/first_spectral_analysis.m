@@ -123,7 +123,8 @@ firbp = -firbs;
 firbp((length(firbs)+1)/2) = firbp((length(firbs)+1)/2) + 1;    % Bandpass
 continuousz1 = filter(firbs, 1, z1);
 % Periodogram of the continuous spectrum
-CZ = fft(continuousz1);
+% We should skip the transient
+CZ = fft(continuousz1(length(firbp):length(continuousz1)), K);
 period_continuous = abs(CZ).^2/K;
 
 % Plotting
@@ -135,7 +136,8 @@ axis([0, 1, -5, 40])
 
 % Plot the periodogram of the spectral lines
 lines = filter(firbp, 1, z1);
-LZ = fft(lines);
+% We should skip the transient
+LZ = fft(lines(length(firbp):length(lines)), K);
 period_lines = abs(LZ).^2/K;
 subplot(2,1,2);
 plot((1:K)/K, 10*log10(period_lines))
