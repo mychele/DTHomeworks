@@ -2,111 +2,62 @@ close all;
 clear all;
 clc;
 
-% load data
+%% Load data
 z = load('data for hw1.mat');
 fir_bs_1 = load('fir_bs_1.mat');
-fir_bs_1 = fir_bs_1.fir_bs_1;
-% make a column vector
-z1 = z.z.';
-
-z1 = z1 - mean(z1);
-
-K = length(z1);
+firbs = fir_bs_1.fir_bs_1;
+z = z.z.'; % make a column vector
+z = z - mean(z); % remove average
+K = length(z); % signal length
 
 
-% compute different spectral analysis
+%% Compute different spectral analysis
 
 % PERIODOGRAM pg 84
-Z = fft(z1);
-periodogram_1 = abs(Z).^2/K;
+Z = fft(z);
+periodogr = abs(Z).^2/K;
 
 % compute WELCH estimator pg 85 
 D = 200; % window size
 window = kaiser(D, 5.65); % rectangular, consider using a hamming or smth else
-M_w = 1/D * sum(window.^2);
 S = D/2; %common samples
-N_s = floor((K-D)/(D-S) + 1); % number of subsequences
-P_per_w = zeros(K, N_s);
-for s = 0:(N_s-1)
-  z_s = window .* z1( s*(D-S) + 1 : s*(D-S) + D ); % 1.495 with index + 1
-  Z_s = fft(z_s, K);
-  P_per_w(:, s + 1) = abs(Z_s).^2/(D*M_w);
-end
-P_welch = sum(P_per_w, 2)/N_s;
-
-
-% compute autocorrelation with an estimator
-N_corr = ceil(K/5);
-
-autoc = zeros(N_corr + 1, 1);
-% we should use the unbiased estimator pg 82 1.478
-for n = 1:(N_corr + 1)
-    d = z1(n:K);
-    b = conj(z1(1:(K - n + 1)));
-    c = K - n + 1; % check this scaling factor
-    autoc(n) = d.' * b / c;
-end
-
-% consider formulas as more close as possible to the book
-% make autocorrelation simmetric
-autoc_complete = zeros(K, 1);
-autoc_complete(1:N_corr + 1) = autoc;
-temp = flipud(conj(autoc));
-% it's the same as puttig the conjugate, flipped, at the end of this
-% vector, since fft considers a periodic repetition of the signal
-autoc_complete((K - N_corr + 1):K) = temp(1:length(temp)-1);
-
+P_welch = welchPsd(z, window, S);
 
 % CORRELOGRAM
+N_corr = ceil(K/5); % N_corr is the order of the autocorrelation estimate
 window_correlogram = kaiser(2*N_corr + 1, 5.65); % window centered around N_corr
-window_complete = zeros(K, 1);
-window_complete(1:N_corr + 1) = window_correlogram(N_corr + 1 : 2*N_corr + 1);
-window_complete(K - N_corr + 1 : K) = window_correlogram(1 : N_corr);
+correlogram = correlogramPsd(z, window_correlogram, N_corr);
 
-windowed_autoc = autoc_complete.*window_complete;
-correlogram = fft(windowed_autoc);
-
-% ar model
+% AR model: order estimation
 % compute variance of AR model and plot it to identify the knee
 % it's computed up to K/5 - 1, don't know if it makes sense
+autoc = autocorrelation(z, N_corr);
 upp_limit = 60;
+sigma_w = zeros(1, upp_limit);
 for N = 1:upp_limit
-    
-    row1 = conj(autoc);
-    row1(1) = conj(row1(1));
-    R = toeplitz(row1(1:N));
-    
-    a = -inv(R)*autoc(2:N+1);
-    sigma_w(N) = autoc(1) + autoc(2:N+1)'*a;
-    
-      %figure
-      %[H, omega] = freqz(1, [1; a], 'whole');
-      %plot(omega, 10*log(sigma_w*abs(H)));
-    
+    [~, sigma_w(N)] = arModel(N, autoc);
 end
-
-figure
-plot(1:upp_limit, 10*log10(sigma_w))
+figure, plot(1:upp_limit, 10*log10(sigma_w))
 
 % the knee is apparently at N = 3
 % compute the vector of coefficients a
-% check it out, it is slightly scaled than pwelch 
 N = 3;
-row1 = conj(autoc);
-row1(1) = conj(row1(1));
-R = toeplitz(row1(1:N));
+[a, sigma_w] = arModel(N, autoc);
+[H, omega] = freqz(1, [1; a], K, 'whole');
 
-a = -inv(R)*autoc(2:N+1);
-sigma_w = abs(autoc(1) + autoc(2:N+1)'*a);  % Abs to correct rounding errors
 
-[H, omega] = freqz(1, [1; a], 'whole');
+clear a autoc D fir_bs_1 N N_corr S upp_limit window window_correlogram
+
+
+
+%% Plot PSD estimate
 
 figure
 plot((1:K)/K, 10*log10(P_welch), 'Color', 'r', 'LineWidth', 2)
 hold on
 plot((1:K)/K, 10*log10(abs(correlogram)), 'Color', 'b', 'LineWidth', 1)
 hold on
-plot((1:K)/K, 10*log10(periodogram_1), 'c:')
+plot((1:K)/K, 10*log10(periodogr), 'c:')
 hold on
 plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
 hold off
@@ -114,20 +65,23 @@ axis([0, 1, -10, 40])
 legend('Welch', 'Correlogram', 'Periodogram', 'AR(3)', 'Location', 'SouthEast')
 title('Spectral analysis')
 
-%%%%%%%%%%%
-% Filtering
-%%%%%%%%%%%
 
-firbs = fir_bs_1;
+
+%% Split continuous and spectral lines
+
 firbp = -firbs;
 firbp((length(firbs)+1)/2) = firbp((length(firbs)+1)/2) + 1;    % Bandpass
-continuousz1 = filter(firbs, 1, z1);
-% Periodogram of the continuous spectrum
-% We should skip the transient
-CZ = fft(continuousz1(length(firbp):length(continuousz1)), K);
-period_continuous = abs(CZ).^2/K;
+z_cont = filter(firbs, 1, z);
+z_lines = filter(firbp, 1, z);
 
-% Plotting
+% Skip the transients
+z_cont  = z_cont (length(firbp):length(z_cont));
+z_lines = z_lines(length(firbp):length(z_lines));
+K = length(z_cont);
+
+% Periodogram of the continuous spectrum
+CZ = fft(z_cont, K);
+period_continuous = abs(CZ).^2/K;
 figure
 subplot(2,1,1);
 plot((1:K)/K, 10*log10(period_continuous))
@@ -135,11 +89,59 @@ title('Continuous spectrum');
 axis([0, 1, -5, 40])
 
 % Plot the periodogram of the spectral lines
-lines = filter(firbp, 1, z1);
-% We should skip the transient
-LZ = fft(lines(length(firbp):length(lines)), K);
+LZ = fft(z_lines, K);
 period_lines = abs(LZ).^2/K;
 subplot(2,1,2);
 plot((1:K)/K, 10*log10(period_lines))
 title('Spectral lines');
 axis([0, 1, -5, 40])
+
+
+%% AR continuous
+
+% AR model: order estimation
+% compute variance of AR model and plot it to identify the knee
+% it's computed up to K/5 - 1, don't know if it makes sense
+N_corr = K/5;
+autoc_cont = autocorrelation(z_cont, N_corr);
+upp_limit = 60;
+sigma_w = zeros(1, upp_limit);
+for N = 1:upp_limit
+    [~, sigma_w(N)] = arModel(N, autoc_cont);
+end
+figure, plot(1:upp_limit, 10*log10(sigma_w))
+
+% the knee is apparently at N = 3
+% compute the vector of coefficients a
+N = 3;
+[a_cont, sigma_w] = arModel(N, autoc_cont);
+[H_cont, omega] = freqz(1, [1; a_cont], K, 'whole');
+
+figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H_cont).^2), 'Color', 'm', 'LineWidth', 1);
+
+figure, zplane(roots([1; a_cont]))
+
+
+%% AR lines
+
+% AR model: order estimation
+% compute variance of AR model and plot it to identify the knee
+% it's computed up to K/5 - 1, don't know if it makes sense
+N_corr = K/5;
+autoc_lines = autocorrelation(z_lines, N_corr);
+upp_limit = 60;
+sigma_w = zeros(1, upp_limit);
+for N = 1:upp_limit
+    [~, sigma_w(N)] = arModel(N, autoc_lines);
+end
+figure, plot(1:upp_limit, 10*log10(sigma_w))
+
+% the knee is apparently at N = 2
+% compute the vector of coefficients a
+N = 2;
+[a_lines, sigma_w] = arModel(N, autoc_lines);
+[H_lines, omega] = freqz(1, [1; a_lines], K, 'whole');
+
+figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H_lines).^2), 'Color', 'm', 'LineWidth', 1);
+
+figure, zplane(roots([1; a_lines]))
