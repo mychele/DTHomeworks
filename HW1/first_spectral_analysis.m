@@ -19,7 +19,7 @@ periodogr = abs(Z).^2/K;
 
 % compute WELCH estimator pg 85 
 D = 200; % window size
-window = kaiser(D, 5.65); % rectangular, consider using a hamming or smth else
+window = kaiser(D, 5.65);
 S = D/2; %common samples
 P_welch = welchPsd(z, window, S);
 
@@ -110,6 +110,7 @@ for N = 1:upp_limit
     [~, sigma_w(N)] = arModel(N, autoc_cont);
 end
 figure, plot(1:upp_limit, 10*log10(sigma_w))
+title('Variance for the AR model of the continuous part');
 
 % the knee is apparently at N = 3
 % compute the vector of coefficients a
@@ -118,8 +119,10 @@ N = 3;
 [H_cont, omega] = freqz(1, [1; a_cont], K, 'whole');
 
 figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H_cont).^2), 'Color', 'm', 'LineWidth', 1);
+title('AR model of the continuous part');
 
 figure, zplane(roots([1; a_cont]))
+title('Location of poles and zeros for the AR model of continuous part');
 
 
 %% AR lines
@@ -135,6 +138,7 @@ for N = 1:upp_limit
     [~, sigma_w(N)] = arModel(N, autoc_lines);
 end
 figure, plot(1:upp_limit, 10*log10(sigma_w))
+title('Variance for the AR model of the spectral lines');
 
 % the knee is apparently at N = 2
 % compute the vector of coefficients a
@@ -143,5 +147,7 @@ N = 2;
 [H_lines, omega] = freqz(1, [1; a_lines], K, 'whole');
 
 figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H_lines).^2), 'Color', 'm', 'LineWidth', 1);
+title('AR model of the spectral lines');
 
 figure, zplane(roots([1; a_lines]))
+title('Location of poles and zeros for the AR model of the spectral lines');

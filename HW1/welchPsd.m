@@ -1,10 +1,14 @@
 function [ P_welch ] = welchPsd( z1, window, S )
-%WELCHPSD Summary of this function goes here
-%   Detailed explanation goes here
+% WELCHPSD This function computes the Welch estimation of the PSD of a
+% random process.
+%
+%   z1: signal for which to compute the estimate
+%   window: an array containing the window to use to frame the signal
+%   S: number of overlapping samples 
 
 D = length(window);
 K = length(z1); % signal length
-M_w = 1/D * sum(window.^2);
+M_w = 1/D * sum(window.^2); % Power of the window
 N_s = floor((K-D)/(D-S) + 1); % number of subsequences
 P_per_w = zeros(K, N_s);
 for s = 0:(N_s-1)
