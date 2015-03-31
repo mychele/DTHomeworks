@@ -151,3 +151,35 @@ title('AR model of the spectral lines');
 
 figure, zplane(roots([1; a_lines]))
 title('Location of poles and zeros for the AR model of the spectral lines');
+
+
+%%
+
+close all
+fft_meanmean = zeros(size(z));
+Dvalues = 100:4:200;
+for D=Dvalues
+    window = kaiser(D, 5.65);
+    S = round(D*0.9); %common samples
+    [~, ~, ~, fft_mean] = findSine(z, window, S);
+    fft_meanmean = fft_meanmean + fft_mean;
+end
+figure, plot(10*log10(abs(fft_meanmean / length(Dvalues))));
+
+
+
+%close all
+D = round(16/0.082); % window size
+window = kaiser(D, 5.65);
+S = round(D-K/64); %common samples
+[Pm, PM, Psorted, fft_mean] = findSine(z, window, S);
+
+figure, plot(10*log10(abs(fft_mean)));
+
+return
+figure
+plot(10*log10(abs(Pm)).'), hold on
+plot(10*log10(abs(PM)).')
+figure
+plot(10*log10(Psorted(:, 13))), hold on
+plot(10*log10(Psorted(:, 47)))
