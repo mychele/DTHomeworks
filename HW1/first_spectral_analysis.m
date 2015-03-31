@@ -153,7 +153,7 @@ figure, zplane(roots([1; a_lines]))
 title('Location of poles and zeros for the AR model of the spectral lines');
 
 
-%%
+%% temp
 
 close all
 fft_meanmean = zeros(size(z));
