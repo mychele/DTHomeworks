@@ -5,9 +5,12 @@ clear all
 clc
 rng default
 
-ctot = zeros(3, 1000);
 
-iterations = 200;
+upper_limit = 999; % iterations of lms
+ctot = zeros(3, upper_limit + 1);
+etot = zeros(1, upper_limit);
+
+iterations = 1000;
 for i=1:iterations
     
     %% Load data
@@ -26,12 +29,12 @@ for i=1:iterations
     
     %%
     N = 3; % order of the predictor
-    upper_limit = 999; %MATLAB requires indices from 1 to 401
+     %MATLAB requires indices from 1 to 401
     c = zeros(N, upper_limit + 1); % init c vector, no info -> set to 0
     % each column of this matrix is c(k), a vector with coefficients from 1 to N (since we are implementing the predictor)!
     e = zeros(1, upper_limit);
     
-    mu = 0.1/(autoc_z(1)*N); % actually mu must be > 0 and < 2/(N r_z(0))
+    mu = 0.4/(autoc_z(1)*N); % actually mu must be > 0 and < 2/(N r_z(0))
     
     % watch out, in the predictor y(k) = transp(x(k-1))c(k)
     for k = 1:upper_limit
@@ -46,9 +49,11 @@ for i=1:iterations
         e(k) = e_k;
         c(:, k + 1) = c(:, k) + mu*e_k*conj(z_k_1); % update the filter, c(k+1) = c(k) + mu*e(k)*conj(z(k-1))
     end
+    % moving average if each instance
     ctot = ctot + c / iterations;
+    etot = etot + e / iterations;
     
-    disp(i)
+    %disp(i);
 end
 
 
@@ -75,6 +80,9 @@ title('Real part of c3');
 subplot(2, 1, 2)
 plot(1:upper_limit+1, imag(ctot(3, :)), 1:upper_limit+1, -imag(a(3)))
 title('Imaginary part of c3');
+
+figure, plot(1:upper_limit, 10*log10(abs(e).^2), 1:upper_limit, sigma_w * ones(upper_limit, 1))
+title('Error function at each iteration');
 
 
 return
@@ -103,6 +111,5 @@ subplot(2, 1, 2)
 plot(1:upper_limit+1, imag(c(3, :)), 1:upper_limit+1, -imag(a(3)))
 title('Imaginary part of c3');
 
-figure, plot(1:upper_limit, 10*log10(abs(e).^2))
-title('Error function at each iteration');
+
 
