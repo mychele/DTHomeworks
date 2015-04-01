@@ -100,17 +100,17 @@ acc_locs_c = acc_locs_c/i;
 
 
 figure
-subplot(1, 3, 1)
+% subplot(1, 3, 1)
 bar((1:span)/span, acc_locs_per)
 axis([0, 1, 0, max(acc_locs_per)])
 title('periodogram peaks accumulation')
-subplot(1, 3, 2)
-bar((1:span)/span, acc_locs_w)
-axis([0, 1, 0, max(acc_locs_per)])
-title('welch')
-subplot(1, 3, 3)
-bar((1:span)/span, acc_locs_c)
-axis([0, 1, 0, max(acc_locs_per)])
-title('correlogram')
+% subplot(1, 3, 2)
+% bar((1:span)/span, acc_locs_w)
+% axis([0, 1, 0, max(acc_locs_per)])
+% title('welch')
+% subplot(1, 3, 3)
+% bar((1:span)/span, acc_locs_c)
+% axis([0, 1, 0, max(acc_locs_per)])
+% title('correlogram')
 
 disp(find(acc_locs_per > 0.7)/span)
