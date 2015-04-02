@@ -23,11 +23,12 @@ function plot_spectrum(signal)
     %compute variance of AR model and plot it to identify the knee
     %it's computed up to K/5 - 1, don't know if it makes sense
     autoc = autocorrelation(signal, N_corr);
-    upp_limit = 60;
-    sigma_w = zeros(1, upp_limit);
-    for N = 1:upp_limit
-        [~, sigma_w(N)] = arModel(N, autoc);
-    end
+    % useful only to know which is the knee of the sigma_w
+%     upp_limit = 60;
+%     sigma_w = zeros(1, upp_limit);
+%     for N = 1:upp_limit
+%         [~, sigma_w(N)] = arModel(N, autoc);
+%     end
     %figure, plot(1:upp_limit, 10*log10(sigma_w))% Uncomment to plot sigma
 
     %the knee is apparently at N = 3
