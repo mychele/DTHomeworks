@@ -15,14 +15,14 @@ for s = 0:(N_s-1)
   Z_s = fft(z_s, K);
   Z_s_all(:, s + 1) = Z_s;
   P_per_w(:, s + 1) = abs(Z_s).^2/(D*M_w);
-  subplot(2, 1, 1)
-  plot(10*log10(abs(P_per_w(:, s+1))))
-  title([int2str(s*(D-S) + 1) ' to ' int2str(s*(D-S) + D)])
-  ylim([0 50])
-  subplot(2, 1, 2)
-  plot(real(z(s*(D-S) + 1 : s*(D-S) + D))), hold on
-  plot(imag(z(s*(D-S) + 1 : s*(D-S) + D))), hold off
-  pause
+%   subplot(2, 1, 1)
+%   plot(10*log10(abs(P_per_w(:, s+1))))
+%   title([int2str(s*(D-S) + 1) ' to ' int2str(s*(D-S) + D)])
+%   ylim([0 50])
+%   subplot(2, 1, 2)
+%   plot(real(z(s*(D-S) + 1 : s*(D-S) + D))), hold on
+%   plot(imag(z(s*(D-S) + 1 : s*(D-S) + D))), hold off
+%   pause
 end
 %P_welch = sum(P_per_w, 2)/N_s;
 

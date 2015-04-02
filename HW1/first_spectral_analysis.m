@@ -8,6 +8,7 @@ fir_bs_1 = load('fir_bs_1.mat');
 firbs = fir_bs_1.fir_bs_1;
 z = z.z.'; % make a column vector
 z = z - mean(z); % remove average
+%z = randn(1000, 1);
 K = length(z); % signal length
 
 
@@ -153,7 +154,7 @@ figure, zplane(roots([1; a_lines]))
 title('Location of poles and zeros for the AR model of the spectral lines');
 
 
-%% temp
+%% temp FIGO
 
 % close all
 % fft_meanmean = zeros(size(z));
@@ -165,21 +166,34 @@ title('Location of poles and zeros for the AR model of the spectral lines');
 %     fft_meanmean = fft_meanmean + fft_mean;
 % end
 % figure, plot(10*log10(abs(fft_meanmean / length(Dvalues))));
-% 
-% 
-% 
-% %close all
-% D = round(16/0.082); % window size
-% window = kaiser(D, 5.65);
-% S = round(D-K/64); %common samples
-% [Pm, PM, Psorted, fft_mean] = findSine(z, window, S);
-% 
-% figure, plot(10*log10(abs(fft_mean)));
-% 
-% return
-% figure
-% plot(10*log10(abs(Pm)).'), hold on
-% plot(10*log10(abs(PM)).')
-% figure
-% plot(10*log10(Psorted(:, 13))), hold on
-% plot(10*log10(Psorted(:, 47)))
+
+
+
+close all
+%D = round(16/0.082); % window size
+D = round(44/0.228);
+window = kaiser(D, 5.65);
+S = round(D-K/64); %common samples
+[Pm, PM, Psorted, ~] = findSine(z, window, S);
+
+%figure, plot(10*log10(abs(fft_mean)));
+
+figure
+plot(10*log10(Pm).'), hold on
+plot(10*log10(PM).')
+title('Minimum and maximum PSD across all windows')
+ylabel('PSD (dB)')
+figure
+plot(10*(log10(PM) - log10(Pm)).')
+title('Ratio between min and max PSD across all windows')
+
+%sort of percentile (confidence interval)
+figure
+hold on
+percentileindices = round([1 10 20 30 70 80 90 99] * size(Psorted, 2) / 100);
+percentileindices = max(percentileindices, ones(size(percentileindices)));
+for i = percentileindices
+    plot(10*log10(Psorted(:, i)))
+end
+title('Percentiles of PSD (dB)')
+legend('1', '10', '20', '30', '70', '80', '90', '99')
