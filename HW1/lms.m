@@ -16,12 +16,11 @@ autoc_z = autocorrelation(z, K/5);
 %% AR
 % the knee is apparently at N = 3
 % compute the vector of coefficients a
-N = 3;
+N = 2;
 [a, sigma_w] = arModel(N, autoc_z);
 [H, omega] = freqz(1, [1; a], K, 'whole');
 
 %%
-N = 3; % order of the predictor
 upper_limit = 999; %MATLAB requires indices from 1 to 401
 c = zeros(N, upper_limit + 1); % init c vector, no info -> set to 0
 %c(:,1) = -a +5;
@@ -47,28 +46,17 @@ for k = 1:upper_limit
     c(:, k + 1) = c(:, k) + mu*e_k*conj(z_k_1); % update the filter, c(k+1) = c(k) + mu*e(k)*conj(z(k-1))
 end
 
-figure
-subplot(2, 1, 1)
-plot(1:upper_limit+1, real(c(1, :)), 1:upper_limit+1, -real(a(1)))
-title('Real part of c1');
-subplot(2, 1, 2)
-plot(1:upper_limit+1, imag(c(1, :)), 1:upper_limit+1, -imag(a(1)))
-title('Imaginary part of c1');
+% Plot c coefficients
+for index = 1:N
+    figure
+    subplot(2, 1, 1)
+    plot(1:upper_limit+1, real(c(index, :)), [1, upper_limit+1], -real(a(index))* [1 1])
+    title(['Real part of c' int2str(index)]);
+    subplot(2, 1, 2)
+    plot(1:upper_limit+1, imag(c(index, :)), [1, upper_limit+1], -imag(a(index))* [1 1])
+    title(['Imaginary part of c' int2str(index)]);
+end
 
-figure
-subplot(2, 1, 1)
-plot(1:upper_limit+1, real(c(2, :)), 1:upper_limit+1, -real(a(2)))
-title('Real part of c2');
-subplot(2, 1, 2)
-plot(1:upper_limit+1, imag(c(2, :)), 1:upper_limit+1, -imag(a(2)))
-title('Imaginary part of c2');
-figure
-subplot(2, 1, 1)
-plot(1:upper_limit+1, real(c(3, :)), 1:upper_limit+1, -real(a(3)))
-title('Real part of c3');
-subplot(2, 1, 2)
-plot(1:upper_limit+1, imag(c(3, :)), 1:upper_limit+1, -imag(a(3)))
-title('Imaginary part of c3');
 
 figure, plot(1:upper_limit, 10*log10(abs(e).^2))
 title('Error function at each iteration');
