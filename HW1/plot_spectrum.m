@@ -1,6 +1,13 @@
-function plot_spectrum(signal)
+function plot_spectrum(signal, varargin)
 
-    % Compute different signall analysis
+    % Compute different signal analysis
+    
+    if(length(varargin) == 1)
+        N_ar = varargin{1};
+    else
+        N_ar = 3;
+    end
+        
     
     K = length(signal);
 
@@ -31,10 +38,8 @@ function plot_spectrum(signal)
 %     end
     %figure, plot(1:upp_limit, 10*log10(sigma_w))% Uncomment to plot sigma
 
-    %the knee is apparently at N = 3
     %compute the vector of coefficients a
-    N = 3;
-    [a, sigma_w] = arModel(N, autoc);
+    [a, sigma_w] = arModel(N_ar, autoc);
     [H, omega] = freqz(1, [1; a], K, 'whole');
 
     clear a autoc D fir_bs_1 N N_corr S upp_limit window window_correlogram

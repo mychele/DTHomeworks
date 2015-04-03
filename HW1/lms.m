@@ -21,7 +21,7 @@ N = 2;
 [H, omega] = freqz(1, [1; a], K, 'whole');
 
 %%
-upper_limit = 999; %MATLAB requires indices from 1 to 401
+upper_limit = 399; %MATLAB requires indices from 1 to 401
 c = zeros(N, upper_limit + 1); % init c vector, no info -> set to 0
 %c(:,1) = -a +5;
 % each column of this matrix is c(k), a vector with coefficients from 1 to
@@ -29,7 +29,7 @@ c = zeros(N, upper_limit + 1); % init c vector, no info -> set to 0
 e = zeros(1, upper_limit);
 
 
-mu = 0.1/(autoc_z(1)*N); % actually mu must be > 0 and < 2/(N r_z(0))
+mu = 0.4/(autoc_z(1)*N); % actually mu must be > 0 and < 2/(N r_z(0))
 
 % watch out, in the predictor y(k) = transp(x(k-1))c(k)
 for k = 1:upper_limit

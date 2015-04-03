@@ -34,7 +34,7 @@ N = 2;
 [H, omega] = freqz(1, [1; a], K, 'whole');
 
 %% Initialisation
-upper_limit = 999; % Number of iterations of the algorithm
+upper_limit = 399; % Number of iterations of the algorithm
 lambda = 1; % Forgetting factor. For 1, we do not forget past values
 c = zeros(N, upper_limit+1); % Coefficient vector
 delta = autoc_z(1)/100; % Value at which to initialise P
