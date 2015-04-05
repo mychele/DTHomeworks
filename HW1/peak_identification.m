@@ -10,47 +10,59 @@ z = z.z.'; % make a column vector
 z = z - mean(z); % remove average
 K = length(z); % signal length
 
-step = 50; %distance between the first two sample of each window
-span = 200; %actual size of the window
+% TUNE THESE PARAMETERS AND SEE!
+step = 64; %distance between the first two sample of each window
+span = 192; %actual size of the window
 overlap = span - step;
 
-padding = 0;  % Zero padding to apply to the windowed signal
+paddingfactor = 1;
+padding = span * (paddingfactor - 1);  % Zero padding to apply to the windowed signal
 
 locs_per = 1:K+padding; % just to initialize for the first iteration
 peaks = zeros(K+padding,1); % just to initialize for the first iteration
-acc_locs_per = zeros(span + padding, 1);
+acc_pks_per = zeros(span + padding, 1);
 
 max_iter = floor((K-span)/step);
 
-window_span = kaiser(span+padding, 5.65);
+window_span = kaiser(span+padding, 16); %5.65);
 
-frequencies = zeros(0,0);
+h = zeros(span, 1);
+h2 = h;
 
-figure
+%figure
 for i = 0:max_iter
     z_part = [z(i*step + 1: i*step + span); zeros(padding,1)];
-    
     Z = fft(z_part.*window_span);
     periodogr = abs(Z).^2/span;
-    
-    plot(10*log10(periodogr))
-    pause(0.5)
-        
     [peaks, locs_per] = findpeaks(abs(periodogr));
+    %plot(10*log10(periodogr))
+    %pause
+    edges = 0.5:paddingfactor:(span+padding+0.5);
+    [N, ~] = histcounts(locs_per, edges);
+    h = h + N.';
+    %stem(locs_per/(span+padding), 10*log10(peaks)), ylim([-20, 40]), pause
     
-    frequencies = [frequencies, locs_per.'];
-
-    acc_locs_per(locs_per) = acc_locs_per(locs_per) + 1;
+    
+    
+    
+    freqs = findSineNoise3(z_part, 32);
+    %pause
+    edges = (0.5:paddingfactor:(span+padding+0.5)) / (span+padding);
+    [N, ~] = histcounts(freqs, edges);
+    h2 = h2 + N.';
     
 end
 
-normalize
-acc_locs_per = acc_locs_per/i;
+%normalize
+h = h/max_iter;
+h2 = h2/max_iter;
 
 figure
-h = histogram(frequencies/(span+padding), span+padding);
-bar((1:(span+padding))/(span+padding), acc_locs_per)
-axis([0, 1, 0, max(acc_locs_per)])
+bar((1:span)/span, h)
 title('periodogram peaks accumulation')
 
-disp(find(acc_locs_per > 0.7)/(span+padding))
+figure
+bar((1:span)/span, h2)
+title('periodogram peaks accumulation 2')
+
+disp(find(acc_pks_per > 0.7)/(span+padding))
