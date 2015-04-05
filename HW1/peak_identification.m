@@ -8,7 +8,6 @@ fir_bs_1 = load('fir_bs_1.mat');
 firbs = fir_bs_1.fir_bs_1;
 z = z.z.'; % make a column vector
 z = z - mean(z); % remove average
-z = repmat(z, 40, 1);
 K = length(z); % signal length
 
 % TUNE THESE PARAMETERS AND SEE!
