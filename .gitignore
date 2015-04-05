@@ -2,3 +2,9 @@
 *.m~
 
 *.fda
+
+*.aux
+
+*.log
+
+HW1/report/report.pdf
