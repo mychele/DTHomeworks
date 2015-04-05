@@ -1,5 +1,5 @@
 close all;
-%clear all;
+clear all;
 clc;
 
 %% Load data
@@ -7,41 +7,43 @@ z = load('data for hw1.mat');
 z = z.z.'; % make a column vector
 hp18 = load('hp18.mat');
 hp18 = hp18.hp18.'; % make a column vector
-
 z = z - mean(z); % remove average
 K = length(z); % signal length
 autoc = autocorrelation(z, length(z)/5);
 
-%% High pass filter
 
-zhp = filter(hp18, 1, z);
-
-%% Filter pg 137 BC
-N_wien = 31;             % Number of coefficients of the Wiener filter
+%% Wiener filter pg 137 BC
+N_wien = 31;        % Number of coefficients of the Wiener filter
 w0 = 2*pi*0.78;     % 0.78 is probably our freq
 E_w0 = exp(1i * w0 * (0 : N_wien-1)).';
-A = sqrt(30); % see plot of real autoc, rule of thumb
+A = sqrt(30); % see plot of real autoc, rule of thumb (actually doesn't change much)
 B=A;
-lambda = A^2/autoc(1); % autoc(1) should be sigma^2 of the noise, if white
+snr = A^2/autoc(1); % autoc(1) should be sigma^2 of the noise, if white
 gain = B/A;
 D = 100;    % delay
 
-c_opt = gain * lambda * exp(- 1i * w0 * D) * E_w0 / (1 + N_wien*lambda);
+% --- Compute the coefficients
+c_opt = gain * snr * exp(- 1i * w0 * D) * E_w0 / (1 + N_wien*snr);
 
 
 % --- Plot frequency response of Wiener filter
 
 DTFTplot(c_opt, 50000);
-title('Freq resp of Wiener filter')
 ylim([-20 0])
+title('Freq resp of Wiener filter')
 % [H, w] = freqz(c_opt, 1, 'whole');
 % figure, plot(w/(2*pi), 20*log10(abs(H)))
 % axis([0, 1, -40, 5])
 % figure, plot(w/(2*pi), angle(H))
 
 
-% --- Filter using the Wiener filter
-spectral_lines = filter(c_opt, 1, zhp);
+% --- Filter using the HPF and the Wiener filter
+%zhp = filter(hp18, 1, z);
+linesfilter = conv(hp18, c_opt);
+spectral_lines = filter(linesfilter, 1, z);
+% Plot filter's freq resp
+DTFTplot(linesfilter, 10000);
+title('Freq response of LPF + Wiener filter (dB)')
 
 
 % --- Plot original and filtered signal
@@ -53,16 +55,16 @@ spectral_lines = filter(c_opt, 1, zhp);
 % plot(imag(z), 'r')
 % title('Imaginary part of original signal');
 % subplot(2,2,2)
-% plot(real(spectra))
+% plot(real(spectral_lines))
 % title('Real part of spectral line');
 % subplot(2,2,4)
-% plot(imag(spectra), 'r')
+% plot(imag(spectral_lines), 'r')
 % title('Imaginary part of spectral line');
 
 
 % --- Plot spectrum of the spectral lines
 plot_spectrum(spectral_lines, 1); % 1 is the order of the desired AR model
-title('Spectral analysis of the signal after Wiener'), legend('Location', 'NorthWest')
+title('Spectral analysis of the signal after filtering'), legend('Location', 'NorthWest')
 
 
 
@@ -89,15 +91,25 @@ title('Spectral analysis of the signal after Wiener'), legend('Location', 'North
 
 % --- Continuous part of the signal
 
-% Compute the opposite of the Wiener filter we just used
-neg_wiener = -c_opt;
-neg_wiener((N_wien-1)/2) = neg_wiener((N_wien-1)/2) + 1;  % The order is N_wien-1
+% Compute the complementary of the filter we just used
+linesfilter_compl = -linesfilter;
+N_linesfilter = length(linesfilter) - 1; % Order of the filter
+linesfilter_compl(N_linesfilter/2) = linesfilter_compl(N_linesfilter/2) + 1;
+DTFTplot(linesfilter_compl, 10000);
+title('Freq response of complementary filter (dB)')
 
-% Filter original signal (not the HP'ed one!)
-continuous = filter(neg_wiener, 1, z);
+% Filter original signal
+continuous = filter(linesfilter_compl, 1, z);
 
 % Plot original signal and continuous (without AR models)
 plot_spectrum(continuous, 0);
 ylim([-10 40]), title('Spectral analysis of continuous part')
 plot_spectrum(z, 0);
 ylim([-10 40]), title('Spectral analysis of original signal')
+
+% See that diff is zero
+delayonly = [zeros(N_linesfilter/2 - 1, 1); 1];
+delayed_z = filter(delayonly, 1, z);
+diff = delayed_z - (continuous + spectral_lines);
+figure, plot(real(diff)), hold on, plot(imag(diff), 'r'), legend('Real part', 'Imag part')
+title('Difference between original signal and the sum of its two components')
