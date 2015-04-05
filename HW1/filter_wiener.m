@@ -29,7 +29,7 @@ D = 100;    % delay
 c_opt = gain * lambda * exp(- 1i * w0 * D) * E_w0 / (1 + N_wien*lambda);
 
 
-% -- Plot frequency response of Wiener filter
+% --- Plot frequency response of Wiener filter
 
 DTFTplot(c_opt, 50000);
 title('Freq resp of Wiener filter')
@@ -40,12 +40,11 @@ ylim([-20 0])
 % figure, plot(w/(2*pi), angle(H))
 
 
-% -- Filter using the Wiener filter
+% --- Filter using the Wiener filter
 spectral_lines = filter(c_opt, 1, zhp);
 
 
-% -- Plot original and filtered signal
-
+% --- Plot original and filtered signal
 % figure
 % subplot(2,2,1)
 % plot(real(z))
@@ -61,35 +60,43 @@ spectral_lines = filter(c_opt, 1, zhp);
 % title('Imaginary part of spectral line');
 
 
+% --- Plot spectrum of the spectral lines
 plot_spectrum(spectral_lines, 1); % 1 is the order of the desired AR model
 title('Spectral analysis of the signal after Wiener'), legend('Location', 'NorthWest')
 
-N_corr = length(spectral_lines)/5;
-autoc = autocorrelation(spectral_lines, N_corr);
-% useful only to know which is the knee of the sigma_w
-upp_limit = 60;
-sigma_w = zeros(1, upp_limit);
-for N = 1:upp_limit
-    [~, sigma_w(N)] = arModel(N, autoc);
-end
-%figure, plot(1:upp_limit, 10*log10(sigma_w))% Uncomment to plot sigma
-
-%compute the vector of coefficients a
-N = 1;
-[a, sigma_w] = arModel(N, autoc);
-[H, omega] = freqz(1, [1; a], K, 'whole');
-
-% figure
-% plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
-% axis([0, 1, -40, 10])
 
 
-%% Continuous part
+% --- Recompute everything for AR
 
+% Find the knee of sigma_w
+%N_corr = length(spectral_lines)/5;
+%autoc = autocorrelation(spectral_lines, N_corr);
+%upp_limit = 60;
+%sigma_w = zeros(1, upp_limit);
+%for N = 1:upp_limit
+%    [~, sigma_w(N)] = arModel(N, autoc);
+%end
+%figure, plot(1:upp_limit, 10*log10(sigma_w))  % Uncomment to plot sigma
+
+% Choose order for AR and compute the vector of coefficients a
+%N = 1;
+%[a, sigma_w] = arModel(N, autoc);
+%[H, omega] = freqz(1, [1; a], K, 'whole');
+%figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
+%axis([0, 1, -40, 10])
+
+
+
+% --- Continuous part of the signal
+
+% Compute the opposite of the Wiener filter we just used
 neg_wiener = -c_opt;
 neg_wiener((N_wien-1)/2) = neg_wiener((N_wien-1)/2) + 1;  % The order is N_wien-1
 
+% Filter original signal (not the HP'ed one!)
 continuous = filter(neg_wiener, 1, z);
+
+% Plot original signal and continuous (without AR models)
 plot_spectrum(continuous, 0);
 ylim([-10 40]), title('Spectral analysis of continuous part')
 plot_spectrum(z, 0);
