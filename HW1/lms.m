@@ -6,7 +6,7 @@ clc;
 
 %% Load "continuous PSD" signal
 load('split_signal.mat', 'z_continuous');
-z = z_continuous;
+z = z_continuous - mean(z_continuous);
 K = length(z); % signal length
 autoc_z = autocorrelation(z, round(K/5));
 

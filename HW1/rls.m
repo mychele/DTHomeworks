@@ -11,14 +11,11 @@ close all;
 clear all;
 clc;
 
-%% Load data, initialise algorithm
-
-% Load actual signal
-z = load('data for hw1.mat');
-z = z.z.'; % make a column vector
-z = z - mean(z); % remove average
+%% Load "continuous PSD" signal
+load('split_signal.mat', 'z_continuous');
+z = z_continuous - mean(z_continuous);
 K = length(z); % signal length
-autoc_z = autocorrelation(z, K/5);
+autoc_z = autocorrelation(z, round(K/5));
 
 % Uncomment to load Dittadi's filtered white noise 
 % z = randn(5000, 1);
@@ -27,11 +24,13 @@ autoc_z = autocorrelation(z, K/5);
 % K = length(z); % signal length
 % autoc_z = autocorrelation(z, K/10);
 
+
 %% AR model
 % compute the vector of coefficients a
 N = 2;
 [a, sigma_w] = arModel(N, autoc_z);
 [H, omega] = freqz(1, [1; a], K, 'whole');
+
 
 %% Initialisation
 upper_limit = 399; % Number of iterations of the algorithm
