@@ -73,20 +73,84 @@ basicstyle=\footnotesize\ttfamily
 \maketitle
 
 \section{Estimating the PSD}
-In order to estimate the PSD of a given a process $z(k)$ it is necessary to introduce two hypothesis. The first is that the process is at least wide sense stationary. A process $z(k)$ is WSS if $m_z(t) = m_z, \forall t$ and $r_z(t, t - \tau) = r_z(\tau), \forall t$. By looking at the mean and autocorrelation over different non-overlapping windows of 100 samples it appears that the mean is quite constant, as it is the estimate of the real part of the autocorrelation, while the imaginary part of the autocorrelation changes more than the two other estimates. By looking at the sample mean of different windows of 20 samples inside each bigger window the real and imaginary parts of the mean vary very little, despite the great variance that an estimator with few samples has. We conclude that in each window of 100 sample the process can be considered WSS, while it is harder to state that it is WSS in all the 1000 samples. Because of this consideration we will use windows of 100 samples to analyze the PSD of the process and derive conclusions on the presence of the spectral lines.
+In order to estimate the PSD of a given a process $z(k)$ it is necessary to introduce two hypothesis. The first is that the process is at least wide sense stationary. A process $z(k)$ is WSS if $m_z(t) = m_z, \forall t$ and $r_z(t, t - \tau) = r_z(\tau), \forall t$. By looking at the mean and autocorrelation over different non-overlapping windows of 100 samples it appears that the mean is quite constant, as it is the estimate of the real part of the autocorrelation, while the imaginary part of the autocorrelation changes more than the two other estimates. By looking at the sample mean of different windows of 20 samples inside each bigger window the real and imaginary parts of the mean varies very little, despite the great variance that an estimator with few samples has. We conclude that in each window of 100 sample the process can be considered WSS, while it is harder to state that it is WSS in all the 1000 samples. Because of this consideration we will use windows of 100 samples to analyze the PSD of the process and derive conclusions on the presence of the spectral lines.
 
 
 % Do we agree on this Does it make sense? Can we provide some figures?
 % Or we skip these considerations and say that it is wss?
 
 The second hypothesis is that the process is ergodic, and as suggested in \cite{bc} we assume that every WSS process is also ergodic. In this way from a single representation of the process it is possible to estimate the autocorrelation and thus the PSD of the whole process. This is a key assumption for the analysis of the process we are given, without this hypothesis not much can be said. \\
+We also subtract the sample mean by the given signal $z(k)$, since the continuous component doesn't bring any relevant information to the estimates of the process. Thus the signal to which we will refer in the following section is a zero-mean signal with the form $z(k) = z(k) - \frac{1}{K} \sum_{i=1}^K z(k)$ with $K$ the number of samples of the signal. \\
+In order to estimate the PSD of the process and find the spectral lines we used a combination different estimators that will be introduced in the following sections. Each of the estimators presented in the next sections is externalized in a MATLAB function.\\
+Note that unless specified we assume a unitary sampling period $T_c = 1$.
+\subsubsection*{Unbiased estimate of autocorrelation}
+The autocorrelation is estimated using
+\begin{equation}
+  \hat{r}_z(n) = \frac{1}{K - n}\sum_{k=n}^{K-1} z(k) z^*(k-n)
+\end{equation}
+with $n = 0, 1, ... K/5$ in order to avoid poor estimates given by the fact that as $n$ approaches $K$ the number of samples used in the estimate becomes smaller and smaller, and the variance of the estimator increases.
+\subsubsection*{Periodogram}
+The periodogram is an estimator of the PSD based of the Fourier transform of the signal
+\begin{equation}
+  \mathcal{P}_{PER} = \frac{1}{K T_c} |\mathcal{\tilde{Z}}(f)|^2
+\end{equation}
+The Fourier transform $|\mathcal{\tilde{Z}}(f)|$ is computed as a DFT with the function \verb fft  provided in MATLAB. This is a biased estimator, because of the fact that the signal is windowed over a finite number of samples. In order to improve the quality of this estimate and to detect more precisely the spectral lines we applied a Kaiser window (\cite{mitra}) to the signal before the computation the \verb fft. This is a tunable window in the form
+\begin{equation}
+  w(k) = \frac{I_0 \bigg[w_a \sqrt{1-\big(1-\frac{2(n+1)}{L+1}\big)^2}\bigg]}{I_0[w_a]} \; \; \;  0 \le n < L
+\end{equation}
+with $I_0[x]$ the zero-order Bessel function and $w_a$ a tunable parameter that depends on the attenuation of the secondary lobes of the window. We chose $w_a = 16$ which corresponds to a sidelobe attenuation of 155 dB. In this way it is possible to reduce spectral leakage and make real spectral lines stand out among the peaks produced by the noise. Given the length and the parameter $w_a$ the Kaiser window can be computed using MATLAB function \verb kaiser(lenght, $w_a$).
+% Alternatively, $w_a = 5.65$ -> 60 dB %
 
+\subsubsection*{Welch periodogram}
+The idea behind Welch periodogram is to compute the periodograms on different windows of the given signal and averaging them for each frequency. Each subsequence $z^{(s)}$ is composed of $D$ consecutive samples of the original signal, and has $S$ samples in common with the previous and the following windows. Thus given the length $K$ of the original signal the number of subsequences is $N_s = \floor{\frac{K - D}{D - S} + 1}$. For each subsequence $z^{(s)} = w(k)z(k + s(D-S)), k=0,1,..., D- 1, s = 0, 1, ... N_s - 1$, with $w(k)$ a window of $D$ samples and normalized energy $M_w = \frac{1}{D}\sum_{k=0}^{D-1}w^2(k)$, we compute the periodogram $\mathcal{P}_{PER}^{(s)}(f) = \frac{1}{D T_c M_w} |\mathcal{\tilde{Z}}^{(s)}(f)|^2$.
+Therefore the Welch estimate is given by
+\begin{equation}
+  \mathcal{P}_{WE}(f) = \frac{1}{N_s}\sum_{s=0}^{N_s-1}{P}_{PER}^{(s)}(f)
+\end{equation}
+
+
+\subsubsection*{Blackman and Tukey correlogram}
+This estimator uses an unbiased autocorrelation sequence estimate ${\hat{r}_z(n)}, n = -L, ..., L$ and computes the Fourier transform of the ACS multiplied by a window $w(k)$ of length $2*L + 1$ and $w(0)=1$ (both requirement are satisfied by the Kaiser window of the previous section):
+\begin{equation}
+  \mathcal{P}_{CORR}(f) = T_c\sum_{n=-L}^{L}w(n)\hat{r}_z(n)e^{-j2\pi f n T_c}
+\end{equation}
+Note that $L \le K/5$ because of the considerations about the variance of ACS estimate. In particular we chose $L = K/5$.
+
+\subsubsection*{AR model}
+The last estimate of the PSD of the process can be computed using an AR model of order N to describe the process. Since the complete statistical description of the problem isn't available, we compute the autocorrelation matrix $\mathbf{R}$ using the ACS estimate described previously, where the samples for $k=-1, -2, ..., -N$ are computed using the hermitian symmetry of the ACS, thus $\hat{r}_z(-k) = \hat{r}_z^*(k)$.
+Therefore for an AR model of order $N$:
+
+\begin{equation}
+  \mathbf{R} =
+  \begin{bmatrix}
+    \hat{r}_z(0) & \hat{r}_z(-1) & \cdots & \hat{r}_z(-N+1) \\
+    \hat{r}_z(1) & \hat{r}_z(0)  & \cdots & \hat{r}_z(-N+2) \\
+    \vdots       & \vdots        & \vdots & \vdots \\
+    \hat{r}_z(N-1) & \hat{r}_z(N-2) & \cdots & \hat{r}_z(0)
+  \end{bmatrix}
+\end{equation}
+
+and $ \mathbf{r} = [\hat{r}_z(1), \hat{r}_z(2), \hat{r}_z(N)]^T $. Then the vector $\mathbf{a}$ of the coefficients of the AR model is given by
+\begin{equation}
+  \mathbf{R} \, \mathbf{a} = - \mathbf{r}
+\end{equation}
+and the variance of the white noise driving the model is
+\begin{equation}
+  \sigma_w^2 = \hat{r}_z(0) + \mathbf{r}^H\mathbf{a}
+\end{equation}
+Finally the estimate of the PSD is
+\begin{equation}
+  \mathcal{P}_{AR} = \frac{T_c \sigma_w^2}{|\mathcal{A}(f)|^2}
+\end{equation}
 
 
 \begin{thebibliography}{10}
 
 \bibitem{bc}
 Benvenuto, Cherubini, Algorithms for Communications Systems and their Applications, Wiley, 2004
+
+\bibitem{mitra}
+Mitra, Digital Signal Processing: A Computer-based Approach, McGraw-Hill international, 2001
 
 \end{thebibliography}
 

@@ -42,7 +42,7 @@ for i = 0:max_iter
     
     % compute WELCH estimator pg 85
     D = 50; % window size
-    window = kaiser(D, 5.65);
+    window = kaiser(D, 16);
     S = D/2; %common samples
     P_welch = welchPsd(z_part, window, S);
     
@@ -60,7 +60,7 @@ for i = 0:max_iter
     
     
     
-    clear a autoc D fir_bs_1 N N_corr S upp_limit window window_correlogram
+    clear a autoc D fir_bs_1 N N_corr S upp_limit window %window_correlogram
     
     %% Plot PSD estimate
     
