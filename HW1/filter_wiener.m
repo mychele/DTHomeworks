@@ -12,7 +12,7 @@ K = length(z); % signal length
 autoc = autocorrelation(z, length(z)/5);
 
 
-%% Wiener filter pg 137 BC
+%% HPF plus Wiener filter pg 137 BC
 N_wien = 31;        % Number of coefficients of the Wiener filter
 w0 = 2*pi*0.78;     % 0.78 is probably our freq
 E_w0 = exp(1i * w0 * (0 : N_wien-1)).';
@@ -27,45 +27,25 @@ c_opt = gain * snr * exp(- 1i * w0 * D) * E_w0 / (1 + N_wien*snr);
 
 
 % --- Plot frequency response of Wiener filter
-
 DTFTplot(c_opt, 50000);
 ylim([-20 0])
 title('Freq resp of Wiener filter')
-% [H, w] = freqz(c_opt, 1, 'whole');
-% figure, plot(w/(2*pi), 20*log10(abs(H)))
-% axis([0, 1, -40, 5])
-% figure, plot(w/(2*pi), angle(H))
 
 
-% --- Filter using the HPF and the Wiener filter
-%zhp = filter(hp18, 1, z);
+
+%% Filter the signal with LPF + Wiener
 linesfilter = conv(hp18, c_opt);
 spectral_lines = filter(linesfilter, 1, z);
-% Plot filter's freq resp
-DTFTplot(linesfilter, 10000);
+DTFTplot(linesfilter, 10000); % Plot filter's freq resp
 title('Freq response of LPF + Wiener filter (dB)')
 
 
-% --- Plot original and filtered signal
-% figure
-% subplot(2,2,1)
-% plot(real(z))
-% title('Real part of original signal');
-% subplot(2,2,3)
-% plot(imag(z), 'r')
-% title('Imaginary part of original signal');
-% subplot(2,2,2)
-% plot(real(spectral_lines))
-% title('Real part of spectral line');
-% subplot(2,2,4)
-% plot(imag(spectral_lines), 'r')
-% title('Imaginary part of spectral line');
 
+%% Analysis
 
 % --- Plot spectrum of the spectral lines
 plot_spectrum(spectral_lines, 1); % 1 is the order of the desired AR model
 title('Spectral analysis of the signal after filtering'), legend('Location', 'NorthWest')
-
 
 
 % --- Recompute everything for AR
@@ -86,6 +66,7 @@ title('Spectral analysis of the signal after filtering'), legend('Location', 'No
 %[H, omega] = freqz(1, [1; a], K, 'whole');
 %figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
 %axis([0, 1, -40, 10])
+
 
 
 
@@ -111,5 +92,5 @@ ylim([-10 40]), title('Spectral analysis of original signal')
 delayonly = [zeros(N_linesfilter/2 - 1, 1); 1];
 delayed_z = filter(delayonly, 1, z);
 diff = delayed_z - (continuous + spectral_lines);
-figure, plot(real(diff)), hold on, plot(imag(diff), 'r'), legend('Real part', 'Imag part')
-title('Difference between original signal and the sum of its two components')
+disp(['Max magnitude of the difference between the original signal and the', ...
+    'sum of its two components (lines and continuous) is ', num2str(max(abs(diff)))])
