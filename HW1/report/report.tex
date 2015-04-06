@@ -185,6 +185,25 @@ In can be clearly seen that there is a peak for $f_0 = 0.774$ in about 90\% of t
 \section{Amplitude, phase and frequency estimate of the spectral line}
 
 \section{LMS predictor}
+The setting of the predictor problem is as follows. Given a signal $z(k)$, WSS, with zero mean, let $\mathbf{z}^T(k-1)$ be the vector $[z(k-1), z(k-2), ..., z(k-N)]$. The one-step predictor of order N tries to estimate the value of $z(k)$ given $\mathbf{z}^T(k-1)$. This problem can be solved considering $\mathbf{z}^T(k-1)$ the input of a Wiener filter of order N and $z(k)$ the reference signal. Then the Wiener-Hopf equation computes the optimal coefficients of the filter with $\mathbf{R}_N \mathbf{c}_{opt} = \mathbf{r}_N$, given the autocorrelation matrix $\mathbf{R}_N$ and $\mathbf{r}_N = [r_z(1), r_z(2), ..., r_z(N)]^T$. \\
+Both \textit{least mean-square} (LMS) and \textit{recursive least square} (RLS) algorithms provide a recursive method to compute an approximation of the optimal Wiener-Hopf solution for the predictor problem without using the autocorrelation matrix $\mathbf{R}_N$ and the vector $\mathbf{r}_N$.
+In particular LMS is a version of the gradient algorithm that updates at each iteration $k$ the coefficients of the Wiener filter with the equation
+\begin{equation}
+  \mathbf{c}(k+1) = \mathbf{c}(k) + \mu e(k) \mathbf{x}^*(k-1)
+  \label{eq:lms_up}
+\end{equation}
+The implementation of LMS is simple and it doesn't require too much computation. There are two parameters, the order $N$ and the update coefficient $\mu = \frac{\tilde{\mu}}{N r_z(0)}$, and it must hold $0 < \tilde{\mu} < 2$ for convergency. Then, at each step, compute:
+\begin{equation}
+  y(k) = \mathbf{z}^T(k-1) \mathbf{c}(k)
+\end{equation}
+\begin{equation}
+  e(k) = z(k) - y(k)
+\end{equation}
+and update coefficients with Equation~\ref{eq:lms_up}. At the beginning $\mathbf{c}(0) = \mathbf{0}$, and $z(k) = 0, \; \forall \; k < 0$. \\
+
+We applied the LMS algorithm to the continuous part of the signal as filtered in Section 2. Given the AR model of order N for the continuous part of the signal, the $\mathbf{c}$ vector should converge to $-\mathbf{a}$ and $|e(k)|^2 = \sigma_w^2$ at least in mean.
+
+
 
 
 \section{RLS algorithm}
