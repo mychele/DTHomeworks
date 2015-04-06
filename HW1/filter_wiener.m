@@ -7,7 +7,7 @@ z = load('data for hw1.mat');
 z = z.z.'; % make a column vector
 hp18 = load('hp18.mat');
 hp18 = hp18.hp18.'; % make a column vector
-z = z - mean(z); % remove average
+%z = z - mean(z); % remove average
 K = length(z); % signal length
 autoc = autocorrelation(z, length(z)/5);
 
@@ -35,16 +35,19 @@ title('Freq resp of Wiener filter')
 
 %% Filter the signal with LPF + Wiener
 linesfilter = conv(hp18, c_opt);
-spectral_lines = filter(linesfilter, 1, z);
+N_linesfilter = length(linesfilter) - 1; % Order of the filter
+z_lines = filter(linesfilter, 1, z);
 DTFTplot(linesfilter, 10000); % Plot filter's freq resp
 title('Freq response of LPF + Wiener filter (dB)')
+% Discard transient
+z_lines = z_lines( (N_linesfilter/2 + 1) : length(z_lines));
 
 
 
 %% Analysis
 
 % --- Plot spectrum of the spectral lines
-plot_spectrum(spectral_lines, 1); % 1 is the order of the desired AR model
+plot_spectrum(z_lines, 1); % 1 is the order of the desired AR model
 title('Spectral analysis of the signal after filtering'), legend('Location', 'NorthWest')
 
 
@@ -70,20 +73,24 @@ title('Spectral analysis of the signal after filtering'), legend('Location', 'No
 
 
 
-% --- Continuous part of the signal
+%% Compute complementary filter and get "continuous PSD" part
 
 % Compute the complementary of the filter we just used
 linesfilter_compl = -linesfilter;
-N_linesfilter = length(linesfilter) - 1; % Order of the filter
 linesfilter_compl(N_linesfilter/2) = linesfilter_compl(N_linesfilter/2) + 1;
 DTFTplot(linesfilter_compl, 10000);
 title('Freq response of complementary filter (dB)')
 
 % Filter original signal
-continuous = filter(linesfilter_compl, 1, z);
+z_continuous = filter(linesfilter_compl, 1, z);
+% Discard transient
+z_continuous = z_continuous( (N_linesfilter/2 + 1) : length(z_continuous));
+
+
+%% Plots and stuff
 
 % Plot original signal and continuous (without AR models)
-plot_spectrum(continuous, 0);
+plot_spectrum(z_continuous, 0);
 ylim([-10 40]), title('Spectral analysis of continuous part')
 plot_spectrum(z, 0);
 ylim([-10 40]), title('Spectral analysis of original signal')
@@ -91,6 +98,12 @@ ylim([-10 40]), title('Spectral analysis of original signal')
 % See that diff is zero
 delayonly = [zeros(N_linesfilter/2 - 1, 1); 1];
 delayed_z = filter(delayonly, 1, z);
-diff = delayed_z - (continuous + spectral_lines);
-disp(['Max magnitude of the difference between the original signal and the', ...
+% Discard transient
+delayed_z = delayed_z( (N_linesfilter/2 + 1) : length(delayed_z));
+diff = delayed_z - (z_continuous + z_lines);
+disp(['Max magnitude of the difference between the original signal and the ', ...
     'sum of its two components (lines and continuous) is ', num2str(max(abs(diff)))])
+
+%% Export the two signals
+
+save('split_signal', 'z_continuous', 'z_lines');

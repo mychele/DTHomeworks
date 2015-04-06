@@ -4,14 +4,11 @@ close all;
 clear all;
 clc;
 
-%% Load data
-z = load('data for hw1.mat');
-fir_bs_1 = load('fir_bs_1.mat');
-firbs = fir_bs_1.fir_bs_1;
-z = z.z.'; % make a column vector
-z = z - mean(z); % remove average
+%% Load "continuous PSD" signal
+load('split_signal.mat', 'z_continuous');
+z = z_continuous;
 K = length(z); % signal length
-autoc_z = autocorrelation(z, K/5);
+autoc_z = autocorrelation(z, round(K/5));
 
 %% AR
 % the knee is apparently at N = 3
