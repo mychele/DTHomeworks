@@ -26,7 +26,7 @@ c = zeros(N, upper_limit + 1); % init c vector, no info -> set to 0
 e = zeros(1, upper_limit);
 
 
-mu = 0.4/(autoc_z(1)*N); % actually mu must be > 0 and < 2/(N r_z(0))
+mu = 0.42/(autoc_z(1)*N); % actually mu must be > 0 and < 2/(N r_z(0))
 
 % watch out, in the predictor y(k) = transp(x(k-1))c(k)
 for k = 1:upper_limit
@@ -56,5 +56,15 @@ end
 
 
 figure, plot(1:upper_limit, 10*log10(abs(e).^2))
+hold on
+plot(1:upper_limit, 10*log10(sigma_w)*ones(1, upper_limit))
 title('Error function at each iteration');
 
+% Find the value of coefficients at instant k = 350 and the average of e
+% over k \in [350 - 10, 350 + 10]
+
+ind = 350;
+win_side_len = 10;
+win_len = 2*win_side_len + 1;
+c_350 = c(:, ind);
+e_350_av = 10*log10(sum(abs(e(ind-win_side_len:ind+win_side_len)).^2)/win_len);

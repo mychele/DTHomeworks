@@ -87,3 +87,11 @@ end
 figure, plot(1:upper_limit+1, 10*log10(abs(e).^2), [1, upper_limit+1], 10*log10(sigma_w)*[1 1])
 title('Error function at each iteration');
 
+% Find the value of coefficients at instant k = 350 and the average of e
+% over k \in [350 - 10, 350 + 10]
+ind = 350;
+win_side_len = 10;
+win_len = 2*win_side_len + 1;
+c_350 = c(:, ind);
+e_350_av = 10*log10(sum(abs(e(ind-win_side_len:ind+win_side_len)).^2)/win_len);
+
