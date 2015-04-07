@@ -7,7 +7,7 @@ b = x; a = 1;  % Define b and a in z^-1
 
 figure
 %subplot(2, 1, 1)
-plot(f, 10*log10(abs(Hf)))
+plot(f, 20*log10(abs(Hf)))
 %subplot(2, 1, 2), plot(f, angle(Hf))
 
 end
