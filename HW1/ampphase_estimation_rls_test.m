@@ -2,6 +2,25 @@
 
 % For reference, see pages 197, 201-203 of the Benvenuto-Cherubini book.
 
+% Show that 1 coefficient is enough
+% Ae^j(w0k + phi)
+% Acos(w0k + phi) + jAsin(w0k + phi)
+
+% Acos(w0k)cos(phi) - Asin(w0K)sin(phi) + jAsin(w0k)cos(phi) +
+% jAcos(w0k)sin(phi)
+
+% cm = Acos(phi), cd = Asin(phi)
+% cm^2 + cd^2 = A^2(cos^2 + sin^2) = A^2
+
+%cmcos(w0k) + jcmsin(w0k) + jcdcos(w0k) - cdsin(w0k))
+
+%cm e^(jw0k) + j cd e^(jw0k)
+
+% (cm + j cd) e^(jw0k)
+
+% TL; DR a simpler way:
+% Ae^(j w0 k + j phi) = Ae^jphi e^jw0k, c = Ae^jphi
+
 % Clear stuff
 close all
 clear all
@@ -12,13 +31,13 @@ clear all
 z = load('data for hw1.mat');
 z = z.z.'; % make a column vector
 z = z - mean(z); % remove average
-z = z/30 + 3*exp(1i*2*pi*0.1*(1:1000).' + 0.1);
+z = z/30 + 10*exp(1i*2*pi*0.1*(1:1000).' + 1i *pi);
 K = length(z); % signal length
 autoc_z = autocorrelation(z, K/5);
 
 
 %% Initialisation
-N = 2;
+N = 1; % see the first comment
 upper_limit = length(z)-1;%399; % Number of iterations of the algorithm
 lambda = 1; % Forgetting factor. For 1, we do not forget past values
 c = zeros(N, upper_limit+1); % Coefficient vector
@@ -40,9 +59,9 @@ e = zeros(1,upper_limit+1);
 % NOTE: I _hate_ MATLAB's indexing from 1. All indices are kept just like
 % they are in the book, and k simply starts from 2 instead of 1. 
 
-%c(:, 1) = [(15 + 2i); (2 -5i)];
+%c(:, 1) = 15 + 2i;
 w0 = 2*pi*0.1;
-const = 2;
+const = 1;
 x = (const * exp(1i * w0 * (1 : upper_limit+1))).';
 
 for k = 2:upper_limit+1
@@ -58,16 +77,14 @@ for k = 2:upper_limit+1
     k_star(:,k) = r(k) * pi_star(:,k);  
     
     % Output y(k) computed with old coefficients c(k-1)
-    y = x(k) * (c(1, k-1) - 1i * c(2, k-1));
+    y = x(k) * (c(1, k-1));
     % Compute a priori estimation error (with old coefficients)
     epsilon(k) = d(k) - y;
     
-    %epsilon(k) = d(k) - z_k.' * c(:, k-1);
     c(:, k) = c(:, k-1) + epsilon(k) * k_star(:,k);
-    %e(k) = d(k) - x_k.' * c(:,k);
     
     % Output y(k) computed with new coefficients c(k)
-    y = x(k) * (c(1, k) - 1i * c(2, k));
+    y = x(k) * (c(1, k));
     % Compute a posteriori estimation error (with new coefficients)
     e(k) = d(k) - y;
     
@@ -103,20 +120,17 @@ xlabel('Iteration (k)'), ylabel('Ratio (dB)')
 % Average of coefficients from some iteration on, when hopefully they have converged
 expcoeff = mean(c(:, floor(upper_limit*0.9) : upper_limit), 2)
 
-% Acos(t) + jA*sin(t)
-% = c1 * cos(t0) + c2 * sin(t0) + j (c1 * cos(t0 - pi/2) + c2 * sin(t0 - pi/2))
-% = c1 * (cos(t0) + j * sin(t0)) + c2 * (sin(t0) - j * cos(t0))
-% = exp(j * t0) (c1 - j*c2)
-% Thus, Acos(t) = c1 cos(t0) + c2 sin(t0)
-estimatedsine = x * (expcoeff(1) - 1i*expcoeff(2));
-amp = const * abs(expcoeff(1) - 1i*expcoeff(2))
+estimatedsine = x * (expcoeff(1));
 
+amp = const*abs(expcoeff(1))
+phi = angle(expcoeff(1))
 
-figure, plot(real(estimatedsine)), hold on, plot(imag(estimatedsine), 'r')
-title('Estimated signal - imag and real parts')
-legend('Real part', 'Imag part')
-figure, plot3(1:30, real(estimatedsine(1:30)), imag(estimatedsine(1:30)))
-title('First 30 samples of estimated signal')
+% figure, plot(real(estimatedsine)), hold on, plot(imag(estimatedsine), 'r')
+% title('Estimated signal - imag and real parts')
+% legend('Real part', 'Imag part')
+
+% figure, plot3(1:30, real(estimatedsine(1:30)), imag(estimatedsine(1:30)))
+% title('First 30 samples of estimated signal')
 
 figure
 subplot(2, 1, 1), plot(real(estimatedsine)), hold on, plot(real(z), 'r')
