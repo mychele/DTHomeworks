@@ -4,8 +4,6 @@ clc;
 
 %% Load data
 z = load('data for hw1.mat');
-fir_bs_1 = load('fir_bs_1.mat');
-firbs = fir_bs_1.fir_bs_1;
 z = z.z.'; % make a column vector
 z = z - mean(z); % remove average
 %z = randn(1000, 1);

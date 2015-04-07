@@ -14,7 +14,11 @@ autoc = autocorrelation(z, length(z)/5);
 
 %% HPF plus complex bandpass filter
 % --- Compute the coefficients
-c_opt = cfirpm(58, [-1, -0.49, -0.46, -0.45, -0.42, 1], @bandpass);
+f0 = 0.771;
+% cfirpm has a strange behaviour, the center of the band is -(1-f0)*2
+freq_delimiters = [0.752, 0.769, 0.773, 0.790]; % limit of don't care regions, left and right of f0
+matlab_correct_setting = -2*(1-freq_delimiters);
+c_opt = cfirpm(58, [-1, matlab_correct_setting, 1], @bandpass);
 
 % --- Plot frequency response of bandpass filter
 DTFTplot(c_opt, 50000);
@@ -44,18 +48,17 @@ z_continuous = filter(linesfilter_compl, 1, z);
 % Discard transient
 z_continuous = z_continuous( (N_linesfilter/2 + 1) : length(z_continuous));
 
+
+%% Export the two signals
+
+save('split_signal', 'z_continuous', 'z_lines');
+
+
+
 %% Plots and stuff
 
-% Plot original signal and continuous and line (without AR models)
-plot_spectrum(z_lines, 0); 
-ylim([-10 40]), title('Spectral analysis of spectral line part')
-plot_spectrum(z_continuous, 0);
-ylim([-10 40]), title('Spectral analysis of continuous part')
-plot_spectrum(z, 4);
-ylim([-10 40]), title('Spectral analysis of original signal')
-
 % See that diff is zero
-delayonly = [zeros(N_linesfilter/2 - 1, 1); 1];
+delayonly = [zeros(N_linesfilter/2, 1); 1];
 delayed_z = filter(delayonly, 1, z);
 % Discard transient
 delayed_z = delayed_z( (N_linesfilter/2 + 1) : length(delayed_z));
@@ -63,14 +66,19 @@ diff = delayed_z - (z_continuous + z_lines);
 disp(['Max magnitude of the difference between the original signal and the ', ...
     'sum of its two components (lines and continuous) is ', num2str(max(abs(diff)))])
 
-%% Export the two signals
-
-save('split_signal', 'z_continuous', 'z_lines');
-
+z_continuous = z_continuous - mean(z_continuous);
+% Plot original signal and continuous and line (without AR models)
+plot_spectrum(z_lines, 0); 
+ylim([-10 40]), title('Spectral analysis of spectral line part')
+plot_spectrum(z_continuous, 0);
+ylim([-10 40]), title('Spectral analysis of continuous part')
+plot_spectrum(z, 4);
+ylim([-10 40]), title('Spectral analysis of original signal')
 %% AR model for continuous part
 
 
 % --- Recompute everything for AR
+% remove deterministic components
 
 % Find the knee of sigma_w
 N_corr = floor(length(z_continuous)/5);
