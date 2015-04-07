@@ -18,6 +18,9 @@
 
 % (cm + j cd) e^(jw0k)
 
+% TL; DR a simpler way:
+% Ae^(j w0 k + j phi) = Ae^jphi e^jw0k, c = Ae^jphi
+
 % Clear stuff
 close all
 clear all
