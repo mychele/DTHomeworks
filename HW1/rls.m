@@ -51,8 +51,8 @@ e = zeros(1,upper_limit+1);
 % Remember, we are implementing a predictor, so the z(k) of the book is 
 % actually z(k-1) for us. See page 201 for reference.
 %
-% NOTE: I _hate_ MATLAB's indexing from 1. All indices are kept just like
-% they are in the book, and k simply starts from 2 instead of 1. 
+% NOTE: All indices are kept just like they are in the book, and k simply 
+% starts from 2 instead of 1. 
 for k = 2:upper_limit+1
     % Cut off the x(k-1) for this iteration (this part is stolen from the 
     % lms implementation), handling the case in which k < N + 1.
