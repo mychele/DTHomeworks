@@ -176,14 +176,7 @@ for index = 1:sim_length
         d = z; % The reference signal is the input at time k
         epsilon = zeros(1, upper_limit+1); % The a priori estimation error
         e = zeros(1,upper_limit+1);
-        
-        % Begin iterating
-        % Remember, we are implementing a predictor, so the z(k) of the book is
-        % actually z(k-1) for us. See page 201 for reference.
-        %
-        % NOTE: I _hate_ MATLAB's indexing from 1. All indices are kept just like
-        % they are in the book, and k simply starts from 2 instead of 1.
-        
+
         %c(:, 1) = 15 + 2i;
         w = 2*pi*w1;
         const = 1;
