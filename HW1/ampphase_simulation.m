@@ -40,20 +40,20 @@ sim_length = 1000;
 amp_est = zeros(sim_length, 1);
 phi_est = zeros(sim_length, 1);
 rng('default'); % creates reproducible results
-w0 = rand();
-r_phi = 2*pi*rand();
+f0 = rand();
+r_phi = pi*rand() - pi;
 r_amp = 10*rand();
 
 % Simulate sim_length times
 for index = 1:sim_length
-    z = wgn(1000, 1, 10) + r_amp*exp(1i*2*pi*w0*(1:1000).' + 1i * r_phi);
+    z = wgn(1000, 1, 10) + r_amp*exp(1i*2*pi*f0*(1:1000).' + 1i * r_phi);
     K = length(z);
     autoc_z = autocorrelation(z, K/5);
     corr_vec = zeros(6, 1);
     amp_vec = zeros(6, 1);
     phi_vec = zeros(6,1);
     i = 1;
-    for w1 = w0-0.02:0.01:w0+0.02
+    for f1 = f0-0.02:0.01:f0+0.02
         
         
         % Initialisation
@@ -79,7 +79,7 @@ for index = 1:sim_length
         % NOTE: I _hate_ MATLAB's indexing from 1. All indices are kept just like
         % they are in the book, and k simply starts from 2 instead of 1.
         
-        w = 2*pi*w1;
+        w = 2*pi*f1;
         const = 1;
         x = (const * exp(1i * w * (1 : upper_limit+1))).';
         
@@ -133,7 +133,7 @@ end
 
 mse_amp = sum((amp_est-r_amp).^2)/length(amp_est);
 % watch out for the following, if the r_phi is over pi then use (-2*pi+r_phi)
-mse_phi = sum((phi_est-(-2*pi+r_phi)).^2)/length(amp_est);
+mse_phi = sum((phi_est-r_phi).^2)/length(amp_est);
 
 %% Different approach
 % Check if it picks the correct frequency. Freq, amp and phase will be different
@@ -142,15 +142,15 @@ mse_phi = sum((phi_est-(-2*pi+r_phi)).^2)/length(amp_est);
 % center of the vector of frequencies passed to RLS, which is actually the
 % freq of the input signal)
 
-sim_length = 1000;
+sim_length = 500;
 
 % Set our parameters
 amp_est_2 = zeros(sim_length, 1);
 phi_est_2 = zeros(sim_length, 1);
 ind_j = zeros(sim_length, 1);
 rng('default');
-span = 0.05;
-step = 0.01;
+span = 0.005;
+step = 0.0001;
 
 % Simulate sim_length times
 for index = 1:sim_length
@@ -242,4 +242,5 @@ for index = 1:sim_length
     phi_est_2(index) = phi_vec(j) - r_phi;
 end
 
-find(ind_j ~= span/step + 1);
+wrong = ind_j(find(ind_j ~= span/step + 1));
+

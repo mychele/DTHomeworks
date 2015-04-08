@@ -9,23 +9,23 @@ clear all
 %% Load data
 
 % Load spectral signal
-load('split_signal.mat');
-z = z_lines;
-K = length(z); % signal length
-autoc_z = autocorrelation(z, floor(K/5));
-
-% Load complete signal
-% z = load('data for hw1.mat');
-% z = z.z.'; % make a column vector
+% load('split_signal.mat');
+% z = z_lines;
 % K = length(z); % signal length
 % autoc_z = autocorrelation(z, floor(K/5));
+
+% Load complete signal
+z = load('data for hw1.mat');
+z = z.z.'; % make a column vector
+K = length(z); % signal length
+autoc_z = autocorrelation(z, floor(K/5));
 
 
 f0 = 0.77; %estimated freq from DFT
 w0 = 2*pi*f0;
 
 span = 0.005;
-step = 0.001;
+step = 0.0001;
 
 % vectors that will host temporary results
 corr_vec = zeros(2*(span/step) + 1, 1);
