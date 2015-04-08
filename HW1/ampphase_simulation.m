@@ -73,13 +73,6 @@ for index = 1:sim_length
         epsilon = zeros(1, upper_limit+1); % The a priori estimation error
         e = zeros(1,upper_limit+1);
         
-        % Begin iterating
-        % Remember, we are implementing a predictor, so the z(k) of the book is
-        % actually z(k-1) for us. See page 201 for reference.
-        %
-        % NOTE: All indices are kept just like they are in the book, and k 
-        % simply starts from 2 instead of 1.
-        
         w = 2*pi*f1;
         const = 1;
         x = (const * exp(1i * w * (1 : upper_limit+1))).';

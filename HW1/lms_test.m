@@ -51,21 +51,6 @@ for i=1:iterations
         c(:, k + 1) = c(:, k) + mu*e_k*conj(z_k_1); % update the filter, c(k+1) = c(k) + mu*e(k)*conj(z(k-1))
     end
     
-    % Wikipedia's version
-%     for k = 1:upper_limit
-%         if (k < N + 1)
-%             z_k_1 = flipud([zeros(N - k + 1, 1); z(1:(k-1))]); % input vector z_vec_(k-1) of length N
-%             % for k = 1 z(1:0) is an empty matrix
-%         else
-%             z_k_1 = flipud(z((k - N):(k - 1))); % we need the input from k - 1 to k - N
-%         end
-%         y_k = z_k_1.' * conj(c(:, k));
-%         e_k = z(k) - y_k; % the reference signal d(k) is actually the input at sample k
-%         e(k) = e_k;
-%         c(:, k + 1) = c(:, k) + mu * conj(e_k) * z_k_1; % update the filter, c(k+1) = c(k) + mu*e(k)*conj(z(k-1))
-%     end
-    
-    
     % moving average of each instance
     ctot = ctot + c / iterations;
     etot = etot + abs(e.^2) / iterations;
