@@ -97,14 +97,14 @@ ylabel('sigma_w (dB)'), xlabel('Order of the AR(N) model')
 
 % Choose order for AR and compute the vector of coefficients a
 N = 3;
-[a, sigma_w] = arModel(N, autoc_cont);
-[H, omega] = freqz(1, [1; a], K, 'whole');
-figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1)
+[a_cont, sigma_w_cont] = arModel(N, autoc_cont);
+[H, omega] = freqz(1, [1; a_cont], K, 'whole');
+figure, plot(omega/(2*pi), 10*log10(sigma_w_cont*abs(H).^2), 'Color', 'm', 'LineWidth', 1)
 axis([0, 1, -10, 40])
 title('AR model of the continuous part')
 xlabel('Normalized frequency'), ylabel('Magnitude (dB)')
 
-
+figure, zplane(roots([1;a_cont]))
 %% AR model for spectral lines
 
 % Find the knee of sigma_w
@@ -121,9 +121,11 @@ ylabel('sigma_w (dB)'), xlabel('Order of the AR(N) model')
 
 % Choose order for AR and compute the vector of coefficients a
 N = 5;
-[a, sigma_w] = arModel(N, autoc);
-[H, omega] = freqz(1, [1; a], K, 'whole');
-figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
+[a_lines, sigma_w_lines] = arModel(N, autoc);
+[H, omega] = freqz(1, [1; a_lines], K, 'whole');
+figure, plot(omega/(2*pi), 10*log10(sigma_w_lines*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
 axis([0, 1, -35, 15])
 title('AR model of the spectral lines')
 xlabel('Normalized frequency'), ylabel('Magnitude (dB)')
+
+figure, zplane(roots([1;a_cont]))
