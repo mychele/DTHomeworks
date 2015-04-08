@@ -8,3 +8,9 @@
 *.log
 
 HW1/report/report.pdf
+
+*.fdb_latexmk
+
+*.fls
+
+*.gz
