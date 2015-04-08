@@ -11,10 +11,11 @@ K = length(z); % signal length
 
 %% Complex BPF
 % --- Compute the coefficients
-f0 = 0.770;
+f0 = 0.770; % estimated by inspection on the PSD + confirmed by method in ampphase_estimation_rls
 % cfirpm has a strange behaviour, the center of the band is -(1-f0)*2
 freq_delimiters = [f0 - 0.02, f0 - 0.002, f0 + 0.002, f0 + 0.02]; % limit of don't care regions, left and right of f0
 matlab_correct_setting = -2*(1-freq_delimiters);
+% bandpass filter designed with cfirmpm
 bpf = cfirpm(58, [-1, matlab_correct_setting, 1], @bandpass);
 
 % --- Plot frequency response of bandpass filter
@@ -24,6 +25,7 @@ bpf = cfirpm(58, [-1, matlab_correct_setting, 1], @bandpass);
 
 %% Filter the signal with HPF + BPF
 linesfilter = conv(hp18, bpf);
+% normalize linesfilter
 linesfilter = linesfilter / max(abs(fft([linesfilter zeros(1, 5000 - length(linesfilter))])));
 N_linesfilter = length(linesfilter) - 1; % Order of the filter
 z_lines = filter(linesfilter, 1, z);
@@ -53,8 +55,6 @@ z_continuous = z_continuous( (N_linesfilter/2 + 1) : length(z_continuous));
 
 save('split_signal', 'z_continuous', 'z_lines');
 
-
-
 %% See that diff is zero
 
 delayonly = [zeros(N_linesfilter/2, 1); 1];
@@ -76,7 +76,7 @@ plot_spectrum(z_lines, 0);
 axis([0 1 -10 40]), title('Spectral analysis of spectral line part')
 plot_spectrum(z_continuous, 0);
 axis([0 1 -10 40]), title('Spectral analysis of continuous part')
-plot_spectrum(z, 4);
+plot_spectrum(z, 3);
 axis([0 1 -10 40]), title('Spectral analysis of original signal')
 
 
@@ -96,7 +96,7 @@ title('sigma_w of the AR model of the continuous part'), grid on
 ylabel('sigma_w (dB)'), xlabel('Order of the AR(N) model')
 
 % Choose order for AR and compute the vector of coefficients a
-N = 4;
+N = 3;
 [a, sigma_w] = arModel(N, autoc_cont);
 [H, omega] = freqz(1, [1; a], K, 'whole');
 figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1)
@@ -120,7 +120,7 @@ title('sigma_w of the AR model of the spectral lines'), grid on
 ylabel('sigma_w (dB)'), xlabel('Order of the AR(N) model')
 
 % Choose order for AR and compute the vector of coefficients a
-N = 2;
+N = 5;
 [a, sigma_w] = arModel(N, autoc);
 [H, omega] = freqz(1, [1; a], K, 'whole');
 figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
