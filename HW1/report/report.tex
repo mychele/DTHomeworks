@@ -165,21 +165,17 @@ Since the complete statistical description of the process isn't available, we co
 The identification of spectral lines is usually carried out by inspection of the PSD of the process. In this problem there are two factors that make this procedure unfeasible: the low signal to noise ratio and the length of the signal we are given. Moreover the hypothesis of wide sense stationarity should be considered carefully, since we don't know the nature of the underlying process nor if the 1000 samples are sampled with a high period or not. \\
 The low amplitude of the spectral lines, compared to the power of the noise, doesn't allow to clearly distinguish their presence by inspecting the PSD estimated in different ways over the whole 1000 samples. There are some peaks but it isn't straightforward to conclude that they represent noise peaks or spectral lines. On the other side, there's some literature on detection of sinusoidal components with low amplitude in wideband noise, such as the article in \cite{lowamp}, but the proposed algorithms require more than 1000 samples.\\
 This can be seen in Figure~\ref{fig:complete_psd} where different estimates of the PSD are plotted.
-
-% plot from first_spectral_analysis
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.9\textwidth]{images/psd.pdf}
+  \includegraphics[width=0.9\textwidth]{images/psd}
   \caption{Different spectral estimates}
   \label{fig:complete_psd}
 \end{figure}
-
 The parameters of the estimators are as follows. For the periodogram the window used is the default rectangular one. For Welch periodogram $D = 200, S = D/2$ and the window chosen is a Kaiser window with sidelobe attenuation of 60 dB ($w_a = 5.65$). The order of the autocorrelation estimator for the correlogram is $N_{corr} = K/5 = 200$, the window applied is once again a Kaiser window with 60 dB sidelobe attenuation. The AR model has order 3, since the knee of the noise variance $\sigma_w^2$ is present at $N=3$ as it can be seen in Figure~\ref{fig:complete_knee}.
 
-% plot from first_spectral_analysis
 \begin{figure}
   \centering
-  \includegraphics[width = 0.7\textwidth]{images/complete_knee.pdf}
+  \includegraphics[width = 0.7\textwidth]{images/complete_knee}
   \caption{Variance of AR model white noise as a function of the order N}
   \label{fig:complete_knee}
 \end{figure}
@@ -187,10 +183,9 @@ The parameters of the estimators are as follows. For the periodogram the window 
 In order to identify which peaks in Figure~\ref{fig:complete_psd} belong to the noise and which are given by low amplitude spectral lines we developed an algorithm that tries to tackle the issues described before and produce some clear results. At first we consider different windows of samples, of length $L$ and with the initial samples separated by $S$ samples. They overlap by $\max\{0, L-S\}$ samples. The number of windows is $N = \floor{(K-L)/S}$ with $K$ the length of the whole signal. For each of these short windows we compute the periodogram and find its peaks (defined as local maxima, the algorithm uses the function \verb findpeaks of MATLAB). We keep a running sum of the peaks found at each frequency (note: they are quantized by the length $L$ of the window chosen, and the eventual zero padding of the fft) and increase it by 1 whenever there's a peak. In this way we artificially observe more than one realization of the process: if a peak in the periodogram is due to the noise present at a certain instant it could be absent in the next windows. On the other hand, if a peak is due to a weak sinusoidal signal it will be present in more than one window and the sum of peaks found at that frequency will be higher than the ones at frequencies with just the noise. We chose to consider the periodogram and not the other estimators because the length $L$ of the windows we considered is always below or equal 100 samples, otherwise the number of different windows $N$ would be too low. The Welch and correlogram estimator are less effective with so few samples. For the first there's a necessary trade-off between the number of windows $N_s$ and their length $D$: the number of samples in each window should be enough to represent the process, but the smaller $N_s$ is the more the Welch periodogram becomes similar to a simple periodogram with high variance. Also the Blackman and Tukey correlogram suffers in the presence of short windows because it transforms the estimate of the ACS, which is reliable only if computed on less than a fifth of the window's samples.\\
 In Figure~\ref{fig:peak_acc} there's the result of an iteration of the algorithm on the given signal, with parameters $S = 64, L = 96$ and a periodogram computed by windowing the signal with a Kaiser window with parameter $w_a = 5.65$ which guarantees a sidelobe attenuation of 60 dB, without increasing the size of the main lobe too much (this allows us to reduce spectral leakage without increasing the smearing too much).
 
-% plot from first_spectral_analysis, section about periodogram accumulation
 \begin{figure}[h!]
   \centering
-  \includegraphics[width = 0.7\textwidth]{images/period_acc_temp.pdf}
+  \includegraphics[width = 0.7\textwidth]{images/period_acc}
   \caption{Accumulation of peaks in the signal}
   \label{fig:peak_acc}
 \end{figure}
@@ -202,19 +197,19 @@ In order to separate the spectral line from the whole signal we used the cascade
 Note that filtering is performed on the provided signal $z(k)$. \\
 The frequency and phase response of the filters used is in Figures~\ref{fig:line_filt} and~\ref{fig:cont_filt}.\\
 
-% plots from filter_fir.m
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/filter_lines}
   \caption{Frequency response of spectral lines filter $h_{lines}$}
   \label{fig:line_filt}
 \end{figure}
 
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/filter_continuous}
   \caption{Frequency response of filter $h_{continuous}$ for the continuous PSD}
   \label{fig:cont_filt}
 \end{figure}
-
 
 With these filters the maximum of the difference between the original signal, delayed by the transient $D$, and the sum of the continuous part and the spectral line part of the signal is $5.685 \times 10^{-14}$. \\
 
@@ -226,19 +221,22 @@ In Figure~\ref{fig:zpl_cont} there's the plot of zeros of $A(z)$ in the complex 
 
 % plots from filter_fir.m section on AR model of continuous part
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/ar_continuous_sigma}
   \caption{AR model for continuous-PSD signal: variance $\sigma_w^2$ of the noise as a function of N}
   \label{fig:ar_cont_sigma}
 \end{figure}
 
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/ar_continuous_zeros}
   \caption{AR model for continuous-PSD signal: zeros of $A(z)$ in the complex plane}
   \label{fig:zpl_cont}
 \end{figure}
 
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/ar_continuous_psd}
   \caption{AR model for continuous-PSD signal: AR(3) estimate of the PSD of continuous-PSD signal}
   \label{fig:psd_cont}
 \end{figure}
@@ -253,19 +251,22 @@ In Figure~\ref{fig:zpl_lines} there's the plot of zeros of $A(z)$ in the complex
 
 % plots from filter_fir.m section on AR model of lines part
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/ar_lines_sigma}
   \caption{AR model for spectral line signal: variance $\sigma_w^2$ of the noise as a function of N}
   \label{fig:ar_lines_sigma}
 \end{figure}
 
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/ar_lines_zeros}
   \caption{AR model for spectral line signal: zeros of $A(z)$ in the complex plane}
   \label{fig:zpl_lines}
 \end{figure}
 
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/ar_lines_psd} 
   \caption{AR model for spectral line signal: AR(5) estimate of the PSD of spectral line signal}
   \label{fig:psd_lines}
 \end{figure}
@@ -297,13 +298,17 @@ In order to test if this behavior holds, we simulate 500 times the process and a
 
 % plots from lms_test.m
 \begin{figure}[h!]
-  %use subfigures, or update the comments above
-  \caption{Average of coefficients $\mathbf{c}$ (real and imaginary part) over 500 simulations}
+\centering
+	\subfigure{\includegraphics[width=0.3\textwidth]{images/lmstest_c1}}
+	\subfigure{\includegraphics[width=0.3\textwidth]{images/lmstest_c2}}
+	\subfigure{\includegraphics[width=0.3\textwidth]{images/lmstest_c3}}
+ 	 \caption{Average of coefficients $\mathbf{c}$ (real and imaginary part) over 500 simulations}
   \label{fig:coeff_lms_test}
 \end{figure}
 
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/lmstest_err}
   \caption{Average of $|e(k)|^2$ over 500 simulations}
   \label{fig:err_lms_test}
 \end{figure}
@@ -313,13 +318,16 @@ Then we applied the LMS algorithm to the continuous part of the signal as filter
 
 %plots from lms.m
 \begin{figure}[h!]
-  %use subfigures, or update the comments above
+	\centering
+	\subfigure{\includegraphics[width=0.48\textwidth]{images/lms_c1}}
+	\subfigure{\includegraphics[width=0.48\textwidth]{images/lms_c2}}
   \caption{Coefficients $\mathbf{c}$ (real and imaginary part) over 400 iterations of LMS}
   \label{fig:coeff_lms}
 \end{figure}
 
 \begin{figure}[h!]
-
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/lms_err}
   \caption{$|e(k)|^2$ over 400 iterations of LMS}
   \label{fig:err_lms}
 \end{figure}
@@ -366,14 +374,18 @@ The convergence of this algorithm is actually faster than the one of LMS algorit
 
 %plots from rls.m
 \begin{figure}[h!]
-  %use subfigures, or update the comments above
-  \caption{Coefficients $\mathbf{c}$ (real and imaginary part) over 400 iterations of LMS}
+\centering
+	\subfigure{\includegraphics[width=0.75\textwidth]{images/rls_c1}}
+	
+	\subfigure{\includegraphics[width=0.75\textwidth]{images/rls_c2}}
+  \caption{Coefficients $\mathbf{c}$ (real and imaginary part) over 400 iterations of RLS}
   \label{fig:coeff_rls}
 \end{figure}
 
 \begin{figure}[h!]
-
-  \caption{$\mathcal{E}_{min}(k)$ over 400 iterations of LMS}
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/rls_err}
+  \caption{$\mathcal{E}_{min}(k)$ over 400 iterations of RLS}
   \label{fig:err_rls}
 \end{figure}
 
