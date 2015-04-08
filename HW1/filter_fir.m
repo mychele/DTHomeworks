@@ -1,6 +1,6 @@
-close all;
-clear all;
-clc;
+close all
+clear
+clc
 
 %% Load data
 z = load('data for hw1.mat');
@@ -12,25 +12,25 @@ K = length(z); % signal length
 autoc = autocorrelation(z, length(z)/5);
 
 
-%% HPF plus complex bandpass filter
+%% BPF plus complex bandpass filter
 % --- Compute the coefficients
 f0 = 0.771;
 % cfirpm has a strange behaviour, the center of the band is -(1-f0)*2
 freq_delimiters = [0.752, 0.769, 0.773, 0.790]; % limit of don't care regions, left and right of f0
 matlab_correct_setting = -2*(1-freq_delimiters);
-c_opt = cfirpm(58, [-1, matlab_correct_setting, 1], @bandpass);
+bpf = cfirpm(58, [-1, matlab_correct_setting, 1], @bandpass);
 
 % --- Plot frequency response of bandpass filter
-DTFTplot(c_opt, 50000);
+DTFTplot(bpf, 50000);
 ylim([-40 0])
-title('Freq resp of the filter')
+title('Freq resp of the BPF filter')
 
-%% Filter the signal with HPF + BP
-linesfilter = conv(hp18, c_opt);
+%% Filter the signal with HPF + BPF
+linesfilter = conv(hp18, bpf);
 N_linesfilter = length(linesfilter) - 1; % Order of the filter
 z_lines = filter(linesfilter, 1, z);
 DTFTplot(linesfilter, 10000); % Plot filter's freq resp
-title('Freq response of LPF + Wiener filter (dB)')
+title('Freq response of HPF + BPF (dB)')
 % Discard transient
 z_lines = z_lines( (N_linesfilter/2 + 1) : length(z_lines));
 

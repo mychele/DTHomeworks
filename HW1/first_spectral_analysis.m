@@ -44,7 +44,6 @@ N = 3;
 [a, sigma_w] = arModel(N, autoc);
 [H, omega] = freqz(1, [1; a], K, 'whole');
 
-
 clear a autoc D fir_bs_1 N N_corr S upp_limit window window_correlogram
 
 
@@ -66,95 +65,52 @@ title('Spectral analysis')
 
 
 
-%% Split continuous and spectral lines
+%% Percentiles
 
-firbp = -firbs;
-firbp((length(firbs)+1)/2) = firbp((length(firbs)+1)/2) + 1;    % Bandpass
-z_cont = filter(firbs, 1, z);
-z_lines = filter(firbp, 1, z);
 
-% Skip the transients
-z_cont  = z_cont (length(firbp):length(z_cont));
-z_lines = z_lines(length(firbp):length(z_lines));
-K = length(z_cont);
+D = round(44/0.228);
+window = kaiser(D, 5.65);
+S = round(D-K/64); %common samples
+[Pm, PM, Psorted, ~] = findSine(z, window, S);
 
-% Periodogram of the continuous spectrum
-CZ = fft(z_cont, K);
-period_continuous = abs(CZ).^2/K;
+%figure, plot(10*log10(abs(fft_mean)));
+
 figure
-subplot(2,1,1);
-plot((1:K)/K, 10*log10(period_continuous))
-title('Continuous spectrum');
-axis([0, 1, -5, 40])
+plot((0:length(Pm)-1)/length(Pm), 10*log10(Pm).'), hold on
+plot((0:length(PM)-1)/length(PM), 10*log10(PM).')
+title('Minimum and maximum PSD across all windows')
+ylabel('PSD (dB)')
+figure
+plot((0:length(PM)-1)/length(PM), 10*(log10(PM) - log10(Pm)).')
+title('Ratio between min and max PSD across all windows')
 
-% Plot the periodogram of the spectral lines
-LZ = fft(z_lines, K);
-period_lines = abs(LZ).^2/K;
-subplot(2,1,2);
-plot((1:K)/K, 10*log10(period_lines))
-title('Spectral lines');
-axis([0, 1, -5, 40])
-
-
-%% AR continuous
-
-% AR model: order estimation
-% compute variance of AR model and plot it to identify the knee
-% it's computed up to K/5 - 1, don't know if it makes sense
-N_corr = K/5;
-autoc_cont = autocorrelation(z_cont, N_corr);
-upp_limit = 60;
-sigma_w = zeros(1, upp_limit);
-for N = 1:upp_limit
-    [~, sigma_w(N)] = arModel(N, autoc_cont);
+% percentiles
+figure
+hold on
+percentileindices = round([1 30 70 99] * size(Psorted, 2) / 100);
+percentileindices = max(percentileindices, ones(size(percentileindices)));
+for i = percentileindices
+    plot((0:length(Psorted)-1)/length(Psorted), 10*log10(Psorted(:, i)))
 end
-figure, plot(1:upp_limit, 10*log10(sigma_w))
-title('Variance for the AR model of the continuous part');
+title('Percentiles of PSD (dB)')
+legend('1', '30', '70', '99', 'Location', 'SouthEast')
+ylim([-20 40])
 
-% the knee is apparently at N = 3
-% compute the vector of coefficients a
-N = 3;
-[a_cont, sigma_w] = arModel(N, autoc_cont);
-[H_cont, omega] = freqz(1, [1; a_cont], K, 'whole');
-
-figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H_cont).^2), 'Color', 'm', 'LineWidth', 1);
-title('AR model of the continuous part');
-
-figure, zplane(roots([1; a_cont]))
-title('Location of poles and zeros for the AR model of continuous part');
-
-
-%% AR lines
-
-% AR model: order estimation
-% compute variance of AR model and plot it to identify the knee
-% it's computed up to K/5 - 1, don't know if it makes sense
-N_corr = K/5;
-autoc_lines = autocorrelation(z_lines, N_corr);
-upp_limit = 60;
-sigma_w = zeros(1, upp_limit);
-for N = 1:upp_limit
-    [~, sigma_w(N)] = arModel(N, autoc_lines);
+%percentiles zoom
+figure
+hold on
+percentileindices = round([1 10 20 30 70 80 90 99] * size(Psorted, 2) / 100);
+percentileindices = max(percentileindices, ones(size(percentileindices)));
+for i = percentileindices
+    plot((0:length(Psorted)-1)/length(Psorted), 10*log10(Psorted(:, i)))
 end
-figure, plot(1:upp_limit, 10*log10(sigma_w))
-title('Variance for the AR model of the spectral lines');
-
-% the knee is apparently at N = 2
-% compute the vector of coefficients a
-N = 2;
-[a_lines, sigma_w] = arModel(N, autoc_lines);
-[H_lines, omega] = freqz(1, [1; a_lines], K, 'whole');
-
-figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H_lines).^2), 'Color', 'm', 'LineWidth', 1);
-title('AR model of the spectral lines');
-
-figure, zplane(roots([1; a_lines]))
-title('Location of poles and zeros for the AR model of the spectral lines');
+title('Percentiles of PSD (dB)')
+legend('1', '10', '20', '30', '70', '80', '90', '99', 'Location', 'SouthEast')
+ylim([-20 20]), xlim([.6 .9])
 
 
-%% temp FIGO
 
-% close all
+
 % fft_meanmean = zeros(size(z));
 % Dvalues = 100:4:200;
 % for D=Dvalues
@@ -164,34 +120,3 @@ title('Location of poles and zeros for the AR model of the spectral lines');
 %     fft_meanmean = fft_meanmean + fft_mean;
 % end
 % figure, plot(10*log10(abs(fft_meanmean / length(Dvalues))));
-
-
-
-close all
-%D = round(16/0.082); % window size
-D = round(44/0.228);
-window = kaiser(D, 5.65);
-S = round(D-K/64); %common samples
-[Pm, PM, Psorted, ~] = findSine(z, window, S);
-
-%figure, plot(10*log10(abs(fft_mean)));
-
-figure
-plot(10*log10(Pm).'), hold on
-plot(10*log10(PM).')
-title('Minimum and maximum PSD across all windows')
-ylabel('PSD (dB)')
-figure
-plot(10*(log10(PM) - log10(Pm)).')
-title('Ratio between min and max PSD across all windows')
-
-%sort of percentile (confidence interval)
-figure
-hold on
-percentileindices = round([1 10 20 30 70 80 90 99] * size(Psorted, 2) / 100);
-percentileindices = max(percentileindices, ones(size(percentileindices)));
-for i = percentileindices
-    plot(10*log10(Psorted(:, i)))
-end
-title('Percentiles of PSD (dB)')
-legend('1', '10', '20', '30', '70', '80', '90', '99')
