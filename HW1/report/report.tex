@@ -55,7 +55,7 @@ basicstyle=\footnotesize\ttfamily
 %		   the standard version, and over the version in `array.sty'.
 % *** SUBFIGURE PACKAGES ***
 \usepackage[tight,footnotesize]{subfigure}
-\usepackage[top=2cm, bottom=2cm, right=1.6cm,left=1.6cm]{geometry}
+\usepackage[top=2cm, bottom=2cm, right=1.7cm,left=1.7cm]{geometry}
 \usepackage{indentfirst}
 
 
@@ -169,7 +169,7 @@ The low amplitude of the spectral lines, compared to the power of the noise, doe
 This behavior can be seen in Figure~\ref{fig:complete_psd} where different estimates of the PSD are plotted.
 \begin{figure}[htp]
   \centering
-  \includegraphics[width=0.9\textwidth]{images/psd}
+  \includegraphics[width=0.97\textwidth]{images/psd}
   \caption{Different spectral estimates}
   \label{fig:complete_psd}
 \end{figure}
@@ -198,6 +198,30 @@ There are a couple other methods we designed in order to determine the presence 
 
 To equalize the spectrum, the periodogram estimate of the signal has been multiplied by the inverse of the frequency response of the filter given by the AR model. This is equal to the use of a whitening filter: if the signal is thought of as the result of white noise filtering (for which the filter has the same coeffients yielded by the AR model), the inverse of this filter will bring every frequency more or less at the same power. In this situation, it is easier to identify spectral lines, as they could clearly emerge from the white noise, now reduced to a constant. In fact, after passing the signal through such a whitening filter, it can be seen that its representation in the frequency domain is that in Figure~\ref{fig:whitening}. At the $0.77 F_c$ frequency there is a peak that is 5 dB above the rest of the white noise. This can be interpreted as a strong indication of the presence of a spectral line.
 
+To confirm our hypothesis, we developed another algorithm that attempts to identify frequency components that are less subject than others to fluctuations due to randomness. The first step of this algorithm is similar to what discussed in the first and main of the three solutions, in that it iterates over windows of length $D = 200$ that overlap by $S = 175$ samples and computes the periodogram of each of them. We tried different combinations and we concluded that the best setting is when both the size $D$ and the number of windows are sufficiently large, even though the windows are significantly overlapped.
+
+The next step consists in performing a kind of sorting of periodograms that is done as follows. Given $N$ periodograms $\mathcal{P}_{PER}^{(i)} (f)$ for $i=1,~\ldots,~N$, we sort the vector $[ \mathcal{P}_{PER}^{(1)}(\hat{f}), \; \mathcal{P}_{PER}^{(2)}(\hat{f}), \; \ldots, \; \mathcal{P}_{PER}^{(N)}(\hat{f}) ]$ independently for each $\hat{f}$. We have now a set of functions $\mathcal{\tilde{P}}^{(j)}(f)$ for $j = 1,~\ldots,~N$ that verify $\mathcal{\tilde{P}}^{(j)}(f) \leq \mathcal{\tilde{P}}^{(j+1)}(f) \quad \forall j = 1,~\ldots,~N-1$. In a fashion that may recall confidence intervals, we plot in Figure \ref{fig:percentiles} some useful percentiles of the functions in question. In Figure \ref{fig:percentiles_zoom} we highlight the unusual behaviour at the frequency that already caught our attention.
+
+\begin{figure}[h!]
+ \centering
+ \includegraphics[width = 0.7\textwidth]{images/whitening}
+ \caption{Equalized frequency domain of the signal}
+ \label{fig:whitening}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width = 0.97\textwidth]{images/percentiles}
+  \caption{Percentiles of PSD computed as per section \ref{subsec:identify}.}
+  \label{fig:percentiles}
+\end{figure}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width = 0.97\textwidth]{images/percentiles_zoom}
+  \caption{Zoomed view of the percentile plot.}
+  \label{fig:percentiles_zoom}
+\end{figure}
 
 \section{AR models for continuous and spectral lines components}
 In order to separate the spectral line from the whole signal we used the cascade of two filters, that is their convolution in the time domain. A simple passband filter centered at $f_0 = 0.77$ is not enough because the PSD at that frequency is 20 dB below the PSD at frequencies $f \in [0, 0.1]$ and $f \in [0.9, 1]$. Therefore the signal is as first filtered with a real FIR linear-frequency highpass filter that equalizes the PSD and then with a complex FIR linear-frequency bandpass filter centered at $f_0 = 0.77$.
