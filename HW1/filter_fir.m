@@ -14,9 +14,9 @@ autoc = autocorrelation(z, length(z)/5);
 
 %% BPF plus complex bandpass filter
 % --- Compute the coefficients
-f0 = 0.771;
+f0 = 0.770;
 % cfirpm has a strange behaviour, the center of the band is -(1-f0)*2
-freq_delimiters = [0.752, 0.769, 0.773, 0.790]; % limit of don't care regions, left and right of f0
+freq_delimiters = [f0 - 0.02, f0 - 0.002, f0 + 0.002, f0 + 0.02]; % limit of don't care regions, left and right of f0
 matlab_correct_setting = -2*(1-freq_delimiters);
 bpf = cfirpm(58, [-1, matlab_correct_setting, 1], @bandpass);
 
