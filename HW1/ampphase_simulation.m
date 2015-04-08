@@ -79,7 +79,6 @@ for index = 1:sim_length
         % NOTE: I _hate_ MATLAB's indexing from 1. All indices are kept just like
         % they are in the book, and k simply starts from 2 instead of 1.
         
-        %c(:, 1) = 15 + 2i;
         w = 2*pi*w1;
         const = 1;
         x = (const * exp(1i * w * (1 : upper_limit+1))).';
@@ -166,7 +165,7 @@ for index = 1:sim_length
     amp_vec = zeros(2*(span/step) + 1, 1);
     phi_vec = zeros(2*(span/step) + 1, 1);
     i = 1;
-    for w1 = w0-0.05:0.01:w0+0.05 % Then w0 should be the 6th element of the vector (span/step + 1)
+    for w1 = w0-span:step:w0+span % Then w0 should be the 6th element of the vector (span/step + 1)
         
         % Initialisation
         N = 1; % see the first comment
