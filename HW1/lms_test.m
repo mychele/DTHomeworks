@@ -9,13 +9,13 @@ rng default
 upper_limit = 4999; % iterations of lms
 ctot = zeros(3, upper_limit + 1);
 etot = zeros(1, upper_limit);
+filtercoeff = [1, 0.2-0.5i, 0.2, 0.2]; % fixed
 
-iterations = 150;
+iterations = 500;
 for i=1:iterations
     
     %% Load data
     z = randn(5000, 1);
-    filtercoeff = [1, 0.2-0.5i, 0.2, 0.2];
     z = filter(1, filtercoeff, z);
     K = length(z); % signal length
     autoc_z = autocorrelation(z, K/10);
@@ -107,7 +107,7 @@ subplot(2, 1, 2)
 plot(1:upper_limit+1, imag(ctot(3, :)), [1, upper_limit+1], -imag(filtercoeff(4))* [1 1])
 title('Imaginary part of c3');
 
-figure, plot(1:upper_limit, 10*log10(etot), 1:upper_limit, 10*log10(sigma_w) * ones(upper_limit, 1))
+figure, plot(1:upper_limit, 10*log10(etot), 1:upper_limit, 10*log10(1) * ones(upper_limit, 1))
 title('|e(k)|^2 at each iteration k averaged over different realizations')
 ylabel('Mean of |e(k)|^2 (dB)')
 
