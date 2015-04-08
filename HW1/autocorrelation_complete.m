@@ -1,7 +1,5 @@
 function [ autoc_complete ] = autocorrelation_complete( z1, N_corr )
-%AUTOCORRELATION_COMPLETE Summary of this function goes here
-%   Detailed explanation goes here
-
+% Compute the negative index values of the autocorrelation estimate
 autoc = autocorrelation(z1, N_corr);
 
 K = length(z1);

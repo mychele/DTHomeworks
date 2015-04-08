@@ -1,3 +1,5 @@
+%% Amp-Phase simulation
+
 %% This is a simulation designed to test how well does the RLS method works 
 % when it comes to find amplitude, phase of a spectral line, given an
 % approximated frequency derived from the observation of the peak in the
@@ -55,7 +57,6 @@ for index = 1:sim_length
     i = 1;
     for f1 = f0-0.02:0.01:f0+0.02
         
-        
         % Initialisation
         N = 1; % see the first comment
         upper_limit = length(z)-1;%399; % Number of iterations of the algorithm
@@ -76,8 +77,8 @@ for index = 1:sim_length
         % Remember, we are implementing a predictor, so the z(k) of the book is
         % actually z(k-1) for us. See page 201 for reference.
         %
-        % NOTE: I _hate_ MATLAB's indexing from 1. All indices are kept just like
-        % they are in the book, and k simply starts from 2 instead of 1.
+        % NOTE: All indices are kept just like they are in the book, and k 
+        % simply starts from 2 instead of 1.
         
         w = 2*pi*f1;
         const = 1;
@@ -129,7 +130,7 @@ for index = 1:sim_length
     phi_est(index) = phi_vec(j);
 end
 
-%% Statistical things
+%% Statistical values
 
 mse_amp = sum((amp_est-r_amp).^2)/length(amp_est);
 % watch out for the following, if the r_phi is over pi then use (-2*pi+r_phi)
@@ -243,4 +244,3 @@ for index = 1:sim_length
 end
 
 wrong = ind_j(find(ind_j ~= span/step + 1));
-

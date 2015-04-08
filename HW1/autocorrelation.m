@@ -1,6 +1,5 @@
 function [ autoc ] = autocorrelation( z1, N_corr )
-%AUTOCORRELATION Summary of this function goes here
-%   Detailed explanation goes here
+% Compute the autocorrelation estimate of a signal
 
 K = length(z1);
 autoc = zeros(N_corr + 1, 1);

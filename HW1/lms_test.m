@@ -1,10 +1,9 @@
-% Implement LMS algorithm
+%% LMS TEST
 
 close all
 clear all
 clc
 rng default
-
 
 upper_limit = 4999; % iterations of lms
 ctot = zeros(3, upper_limit + 1);
@@ -82,8 +81,6 @@ for i=1:iterations
 %     pause(0.01)
 end
 
-
-
 figure
 subplot(2, 1, 1)
 plot(1:upper_limit+1, real(ctot(1, :)), [1, upper_limit+1], -real(filtercoeff(2))* [1 1])
@@ -137,6 +134,3 @@ title('Real part of c3');
 subplot(2, 1, 2)
 plot(1:upper_limit+1, imag(c(3, :)), 1:upper_limit+1, -imag(a(3)))
 title('Imaginary part of c3');
-
-
-

@@ -1,5 +1,4 @@
-%% This is the implementation of the Recursive Least Squares algorithm (RLS)
-
+%% Amp-Phase Estimation RLS
 % For reference, see pages 197, 201-203 of the Benvenuto-Cherubini book.
 
 % Clear stuff
@@ -19,7 +18,6 @@ z = load('data for hw1.mat');
 z = z.z.'; % make a column vector
 K = length(z); % signal length
 autoc_z = autocorrelation(z, floor(K/5));
-
 
 f0 = 0.77; %estimated freq from DFT
 w0 = 2*pi*f0;
@@ -56,8 +54,8 @@ for f1 = (f0 - span):step:(f0 + span)
     % Remember, we are implementing a predictor, so the z(k) of the book is
     % actually z(k-1) for us. See page 201 for reference.
     %
-    % NOTE: I _hate_ MATLAB's indexing from 1. All indices are kept just like
-    % they are in the book, and k simply starts from 2 instead of 1.
+    % NOTE: All indices are kept just like they are in the book, and k 
+    % simply starts from 2 instead of 1.
     
     w = 2*pi*f1;
     const = 1;
@@ -108,7 +106,7 @@ end
 amp_est = amp_vec(j);
 phi_est = phi_vec(j);
 
-
+% Plotting
 figure, plot(real(estimatedsine)), hold on, plot(imag(estimatedsine), 'r')
 title('Estimated signal - imag and real parts')
 legend('Real part', 'Imag part')

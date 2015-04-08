@@ -1,3 +1,4 @@
+%% Filter FIR
 close all
 clear
 clc
@@ -5,15 +6,16 @@ clc
 %% Load data
 load('data for hw1.mat');
 z = z.'; % make a column vector
-load('hp18.mat');
+load('hp18.mat'); % load an high pass filter
 hp18 = hp18.'; % make a column vector
 K = length(z); % signal length
 
 %% Complex BPF
 % --- Compute the coefficients
-f0 = 0.770; % estimated by inspection on the PSD + confirmed by method in ampphase_estimation_rls
-% cfirpm has a strange behaviour, the center of the band is -(1-f0)*2
-freq_delimiters = [f0 - 0.02, f0 - 0.002, f0 + 0.002, f0 + 0.02]; % limit of don't care regions, left and right of f0
+f0 = 0.770; % estimated by inspection on the PSD + ampphase_estimation_rls
+% Note: cfirpm has a strange behaviour, the center of the band is -(1-f0)*2
+% limit of don't care regions, left and right of f0
+freq_delimiters = [f0 - 0.02, f0 - 0.002, f0 + 0.002, f0 + 0.02]; 
 matlab_correct_setting = -2*(1-freq_delimiters);
 % bandpass filter designed with cfirmpm
 bpf = cfirpm(58, [-1, matlab_correct_setting, 1], @bandpass);
@@ -80,7 +82,6 @@ plot_spectrum(z, 3);
 axis([0 1 -10 40]), title('Spectral analysis of original signal')
 
 
-
 %% AR model for continuous part
 
 % Find the knee of sigma_w
@@ -105,6 +106,8 @@ title('AR model of the continuous part')
 xlabel('Normalized frequency'), ylabel('Magnitude (dB)')
 
 figure, zplane(roots([1;a_cont]))
+
+
 %% AR model for spectral lines
 
 % Find the knee of sigma_w

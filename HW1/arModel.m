@@ -1,6 +1,6 @@
 function [ a, sigma_w ] = arModel( N, autoc )
 % ARMODEL of order N, given the unbiased/biased estimate of the
-% autocorrelation of the signal whose PSD have to be estimated
+% autocorrelation of the signal whose PSD has to be estimated
 
 row1 = conj(autoc);
 % create the Toeplitz R matrix

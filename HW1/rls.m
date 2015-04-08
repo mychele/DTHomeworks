@@ -1,4 +1,4 @@
-%% This is the implementation of the Recursive Least Squares algorithm (RLS)
+%% RLS
 
 % We are trying to estimate the vector of coefficients c by an LS method.
 % As a ballpark figure, this should converge ~10 times faster than the LMS
@@ -17,7 +17,7 @@ z = z_continuous - mean(z_continuous);
 K = length(z); % signal length
 autoc_z = autocorrelation(z, round(K/5));
 
-% Uncomment to load Dittadi's filtered white noise 
+% Uncomment to load filtered white noise 
 % z = randn(5000, 1);
 % filtercoeff = [1, 0.2-0.5i, 0.2, 0.2];
 % z = filter(1, filtercoeff, z);
@@ -94,4 +94,3 @@ win_side_len = 10;
 win_len = 2*win_side_len + 1;
 c_350 = c(:, ind);
 e_350_av = 10*log10(sum(abs(e(ind-win_side_len:ind+win_side_len)).^2)/win_len);
-

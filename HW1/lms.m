@@ -1,4 +1,4 @@
-% Implement LMS algorithm
+%% LMS
 
 close all;
 clear all;
@@ -18,7 +18,7 @@ N = 2;
 [a, sigma_w] = arModel(N, autoc_z);
 [H, omega] = freqz(1, [1; a], K, 'whole');
 
-%%
+%% Initialization and iteration
 upper_limit = 399; %MATLAB requires indices from 1 to 401
 c = zeros(N, upper_limit + 1); % init c vector, no info -> set to 0
 % each column of this matrix is c(k), a vector with coefficients from 1 to
@@ -52,7 +52,6 @@ for index = 1:N
     title(['Imaginary part of c' int2str(index)]);
 end
 
-
 figure, plot(1:upper_limit, 10*log10(abs(e).^2))
 hold on
 plot(1:upper_limit, 10*log10(sigma_w)*ones(1, upper_limit))
@@ -60,7 +59,6 @@ title('Error function at each iteration');
 
 % Find the value of coefficients at instant k = 350 and the average of e
 % over k \in [350 - 10, 350 + 10]
-
 ind = 350;
 win_side_len = 10;
 win_len = 2*win_side_len + 1;

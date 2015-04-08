@@ -1,3 +1,4 @@
+%% First spectral analysis
 close all
 clear
 clc
@@ -8,15 +9,11 @@ z = z.z.'; % make a column vector
 z = z - mean(z); % remove average
 K = length(z); % signal length
 
-
 %% Spectral analysis
 
-
-
-
-% AR model: order estimation
-% compute variance of AR model and plot it to identify the knee
-% it's computed up to K/5 - 1, don't know if it makes sense
+% AR model: order estimation.
+% Compute variance of AR model and plot it to identify the knee.
+% It's computed up to K/5 - 1
 N_corr = ceil(K/5);
 autoc = autocorrelation_biased(z, N_corr);
 upp_limit = 30;
@@ -28,21 +25,19 @@ figure, plot(1:upp_limit, 10*log10(sigma_w))
 title('sigma_w of the AR model of the whole signal'), grid on
 ylabel('sigma_w (dB)'), xlabel('Order of the AR(N) model')
 
-% The knee is apparently at N = 3: use it as order of the AR model
+% Plot the spectra of the signal according to various estimators
 plot_spectrum(z, 3);
 ylim([-10 40])
-
-
 
 %% Peaks accumulation
 % Find if a peak is present in more than one window of the signal
 
-step = 64; %distance between the first two sample of each window
-span = 96; %actual size of the window
+step = 64; % distance between the first two sample of each window
+span = 96; % actual size of the window
 overlap = span - step;
 max_iter = floor((K-span)/step);
 
-% init
+% Initialize
 acc_locs_per = zeros(span, 1);
 window_span = kaiser(span, 5.65);
 
@@ -72,12 +67,11 @@ disp(find(acc_locs_per > 0.7)/span);
 
 %% Whitening filter
 
-% Pass the signal through a whitening filter in order to equalize its spectrum
-% The whitening filter will be obtained as the inverse of the AR model
-% filter. This is needed to identify peaks. As we do not care about the
-% phase in this stage, we can afford to pass it through something that is
-% not with linear phase.
-
+% Pass the signal through a whitening filter in order to equalize its
+% spectrum. The whitening filter will be obtained as the inverse of the AR 
+% model filter. This is needed to identify peaks. As we do not care about 
+% the phase in this stage, we can afford to pass it through something that
+% is not with linear phase.
 
 % Compute the AR model
 [a, sigma_w] = arModel(3, autocorrelation(z, K/5));
@@ -103,11 +97,10 @@ axis([0 1 0 20]);
 
 %% Percentiles
 
-D = round(44/0.228);
+D = round(200);
 window = kaiser(D, 5.65);
 S = round(D-K/64); %common samples
 [Pm, PM, Psorted, ~] = findSine(z, window, S);
-
 
 figure
 plot((0:length(Pm)-1)/length(Pm), 10*log10(Pm).'), hold on
@@ -118,7 +111,7 @@ ylabel('PSD (dB)'), ylim([-25 45])
 % plot((0:length(PM)-1)/length(PM), 10*(log10(PM) - log10(Pm)).')
 % title('Ratio between min and max PSD across all windows')
 
-% percentiles
+% Plot the percentiles
 figure
 hold on
 percentileindices = round([1 30 70 99] * size(Psorted, 2) / 100);
@@ -141,16 +134,3 @@ end
 title('Percentiles of PSD (dB)')
 legend('1', '10', '20', '30', '70', '80', '90', '99', 'Location', 'SouthEast')
 ylim([-20 20]), xlim([.6 .9])
-
-
-
-
-% fft_meanmean = zeros(size(z));
-% Dvalues = 100:4:200;
-% for D=Dvalues
-%     window = kaiser(D, 5.65);
-%     S = round(D*0.9); %common samples
-%     [~, ~, ~, fft_mean] = findSine(z, window, S);
-%     fft_meanmean = fft_meanmean + fft_mean;
-% end
-% figure, plot(10*log10(abs(fft_meanmean / length(Dvalues))));

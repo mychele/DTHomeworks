@@ -1,6 +1,5 @@
 function [ correlogram ] = correlogramPsd( z1, window, N_corr )
-%CORRELOGRAMPSD Summary of this function goes here
-%   Detailed explanation goes here
+% Compute the PSD estimate using the correlogram method
 
 K = length(z1);
 autoc_complete = autocorrelation_complete(z1, N_corr);
