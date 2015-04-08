@@ -6,7 +6,6 @@ clc
 z = load('data for hw1.mat');
 z = z.z.'; % make a column vector
 z = z - mean(z); % remove average
-%z = randn(1000, 1);
 K = length(z); % signal length
 
 

@@ -73,11 +73,11 @@ z_lines = z_lines - mean(z_lines);
 
 % Plot spectral analysis of the signal and its two components (without AR models)
 plot_spectrum(z_lines, 0); 
-ylim([-10 40]), title('Spectral analysis of spectral line part')
+axis([0 1 -10 40]), title('Spectral analysis of spectral line part')
 plot_spectrum(z_continuous, 0);
-ylim([-10 40]), title('Spectral analysis of continuous part')
+axis([0 1 -10 40]), title('Spectral analysis of continuous part')
 plot_spectrum(z, 4);
-ylim([-10 40]), title('Spectral analysis of original signal')
+axis([0 1 -10 40]), title('Spectral analysis of original signal')
 
 
 
@@ -86,7 +86,7 @@ ylim([-10 40]), title('Spectral analysis of original signal')
 % Find the knee of sigma_w
 N_corr = floor(length(z_continuous)/5);
 autoc_cont = autocorrelation_biased(z_continuous, N_corr);
-upp_limit = 40;
+upp_limit = 30;
 sigma_w = zeros(1, upp_limit);
 for N = 1:upp_limit
    [~, sigma_w(N)] = arModel(N, autoc_cont);
@@ -102,6 +102,7 @@ N = 4;
 figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1)
 axis([0, 1, -10, 40])
 title('AR model of the continuous part')
+xlabel('Normalized frequency'), ylabel('Magnitude (dB)')
 
 
 %% AR model for spectral lines
@@ -109,7 +110,7 @@ title('AR model of the continuous part')
 % Find the knee of sigma_w
 N_corr = floor(length(z_lines)/5);
 autoc = autocorrelation_biased(z_lines, N_corr);
-upp_limit = 40;
+upp_limit = 30;
 sigma_w = zeros(1, upp_limit);
 for N = 1:upp_limit
    [~, sigma_w(N)] = arModel(N, autoc);
@@ -125,3 +126,4 @@ N = 2;
 figure, plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2), 'Color', 'm', 'LineWidth', 1);
 axis([0, 1, -35, 15])
 title('AR model of the spectral lines')
+xlabel('Normalized frequency'), ylabel('Magnitude (dB)')
