@@ -97,9 +97,9 @@ axis([0 1 0 20]);
 
 %% Percentiles
 
-D = round(200);
+D = 200;
+S = 175;
 window = kaiser(D, 5.65);
-S = round(D-K/64); %common samples
 [Pm, PM, Psorted, ~] = findSine(z, window, S);
 
 figure
