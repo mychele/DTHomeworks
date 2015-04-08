@@ -11,7 +11,8 @@ K = length(z); % signal length
 autoc_z = autocorrelation(z, round(K/5));
 
 %% AR
-% the knee is apparently at N = 3
+% the knee is apparently at N = 3, however LMS doesn't converge for N = 3
+% in the required number of iterations
 % compute the vector of coefficients a
 N = 2;
 [a, sigma_w] = arModel(N, autoc_z);
@@ -20,14 +21,11 @@ N = 2;
 %%
 upper_limit = 399; %MATLAB requires indices from 1 to 401
 c = zeros(N, upper_limit + 1); % init c vector, no info -> set to 0
-%c(:,1) = -a +5;
 % each column of this matrix is c(k), a vector with coefficients from 1 to
 % N (since we are implementing the predictor)!
 e = zeros(1, upper_limit);
 
-
 mu = 0.42/(autoc_z(1)*N); % actually mu must be > 0 and < 2/(N r_z(0))
-
 % watch out, in the predictor y(k) = transp(x(k-1))c(k)
 for k = 1:upper_limit
     if (k < N + 1)
