@@ -11,6 +11,9 @@ K = length(z); % signal length
 
 %% Spectral analysis
 
+
+
+
 % AR model: order estimation
 % compute variance of AR model and plot it to identify the knee
 % it's computed up to K/5 - 1, don't know if it makes sense
@@ -31,8 +34,74 @@ ylim([-10 40])
 
 
 
-%% Percentiles
+%% Peaks accumulation
+% Find if a peak is present in more than one window of the signal
 
+step = 64; %distance between the first two sample of each window
+span = 96; %actual size of the window
+overlap = span - step;
+max_iter = floor((K-span)/step);
+
+% init
+acc_locs_per = zeros(span, 1);
+window_span = kaiser(span, 5.65);
+
+for i = 0:max_iter
+    z_part = z(i*step + 1: i*step + span);
+    
+    % PERIODOGRAM over span samples
+    Z = fft(z_part.*window_span);
+    periodogr = abs(Z).^2/span;
+    
+    % find local maxima
+    [peaks, locs_per] = findpeaks(abs(periodogr));
+    % accumulate local maxima
+    acc_locs_per(locs_per) = acc_locs_per(locs_per) + 1;   
+end
+
+% normalize to the number of iterations
+acc_locs_per = acc_locs_per/i;
+
+figure
+bar((1:span)/span, acc_locs_per)
+axis([0, 1, 0, max(acc_locs_per)])
+xlabel('Frequency')
+title(sprintf('Histogram of periodogram peaks over %d windows', max_iter))
+
+disp(find(acc_locs_per > 0.7)/span);
+
+%% Whitening filter
+
+% Pass the signal through a whitening filter in order to equalize its spectrum
+% The whitening filter will be obtained as the inverse of the AR model
+% filter. This is needed to identify peaks. As we do not care about the
+% phase in this stage, we can afford to pass it through something that is
+% not with linear phase.
+
+
+% Compute the AR model
+[a, sigma_w] = arModel(3, autocorrelation(z, K/5));
+[H, omega] = freqz(1, [1; a], K, 'whole');
+
+% Plot the two frequency responses
+figure
+plot(omega/(2*pi), 10*log10(sigma_w*abs(H).^2));
+hold on
+plot(omega/(2*pi), 10*log10((1/sigma_w)*abs(1./H).^2));
+hold off
+legend('AR filter', 'Inverse of AR filter');
+title('Frequency response of the AR filter and of its inverse');
+axis([0 1 -40 40]);
+
+% Plot the whitened result
+figure
+equalized_spectrum = abs((fft(z)).*(1./H)*(1/sigma_w));
+plot((1:K-1)/K, 10*log10(equalized_spectrum(2:end))); hold on
+title('Equalized spectrum of the given signal');
+axis([0 1 0 20]);
+
+
+%% Percentiles
 
 D = round(44/0.228);
 window = kaiser(D, 5.65);
