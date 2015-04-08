@@ -128,4 +128,4 @@ axis([0, 1, -35, 15])
 title('AR model of the spectral lines')
 xlabel('Normalized frequency'), ylabel('Magnitude (dB)')
 
-figure, zplane(roots([1;a_cont]))
+figure, zplane(roots([1;a_lines]))
