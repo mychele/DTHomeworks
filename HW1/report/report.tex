@@ -361,7 +361,33 @@ with $\mathbf{\Pi}, \mathbf{k}, \epsilon(k), r(k)$ auxiliary entities that allow
 \begin{equation}
   \mathcal{E}_{min}(k) = \lambda \mathcal{E}_{min}(k-1) + \epsilon(k)e^*(k)
 \end{equation}
+In our implementation $\lambda = 1$. \\
+The convergence of this algorithm is actually faster than the one of LMS algorithm. Since the underlying problem is the same as for LMS, given the AR model of order $N$ of the process, also in RLS algorithm the $\mathbf{c}$ vector should converge to $-\mathbf{a}$ and $\mathcal{E}_{min}(k) = \sigma_w^2$ at least in mean. Since we apply the algorithm to just one realization of the process the average behavior cannot be observed, but as it can be seen in Figures~\ref{rls_coeff} and~\ref{fig:err_rls} the convergence is reached in few iterations also in this single realization.
 
+%plots from rls.m
+\begin{figure}[h!]
+  %use subfigures, or update the comments above
+  \caption{Coefficients $\mathbf{c}$ (real and imaginary part) over 400 iterations of LMS}
+  \label{fig:coeff_rls}
+\end{figure}
+
+\begin{figure}[h!]
+
+  \caption{$\mathcal{E}_{min}(k)$ over 400 iterations of LMS}
+  \label{fig:err_rls}
+\end{figure}
+
+The value of coefficients at iteration $k = 350$ and the average of $\mathcal{E}_{min}(k)$ over the window $k \in [350 - 10, 350 + 10]$ can be found in Table~\ref{table:rls_conv}. It can be seen, both from Figures~\ref{rls_coeff} and~\ref{fig:err_rls} and Table~\ref{table:rls_conv} that the coefficients are closer to the value they should converge to, while the functional $\mathcal{E}_{min}(350)$ has a larger value.
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{c|c|c}
+    $c_1(350)$ &   $c_2(350)$ & $\frac{1}{21}\sum_{k=340}^{360} \mathcal{E}_{min}(k)$ [dB] \\ \hline
+    $1.789 - j0.0148$ & $-0.899 + j0.0177$ & $9.6372$
+  \end{tabular}
+  \caption{Values of coefficients and $\mathcal{E}_{min}(k)$ of LMS at $k=350$}
+  \label{table:lms_conv}
+\end{table}
 
 \section{Amplitude, phase and frequency estimate of the spectral line}
 
