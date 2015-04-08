@@ -1,5 +1,11 @@
 function plot_spectrum(signal, N_ar)
-    
+% This function computes different estimators on a given signal: Periodogram, 
+% Welch periodogram, Correlogram and if N_ar > 0 also the AR model of order
+% N_ar. The parameters and the windows of Welch and Correlogram are hard
+% coded in the function and not passed as arguments. It also plots the
+% various estimate on the same plot, with frequency normalized in [0,1].
+% Use ylim in the main script to set the desired dinamic in the Y axis.
+
     K = length(signal);
 
     % PERIODOGRAM pg 84

@@ -1,6 +1,5 @@
 function [ ] = DTFTplot( x, res )
-%DTFTPLOTLOG Summary of this function goes here
-%   Detailed explanation goes here
+%DTFTPLOTLOG Logarithmic plot of the DTFT module of the signal
 
 b = x; a = 1;  % Define b and a in z^-1
 [Hf, f] = freqz(b, a, res, 1, 'whole');

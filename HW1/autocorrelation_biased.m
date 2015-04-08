@@ -1,5 +1,5 @@
 function [ autoc ] = autocorrelation_biased( z1, N_corr )
-%AUTOCORRELATION biased estimator
+%AUTOCORRELATION biased estimator pg 83 of Benvenuto Cherubini
 
 K = length(z1);
 autoc = zeros(N_corr + 1, 1);
