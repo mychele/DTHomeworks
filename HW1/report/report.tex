@@ -165,14 +165,18 @@ Since the complete statistical description of the process isn't available, we co
 The identification of spectral lines is usually carried out by inspection of the PSD of the process. In this problem there are two factors that make this procedure unfeasible: the low signal to noise ratio and the length of the signal we are given. Moreover the hypothesis of wide sense stationarity should be considered carefully, since we don't know the nature of the underlying process nor if the 1000 samples are sampled with a high period or not. \\
 The low amplitude of the spectral lines, compared to the power of the noise, doesn't allow to clearly distinguish their presence by inspecting the PSD estimated in different ways over the whole 1000 samples. There are some peaks but it isn't straightforward to conclude that they represent noise peaks or spectral lines. On the other side, there's some literature on detection of sinusoidal components with low amplitude in wideband noise, such as the article in \cite{lowamp}, but the proposed algorithms require more than 1000 samples.\\
 This can be seen in Figure~\ref{fig:complete_psd} where different estimates of the PSD are plotted.
+
+% plot from first_spectral_analysis
 \begin{figure}[h!]
   \centering
   \includegraphics[width=0.9\textwidth]{images/psd.pdf}
   \caption{Different spectral estimates}
   \label{fig:complete_psd}
 \end{figure}
+
 The parameters of the estimators are as follows. For the periodogram the window used is the default rectangular one. For Welch periodogram $D = 200, S = D/2$ and the window chosen is a Kaiser window with sidelobe attenuation of 60 dB ($w_a = 5.65$). The order of the autocorrelation estimator for the correlogram is $N_{corr} = K/5 = 200$, the window applied is once again a Kaiser window with 60 dB sidelobe attenuation. The AR model has order 3, since the knee of the noise variance $\sigma_w^2$ is present at $N=3$ as it can be seen in Figure~\ref{fig:complete_knee}.
 
+% plot from first_spectral_analysis
 \begin{figure}
   \centering
   \includegraphics[width = 0.7\textwidth]{images/complete_knee.pdf}
@@ -183,6 +187,7 @@ The parameters of the estimators are as follows. For the periodogram the window 
 In order to identify which peaks in Figure~\ref{fig:complete_psd} belong to the noise and which are given by low amplitude spectral lines we developed an algorithm that tries to tackle the issues described before and produce some clear results. At first we consider different windows of samples, of length $L$ and with the initial samples separated by $S$ samples. They overlap by $\max\{0, L-S\}$ samples. The number of windows is $N = \floor{(K-L)/S}$ with $K$ the length of the whole signal. For each of these short windows we compute the periodogram and find its peaks (defined as local maxima, the algorithm uses the function \verb findpeaks of MATLAB). We keep a running sum of the peaks found at each frequency (note: they are quantized by the length $L$ of the window chosen, and the eventual zero padding of the fft) and increase it by 1 whenever there's a peak. In this way we artificially observe more than one realization of the process: if a peak in the periodogram is due to the noise present at a certain instant it could be absent in the next windows. On the other hand, if a peak is due to a weak sinusoidal signal it will be present in more than one window and the sum of peaks found at that frequency will be higher than the ones at frequencies with just the noise. We chose to consider the periodogram and not the other estimators because the length $L$ of the windows we considered is always below or equal 100 samples, otherwise the number of different windows $N$ would be too low. The Welch and correlogram estimator are less effective with so few samples. For the first there's a necessary trade-off between the number of windows $N_s$ and their length $D$: the number of samples in each window should be enough to represent the process, but the smaller $N_s$ is the more the Welch periodogram becomes similar to a simple periodogram with high variance. Also the Blackman and Tukey correlogram suffers in the presence of short windows because it transforms the estimate of the ACS, which is reliable only if computed on less than a fifth of the window's samples.\\
 In Figure~\ref{fig:peak_acc} there's the result of an iteration of the algorithm on the given signal, with parameters $S = 64, L = 96$ and a periodogram computed by windowing the signal with a Kaiser window with parameter $w_a = 5.65$ which guarantees a sidelobe attenuation of 60 dB, without increasing the size of the main lobe too much (this allows us to reduce spectral leakage without increasing the smearing too much).
 
+% plot from first_spectral_analysis, section about periodogram accumulation
 \begin{figure}[h!]
   \centering
   \includegraphics[width = 0.7\textwidth]{images/period_acc_temp.pdf}
@@ -197,6 +202,7 @@ In order to separate the spectral line from the whole signal we used the cascade
 Note that filtering is performed on the provided signal $z(k)$. \\
 The frequency and phase response of the filters used is in Figures~\ref{fig:line_filt} and~\ref{fig:cont_filt}.\\
 
+% plots from filter_fir.m
 \begin{figure}[h!]
 
   \caption{Frequency response of spectral lines filter $h_{lines}$}
@@ -209,6 +215,7 @@ The frequency and phase response of the filters used is in Figures~\ref{fig:line
   \label{fig:cont_filt}
 \end{figure}
 
+
 With these filters the maximum of the difference between the original signal, delayed by the transient $D$, and the sum of the continuous part and the spectral line part of the signal is $5.685 \times 10^{-14}$. \\
 
 \subsection*{AR model for the continuous-PSD signal}
@@ -217,6 +224,7 @@ Therefore the order of the AR model is $N=3$. The vector of coefficients that so
 .37 - j0.012, 2.071 + j0.023, -0.65 - j0.015]^T$ thus $A(z) = 1 + \sum_{i=1}^3a_i$, and the variance of the noise $\sigma_w^2 = 6.2887$ dB. \\ %(only linear or only dB?)
 In Figure~\ref{fig:zpl_cont} there's the plot of zeros of $A(z)$ in the complex plane, while Figure~\ref{fig:psd_cont} reports the AR(3) estimate of the PSD computed with Equation~\ref{eq:arpsd}.
 
+% plots from filter_fir.m section on AR model of continuous part
 \begin{figure}[h!]
 
   \caption{AR model for continuous-PSD signal: variance $\sigma_w^2$ of the noise as a function of N}
@@ -242,6 +250,8 @@ In Figure~\ref{fig:ar_lines_sigma} there is the plot of the variance $\sigma_w^2
 Therefore let the order of the AR model be $N=5$. The vector of coefficients that solves the Yule-Walker Equation~\ref{eq:yw} is $\mathbf{a} = [-0.0299 + j0.329, 0.985 + j0,023, 0.413 + j0.0959, 0.291 + j0.079, 0.243 + j0.097]^T$ and once again $A(z) = 1 + \sum_{i=1}^5a_i$. The variance of the noise is $\sigma_w^2 = -32.548$ dB. \\ %(only linear or only dB?)
 In Figure~\ref{fig:zpl_lines} there's the plot of zeros of $A(z)$ in the complex plane, while Figure~\ref{fig:psd_lines} reports the AR(5) estimate of the PSD computed with Equation~\ref{eq:arpsd}. Note that since the magnitude of the PSD of the spectral line is below 15 dB the scale used for the Y axis in Figure~\ref{fig:psd_lines} has the same dynamic range as Figure~\ref{fig:psd_cont} but it is scaled down of 25 dB.
 
+
+% plots from filter_fir.m section on AR model of lines part
 \begin{figure}[h!]
 
   \caption{AR model for spectral line signal: variance $\sigma_w^2$ of the noise as a function of N}
@@ -262,7 +272,12 @@ In Figure~\ref{fig:zpl_lines} there's the plot of zeros of $A(z)$ in the complex
 
 \section{LMS predictor}
 \label{sec:lms}
-The setting of the predictor problem is as follows. Given a signal $z(k)$, WSS, with zero mean, let $\mathbf{z}^T(k-1)$ be the vector $[z(k-1), z(k-2), ..., z(k-N)]$. The one-step predictor of order N tries to estimate the value of $z(k)$ given $\mathbf{z}^T(k-1)$. This problem can be solved considering $\mathbf{z}^T(k-1)$ the input of a Wiener filter of order N and $z(k)$ the reference signal. Then the Wiener-Hopf equation computes the optimal coefficients of the filter with $\mathbf{R}_N \mathbf{c}_{opt} = \mathbf{r}_N$, given the autocorrelation matrix $\mathbf{R}_N$ and $\mathbf{r}_N = [r_z(1), r_z(2), ..., r_z(N)]^T$. \\
+The setting of the predictor problem is as follows. Given a signal $z(k)$, WSS, with zero mean, let $\mathbf{z}^T(k-1)$ be the vector $[z(k-1), z(k-2), ..., z(k-N)]$. The one-step predictor of order N tries to estimate the value of $z(k)$ given $\mathbf{z}^T(k-1)$. This problem can be solved considering $\mathbf{z}^T(k-1)$ the input of a Wiener filter of order N and $z(k)$ the reference signal. Then the Wiener-Hopf equation computes the optimal coefficients of the filter with
+\begin{equation}
+  \mathbf{R}_N \mathbf{c}_{opt} = \mathbf{r}_N
+  \label{eq:wh}
+\end{equation}
+given the autocorrelation matrix $\mathbf{R}_N$ and $\mathbf{r}_N = [r_z(1), r_z(2), ..., r_z(N)]^T$. \\
 Both \textit{least mean-square} (LMS) and \textit{recursive least square} (RLS) algorithms provide a recursive method to compute an approximation of the optimal Wiener-Hopf solution for the predictor problem without using the autocorrelation matrix $\mathbf{R}_N$ and the vector $\mathbf{r}_N$.
 In particular LMS is a version of the gradient algorithm that updates at each iteration $k$ the coefficients of the Wiener filter with the equation
 \begin{equation}
@@ -278,13 +293,38 @@ The implementation of LMS is simple and it doesn't require too much computation.
 \end{equation}
 and update coefficients with Equation~\ref{eq:lms_up}. At the beginning $\mathbf{c}(0) = \mathbf{0}$, and $z(k) = 0, \; \forall \; k < 0$. \\
 We tested our implementation of LMS against a known process, generated using an AR model of order $N = 3$ with coefficients $\mathbf{a} = [1, 0.2-0.5i, 0.2, 0.2]$ and white noise variance $\sigma_w^2 = 0$ dB. The length of the generated signal is $K = 5000$ samples, enough to ensure convergence also with a low $\tilde{mu}$ (actually $\tilde{mu} = 0.01$), that we chose in order to have a small error. Then $\mathbf{c_{opt}} = -\mathbf{a}$, with $\mathbf{c_{opt}}$ the optimum coefficients  of the Wiener-Hopf equation and $\mathbf{a}$ the solution of the Yule-Walker equation for the AR model, and $\sigma_w^2 = J_N$, with $J_N$ the cost function of the Wiener filter approximated by $|e(k)|^2$ in the LMS algorithm. Therefore the coefficients $\mathbf{c}$ and the $|e(k)|^2$ of the LMS algorithm should converge in mean to $-\mathbf{a}$ and $sigma_w^2$ respectively.
-In order to test if this behavior holds, we simulate 500 times the process and apply in each iteration the LMS algorithm. In this way it is possible to estimate the mean of the coefficients $\mathbf{c}$ and of the error square $|e(k)|^2$. The results are in Figures.... and it can be seen that the algorithm converges in the mean.
-Then we applied the LMS algorithm to the continuous part of the signal as filtered in Section 2. Given the AR model of order N = 2 for the continuous part of the signal, the $\mathbf{c}$ vector should converge to $-\mathbf{a}$ and $|e(k)|^2 = \sigma_w^2$ at least in mean. This can be seen in Figures
+In order to test if this behavior holds, we simulate 500 times the process and apply in each iteration the LMS algorithm. In this way it is possible to estimate the mean of the coefficients $\mathbf{c}$ and of the error square $|e(k)|^2$. The results are in Figures~\ref{fig:coeff_lms_test} and~\ref{fig:err_lms_test} and it can be seen that the algorithm converges in the mean.
 
-\begin{figure}
+% plots from lms_test.m
+\begin{figure}[h!]
+  %use subfigures, or update the comments above
+  \caption{Average of coefficients $\mathbf{c}$ (real and imaginary part) over 500 simulations}
+  \label{fig:coeff_lms_test}
 \end{figure}
 
-Note that the algorithm is applied on only one realization of the process and this is the reason of the grassy behavior of the coefficients and the error. The value of $\tilde{mu} = 0.42$ ensures the convergence in the 400 iterations required. The value of coefficients at iteration $k = 350$ and the average of $|e(k)|^2$ over the window $k \in [350 - 10, 350 + 10]$ can be found in Table~\ref{table:lms_conv} A lower value would have generated a smaller error at convergency but in 400 iterations it wouldn't have reached it, thus the values in Table~\ref{table:lms_conv} would have been farther from the ones they should converge to ($-\mathbf{a}$ and $|e(k)|^2 = \sigma_w^2$).
+\begin{figure}[h!]
+
+  \caption{Average of $|e(k)|^2$ over 500 simulations}
+  \label{fig:err_lms_test}
+\end{figure}
+
+
+Then we applied the LMS algorithm to the continuous part of the signal as filtered in Section 2. Given the AR model of order N = 2 for the continuous part of the signal, the $\mathbf{c}$ vector should converge to $-\mathbf{a}$ and $|e(k)|^2 = \sigma_w^2$ at least in mean. This can be seen in Figures~\ref{fig:coeff_lms} and~\ref{fig:err_lms}
+
+%plots from lms.m
+\begin{figure}[h!]
+  %use subfigures, or update the comments above
+  \caption{Coefficients $\mathbf{c}$ (real and imaginary part) over 400 iterations of LMS}
+  \label{fig:coeff_lms}
+\end{figure}
+
+\begin{figure}[h!]
+
+  \caption{$|e(k)|^2$ over 400 iterations of LMS}
+  \label{fig:err_lms}
+\end{figure}
+
+Note that the algorithm is applied on only one realization of the process and this is the reason of the grassy behavior of the coefficients and the error. The value of $\tilde{mu} = 0.42$ ensures the convergence in the 400 iterations required. The value of coefficients at iteration $k = 350$ and the average of $|e(k)|^2$ over the window $k \in [350 - 10, 350 + 10]$ can be found in Table~\ref{table:lms_conv}. A lower value for $\tilde{mu}$ would have generated a smaller error at convergency but in 400 iterations it wouldn't have reached it, thus the values in Table~\ref{table:lms_conv} would have been farther from the ones they should converge to ($-\mathbf{a}$ and $|e(k)|^2 = \sigma_w^2$).
 \begin{table}[h!]
   \centering
   \begin{tabular}{c|c|c}
@@ -296,6 +336,32 @@ Note that the algorithm is applied on only one realization of the process and th
 \end{table}
 
 \section{RLS algorithm}
+The setting for the RLS predictor is the same as described in Section~\ref{sec:lms}. It is an algorithm that provides a recursive solution for the Wiener-Hopf Equation~\ref{eq:wh} as like as LMS, but it has a faster convergency at the cost of a larger computational complexity. \\
+Let $\mathbf{c}^T(k) = [c_1(k), c_2(k), ..., c_N(k)]$ the vector of $N$ coefficients at instant $k$, $\mathbf{z}^T(i) = [z(i-1), z(i-2), ..., z(i-N)]$ the input of the filter at instant $i$ and $y(i) = \mathbf{c}^T(k)\mathbf{z}(i) = \mathbf{z}^T(i)\mathbf{c}(k)$ the output of the filter at instant $i$ obtained with coefficients at instant $k$. Since this is a predictor the reference signal $d(i) = z(i)$, the error at each iteration is $e(k) = z(k) - y(k)$. Finally let $\lambda$ be a forgetting factor.\\
+The algorithm is quite complex, it begins with an initialization phase. The vector of coefficients at instant $0$ is $\mathbf{c}(0) = \mathbf{0}$ and the auxiliary matrix $\mathbf{P}(k)$ is $\mathbf{P}(0) = \frac{100}{\hat{r}_x(0)} \mathbf{I}$ with $\mathbf{I}$ the identity matrix of size $N\times N$. Then at each iteration $k = 1, 2, ...$:
+\begin{equation}
+  \mathbf{\Pi}^*(k) = \mathbf{P}(k-1)\mathbf{z}^*(k)
+\end{equation}
+\begin{equation}
+  r(k) = \frac{1}{\lambda + \mathbf{z}^T(k)\mathbf{\Pi}^*(k)}
+\end{equation}
+\begin{equation}
+  \mathbf{k}^*(k) = r(k)\mathbf{\Pi}^*(k)
+\end{equation}
+\begin{equation}
+  \epsilon(k) = z(k) - \mathbf{z}^T(k)\mathbf{c}(k-1)
+\end{equation}
+\begin{equation}
+  \mathbf{c}(k) = \mathbf{c}(k-1) + \epsilon(k)\mathbf{k}^*(k)
+\end{equation}
+\begin{equation}
+  \mathbf{P}(k) = \lambda^{-1}(\mathbf{P}(k-1) - \mathbf{k}^*(k)\mathbf{\Pi}^T(k))
+\end{equation}
+with $\mathbf{\Pi}, \mathbf{k}, \epsilon(k), r(k)$ auxiliary entities that allow a lower computational complexity. Moreover, since it is required to compute the cost function $\mathcal{E}(k) = \sum_{i=1}^k \lambda^{k-i} |e(i)|^2$ for each iteration, compute also
+\begin{equation}
+  \mathcal{E}_{min}(k) = \lambda \mathcal{E}_{min}(k-1) + \epsilon(k)e^*(k)
+\end{equation}
+
 
 \section{Amplitude, phase and frequency estimate of the spectral line}
 
@@ -312,7 +378,7 @@ Once assessed that the algorithm works we applied it both to the given signal $z
   \centering
   \begin{tabular}{c|c|c|c}
     Signal & Normalized frequency & Amplitude & Phase [rad] \\ \hline
-    $z_(k)  $    & 0.77           & 0.2128    & 2.4495      \\
+    $z(k)  $    & 0.77           & 0.2118    & 2.4495      \\
     $z_{lines}(k)$ & 0.77           & 0.21      & 2.4591    \\
   \end{tabular}
   \caption{Frequency, amplitude and phase of the spectral line}
