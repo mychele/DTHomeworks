@@ -209,19 +209,24 @@ The next step consists in performing a kind of sorting of periodograms that is d
  \label{fig:whitening}
 \end{figure}
 
-\begin{figure}[h!]
+
+\begin{figure}[htp]
   \centering
   \includegraphics[width = 0.97\textwidth]{images/percentiles}
   \caption{Percentiles of PSD computed as per section \ref{subsec:identify}.}
   \label{fig:percentiles}
 \end{figure}
 
-\begin{figure}[h!]
+
+
+\begin{figure}[htp]
   \centering
   \includegraphics[width = 0.97\textwidth]{images/percentiles_zoom}
   \caption{Zoomed view of the percentile plot.}
   \label{fig:percentiles_zoom}
 \end{figure}
+
+
 
 \section{AR models for continuous and spectral lines components}
 In order to separate the spectral line from the whole signal we used the cascade of two filters, that is their convolution in the time domain. A simple passband filter centered at $f_0 = 0.77$ is not enough because the PSD at that frequency is 20 dB below the PSD at frequencies $f \in [0, 0.1]$ and $f \in [0.9, 1]$. Therefore the signal is as first filtered with a real FIR linear-frequency highpass filter that equalizes the PSD and then with a complex FIR linear-frequency bandpass filter centered at $f_0 = 0.77$.
@@ -298,6 +303,8 @@ In Figure~\ref{fig:zpl_lines} there's the plot of zeros of $A(z)$ in the complex
   \label{fig:zpl_lines}
 \end{figure}
 
+\clearpage
+
 
 \begin{figure}[htp]
   \centering
@@ -305,6 +312,7 @@ In Figure~\ref{fig:zpl_lines} there's the plot of zeros of $A(z)$ in the complex
   \caption{AR model for spectral line signal: AR(5) estimate of the PSD of spectral line signal}
   \label{fig:psd_lines}
 \end{figure}
+
 
 
 \section{LMS predictor}
@@ -409,6 +417,14 @@ In our implementation $\lambda = 1$. \\
 The convergence of this algorithm is actually faster than the one of LMS algorithm. Since the underlying problem is the same as for LMS, given the AR model of order $N$ of the process, also in RLS algorithm the $\mathbf{c}$ vector should converge to $-\mathbf{a}$ and $\mathcal{E}_{min}(k) = \sigma_w^2$ at least in mean. Since we apply the algorithm to just one realization of the process the average behavior cannot be observed, but as it can be seen in Figures~\ref{fig:rls_coeff} and~\ref{fig:err_rls} the convergence is reached in few iterations also in this single realization.
 
 %plots from rls.m
+
+\begin{figure}[htp]
+  \centering
+  \includegraphics[width = 0.7\textwidth]{images/rls_err}
+  \caption{$\mathcal{E}_{min}(k)$ over 400 iterations of RLS}
+  \label{fig:err_rls}
+\end{figure}
+
 \begin{figure}[h!]
 \centering
 	\subfigure{\includegraphics[width=0.75\textwidth]{images/rls_c1}}
@@ -418,12 +434,10 @@ The convergence of this algorithm is actually faster than the one of LMS algorit
   \label{fig:rls_coeff}
 \end{figure}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width = 0.7\textwidth]{images/rls_err}
-  \caption{$\mathcal{E}_{min}(k)$ over 400 iterations of RLS}
-  \label{fig:err_rls}
-\end{figure}
+\clearpage
+
+
+
 
 The value of coefficients at iteration $k = 350$ and the average of $\mathcal{E}_{min}(k)$ over the window $k \in [350 - 10, 350 + 10]$ can be found in Table~\ref{table:rls_conv}. It can be seen, both from Figures~\ref{fig:rls_coeff} and~\ref{fig:err_rls} and Table~\ref{table:rls_conv} that the coefficients are closer to the value they should converge to, while the functional $\mathcal{E}_{min}(350)$ has a larger value.
 
