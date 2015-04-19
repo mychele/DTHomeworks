@@ -50,6 +50,7 @@ Tq = Tc; % Fundamental sampling time. This is the same as Tc, right???
 % We stick to anastasopolous chugg paper (1997) and choose Tp such that
 % fd*Tp = 0.1
 Tp = 1/10 * (1/fd) * Tq; % Sampling time used for filtering the white noise
+fprintf('fd * Tp = %d \n', Tp*fd);
 g_samples_needed = 20000; % Some will be dropped because of transient
 w_samples_needed = ceil(g_samples_needed / Tp);
 
@@ -60,20 +61,38 @@ w = wgn(w_samples_needed,1,0,'complex');
 % Filter the wgn with a narrowband filter. The filter will have the
 % classical Doppler spectrum in the frequency domain, with f_d * Tc = 1.25*10^-3
 % By using the approach suggested in anastchugg97 we use an iir filter
-% with known coefficients and a Cheby low pass filter. Note that it is
+% with known coefficients which is the convolution of a Cheby lowpass and a shaping filter.
+% Note that it is
 % possible to initialize properly the filters, consider doing it in
 % following versions since it allows to start in steady state conditions
 % and avoid dropping about 2000 samples (it is a very cool thing!)
 
 % these are the coefficients proposed by the authors of anastchugg97
 a_dopp = [1, -4.4153, 8.6283, -9.4592, 6.1051, -1.3542, -3.3622, 7.2390, ...
-     -7.9361, 5.1221, -1.8401, 2.8706]; 
+    -7.9361, 5.1221, -1.8401, 2.8706]; 
 b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
-    6.7852e-4, 1.3550e-3, 1.8076e-3, 1.3550e-3, 5.3726e-4, 6.1818e-5, -7.1294e-5, ...
-    -9.5058e-5, -7.1294e-5, -2.5505e-5, 1.3321e-5, 4.5186e-5, 6.0248e-5, 4.5186e-5, ...
-    1.8074e-5, 3.0124e-6];
+   6.7852e-4, 1.3550e-3, 1.8076e-3, 1.3550e-3, 5.3726e-4, 6.1818e-5, -7.1294e-5, ...
+   -9.5058e-5, -7.1294e-5, -2.5505e-5, 1.3321e-5, 4.5186e-5, 6.0248e-5, 4.5186e-5, ...
+   1.8074e-5, 3.0124e-6];
 
-DTFTplot(b_dopp, a_dopp, 1000, 1);
+[Hf, f] = freqz(b_dopp, a_dopp, 1000, 'whole');
+figure, plot(f, 20*log10(abs(Hf)))
+
+% Alternatively from BC, pg 316
+% wd = 2*pi*fd;
+% w0 = tan(wd*Tp/2);
+% a0 = 1;
+% a1 = -2*(1-w0^2)/(1+w0^2+sqrt(2)*w0);
+% a2 = (1+w0^4)/(1+w0^2+sqrt(2)*w0)^2;
+% a_dopp = [a0, a1, a2];
+% c0 = sum(a_dopp)/4;
+% b_dopp = c0*[1, 2, 1];
+% 
+% [Hf, f] = freqz(b_dopp, a_dopp, 1000, 'whole');
+% figure, plot(f, 20*log10(abs(Hf)))
 
 giprime = filter(b_dopp, a_dopp, w);
+
+Gpr = fft(giprime);
+figure, plot(20*log10(abs(Gpr)))
 
