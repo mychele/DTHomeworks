@@ -69,7 +69,7 @@ w = wgn(w_samples_needed,1,0,'complex');
 
 % these are the coefficients proposed by the authors of anastchugg97
 a_dopp = [1, -4.4153, 8.6283, -9.4592, 6.1051, -1.3542, -3.3622, 7.2390, ...
-    -7.9361, 5.1221, -1.8401, 2.8706]; 
+    -7.9361, 5.1221, -1.8401, 2.8706e-1]; 
 b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
    6.7852e-4, 1.3550e-3, 1.8076e-3, 1.3550e-3, 5.3726e-4, 6.1818e-5, -7.1294e-5, ...
    -9.5058e-5, -7.1294e-5, -2.5505e-5, 1.3321e-5, 4.5186e-5, 6.0248e-5, 4.5186e-5, ...
@@ -78,21 +78,11 @@ b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
 [Hf, f] = freqz(b_dopp, a_dopp, 1000, 'whole');
 figure, plot(f, 20*log10(abs(Hf)))
 
-% Alternatively from BC, pg 316
-% wd = 2*pi*fd;
-% w0 = tan(wd*Tp/2);
-% a0 = 1;
-% a1 = -2*(1-w0^2)/(1+w0^2+sqrt(2)*w0);
-% a2 = (1+w0^4)/(1+w0^2+sqrt(2)*w0)^2;
-% a_dopp = [a0, a1, a2];
-% c0 = sum(a_dopp)/4;
-% b_dopp = c0*[1, 2, 1];
-% 
-% [Hf, f] = freqz(b_dopp, a_dopp, 1000, 'whole');
-% figure, plot(f, 20*log10(abs(Hf)))
 
 giprime = filter(b_dopp, a_dopp, w);
 
 Gpr = fft(giprime);
 figure, plot(20*log10(abs(Gpr)))
+
+
 
