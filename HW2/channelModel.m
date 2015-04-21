@@ -27,7 +27,7 @@ b_dopp = b_dopp / sqrt(hds_nrg);
 % See 4.224 for reference
 tau_rms = 0.3*T;  % Tc = 1, as it is the fundamental sampling time
 
-N_h = 4; % To be determined
+N_h = 3; % To be determined
 % note that for this choice of final_tau
 residual_power = exp(-N_h*Tc/tau_rms);
 if (residual_power > 0.1)
