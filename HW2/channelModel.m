@@ -23,27 +23,30 @@ fd = 5*10^-3/T; % doppler frequency
 % See 4.224 for reference
 tau_rms = 0.3*T;  % Tc = 1, as it is the fundamental sampling time
 
-N_h = 5; % To be determined
+N_h = 3; % To be determined
 % note that for this choice of final_tau
 residual_power = exp(-N_h*Tc/tau_rms);
 if (residual_power > 0.1)
     disp('Consider increasing final_tau, since the exp is truncated too early')
 end
-tau = 0:Tc:N_h;
-pdp = 1/tau_rms * exp(-tau/tau_rms);
+tau = 0:Tc:N_h-1;
+pdp_gauss = 1/tau_rms * exp(-tau/tau_rms);
 
-% normalize pdp: it must be sum(E[|g_i|^2] = 1
-pdp = pdp/sum(pdp);
+C = sqrt(K/(K+1));
+% normalize pdp: it must be sum(E[|gtilde_i|^2]) = 1 - C^2
+pdp_gauss = pdp_gauss.*(1-C^2)/sum(pdp_gauss);
 
-C = sqrt(K/(K + 1));   % This is the deterministic component inside of g_1
-M_d = sum(pdp) - C^2; % 1 - C^2, it's the sum of energies of random components gtilde
+M_d = sum(pdp_gauss);
 
 % Determine suitable length for h, N_h, define criterion
 % N_h is final_tau, the criterion is linked to the truncation of
 % exp(t/taurms)
 
-% Plot the normalised PDP
-figure, stem(tau,10*log10(pdp)), title('PDP'), xlabel('tau'), ylabel('E[|g_i|^2]');
+pdp = pdp_gauss;
+pdp(1) = pdp(1) + C^2;
+
+% Plot the normalised PDP 
+figure, stem(tau,10*log10(pdp_gauss)), title('Gaussian part of PDP'), xlabel('tau'), ylabel('E[|gtilde_i|^2]');
 
 %% We now have to generate the time behavior of the i-th coefficient. For
 % this, we use the model in figure 4.36, page 315.
@@ -95,7 +98,7 @@ g_notrans = g_fine(50000:end);
 g_mat = repmat(g_notrans, N_h + 1, 1);
 
 for k = 1:N_h
-    g_mat(k, :) = g_mat(k, :)*sqrt(pdp(k));
+    g_mat(k, :) = g_mat(k, :)*sqrt(pdp_gauss(k));
 end
 
 % Only for LOS component
@@ -112,12 +115,12 @@ g_mean = mean(g_mat(:, 1:5000).');
 
 %% Histogram of g_1
 
-figure, histogram(abs(g_mat(2, 1:1000).')/sqrt(pdp(2)), 100)
+figure, histogram(abs(g_mat(2, 1:1000).')/sqrt(pdp_gauss(2)), 100)
 
 %% Simulation
 
 rng('default') % for reproducibility
-numexp = 5000;
+numexp = 1000;
 g_1 = zeros(numexp, 1);
 for k = 1:numexp
     disp(k)
