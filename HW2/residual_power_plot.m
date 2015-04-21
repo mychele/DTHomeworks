@@ -103,21 +103,22 @@ ylim([-5, 5])
 
 h = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
 h = h.*(1-C^2)/sum(h);
-figure, plot(h)
+%figure, plot(h)
 
 for N_h = 1:20; % To be determined
     % note that for this choice of final_tau
-    deltah = h(N_h:end);
+    deltah = h(N_h+1:end);
     
-    power_h(N_h) = sum(abs(h));
+    %power_h(N_h) = 1;
     residual_power(N_h) = sum(abs(deltah));
     
     lambda_n(N_h) = 1/(snr_lin * residual_power(N_h));
 end
 
+%figure, plot(2:12, -10*log10(residual_power(2:12))), grid on
+
 figure, plot(10*log10(lambda_n)), grid on
 title('\Lambda_n = |1|/(snr*|sqrt(exp) - troncato|^2)')
-xlabel('N_h')
-ylabel('\Lambda_n [dB]')
-ylim([-5, 10])
+xlabel('N_h'), ylabel('\Lambda_n [dB]')
+ylim([-5, 15])
 

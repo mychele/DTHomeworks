@@ -1,7 +1,7 @@
 %% Clear, initialize useful quantities
-clear all
-close all
-clc
+% clear all
+% close all
+% clc
 
 Tc = 1; % This is the smallest time interval we want to simulate
 T = 4*Tc;   % Time sampling interval of the input of the channel
@@ -70,7 +70,7 @@ transient = ceil(g_samples_needed/4);
 
 % Generate complex-valued Gaussian white noise with zero mean and unit
 % variance
-rng('default');
+%rng('default');
 
 g_mat = zeros(N_h_max, g_samples_needed - transient);
 for ray = 1:N_h_max
@@ -108,65 +108,45 @@ g_mat(1, :) = g_mat(1, :) + C;
 
 %% Compute the energy loss if we use a smaller N_h
 
-MAX_NH = 40;
+snr_db = 10;
+snr_lin = 10^(snr_db/10);
+
+MAX_NH = 25;
 nrg_avg = zeros(MAX_NH, 1);
 nrg_across_time = zeros(MAX_NH, size(g_mat, 2));
-for N_h = 2:MAX_NH
+for N_h = 1:MAX_NH
     % Sum of the powers |g_i(t)|^2 for i=0...Nh-1 (it varies across time)
-    nrg_across_time(N_h, :) = sum(abs(g_mat(1:N_h, :)).^2);
+    nrg_across_time(N_h, :) = sum(abs(g_mat(1:N_h, :)).^2, 1);
     % Average in time of the thing above
     nrg_avg(N_h) = sum(nrg_across_time(N_h, :)) / length(nrg_across_time(N_h, :));
 end
-% figure, plot(2:MAX_NH, nrg_avg(2:MAX_NH)), title('Average energy of the IR varying N_h')
+
+% figure, plot(:MAX_NH, nrg_avg), title('Average energy of the IR varying N_h')
+
+% figure, plot(nrg_across_time(2:7, :)')
+% title('Energy across time')
+% legend('N_h = 2', 'N_h = 3', 'N_h = 4', 'N_h = 5', 'N_h = 6', 'N_h = 7')
 
 % E(|delta h|^2) is the avg energy of the tail we dropped (i.e. of the g_i's for i > Nh-1)
+% Plot of residual power
 nrg_tail = nrg_avg(MAX_NH) - nrg_avg;
-figure, plot(2:MAX_NH, -10*log10(nrg_tail(2:MAX_NH)))
+figure, plot(1:MAX_NH, -10*log10(nrg_tail(1:MAX_NH))), grid on
 
-return
-
-
-
-%% Show the behavior of |g_1(nTc)| for n = 0:1999, dropping the transient
-
-for i = 1:N_h_max
-    figure, plot(0:1999, 20*log10(abs(g_mat(i, 1:2000).')))
-end
-g_mean = mean(g_mat(:, 1:5000).');
-g_var = 10*log10(var(g_mat(:, :).'));
+% Plot of Lambda_n
+lambda_n = 1./(snr_lin * nrg_tail);
+figure, plot(1:MAX_NH, 10*log10(lambda_n)), grid on
+title('\Lambda_n')
+xlabel('N_h'), ylabel('\Lambda_n [dB]')
+ylim([-5 15])
 
 
+%% TEMP: compare theoretical and simulation results
 
-%% Histogram of g_1
-
-figure, histogram(abs(g_mat(2, 1:1000).')/sqrt(pdp_gauss(2)), 100)
-
-%% Simulation
-
-rng('default') % for reproducibility
-numexp = 1000;
-g_1 = zeros(numexp, 1);
-for k = 1:numexp
-    disp(k)
-    w = wgn(w_samples_needed,1,0,'complex');
-    
-    gprime = filter(b_dopp, a_dopp, w);
-    
-    % Interpolation
-    t = 1:length(gprime);
-    t_fine = Tq/Tp:Tq/Tp:length(gprime);
-    
-    g_fine = interp1(t, gprime, t_fine, 'spline');
-    
-    % Drop the transient
-    g_notrans = g_fine(50000:end);
-    
-    % Energy scaling
-    g_1(k) = g_notrans(152);  % it should be multiplied by sqrt(pdp(2)) but since
-    % for the histogram it is required to divide for the same factor then
-    % we drop this computation to save computational time
-end
-
-figure, histogram(abs(g_1), 50)
-
-
+load lambda_n.mat
+figure, hold on
+plot(1:length(lambda_n_simulation), 10*log10(lambda_n_simulation))
+plot(1:length(lambda_n_theoretical), 10*log10(lambda_n_theoretical))
+grid on, title('\Lambda_n')
+xlabel('N_h'), ylabel('\Lambda_n [dB]')
+ylim([-5 15])
+legend('Simulation', 'Theoretical', 'Location', 'NorthWest')
