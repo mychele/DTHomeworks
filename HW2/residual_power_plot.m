@@ -12,7 +12,7 @@ M_d = 1-C^2;
 snr = 10; %dB
 snr_lin = 10^(snr/10);
 
-
+% wrong
 for N_h = 1:20; % To be determined
     % note that for this choice of final_tau
     h = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
@@ -47,13 +47,13 @@ ylim([-5, 5])
 
 for N_h = 1:20; % To be determined
     % note that for this choice of final_tau
-    h = sqrt(1/tau_rms*exp(-(0:899)*Tc/tau_rms));
+    h = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
     hhat = zeros(1, 900);
-    hhat(1:N_h) = sqrt(1/tau_rms*exp(-(0:N_h-1)*Tc/tau_rms));
+    hhat(1:N_h) = 1/tau_rms*exp(-(0:N_h-1)*Tc/tau_rms);
     deltah = h - hhat; %NOTE: h = E(|g_i|^2)
     
-    power_h(N_h) = sum(abs(h).^2);
-    residual_power(N_h) = sum(abs(deltah).^2);
+    power_h(N_h) = sum(abs(h));
+    residual_power(N_h) = sum(abs(deltah));
     
     lambda_n(N_h) = 1/(snr_lin * residual_power(N_h));
 end
@@ -68,7 +68,7 @@ figure, plot(10*log10(lambda_n)), grid on
 title('\Lambda_n = |1|/(snr*|sqrt(exp) - troncato|^2)')
 xlabel('N_h')
 ylabel('\Lambda_n [dB]')
-ylim([-5, 5])
+ylim([-5, 10])
 
 %% Third version
 % Each time the exp is truncated it bring a different normalization, thus a
