@@ -71,6 +71,7 @@ transient = ceil(g_samples_needed/4);
 % Doppler filter shape
 [Hf, f] = freqz(b_dopp, a_dopp, 1000, 'whole');
 figure, plot(f/(2*pi), 20*log10(abs(Hf)))
+title('Frequency response of the Doppler filter')
 
 % Generate complex-valued Gaussian white noise with zero mean and unit
 % variance
@@ -114,21 +115,62 @@ g_mat(1, :) = g_mat(1, :) + C;
 
 G = fft(g_mat, [], 2);
 
-figure, plot(20*log10(abs(G.')));
+figure, plot((0:size(G, 2)-1)/size(G,2), 20*log10(abs(G.')));
+title('Magnitude of DFT of g_i')
 
 %% Show the behavior of |g_1(nTc)| for n = 0:1999, dropping the transient
 
-for i = 1:N_h
-    figure, plot(0:1999, 20*log10(abs(g_mat(i, 1:2000).')))
-end
-g_mean = mean(g_mat(:, 1:5000).');
-g_var = 10*log10(var(g_mat(:, :).'));
+figure, hold on
+plot(0:1999, 20*log10(abs(g_mat(2, 1:2000).')))
+grid on, box on, xlabel('Time samples'), ylabel('|g_1(nT_C)|_{dB}')
+title('|g_1(nT_C)|')
+
+
+%% Show all |g_i|'s
+
+figure, hold on
+plot(0:9999, 20*log10(abs(g_mat(:, 1:10000).')))
+grid on, box on, xlabel('Time samples'), ylabel('|g_i(nT_C)|_{dB}')
+legend('g_0', 'g_1', 'g_2'), ylim([-40 10])
+title('|g_i|')
+
+% g_mean = mean(g_mat(:, 1:5000).');
+% g_var = 10*log10(var(g_mat(:, :).'));
 
 
 
 %% Histogram of g_1
 
 figure, histogram(abs(g_mat(2, 1:1000).')/sqrt(pdp_gauss(2)), 100)
+title('1000 samples of |g_1|')
+
+%% Histograms of g_1 in subsequent disjoint intervals
+% The variability shows that these intervals of 1000 samples are too small.
+% Looking at |g1| in one of these intervals, we observe that this quantity
+% has an oscillatory trend. In fact, g1(nTc) for different n's are
+% identically distributed rv's, but they are not independent. Whenever
+% there is a peak (max or min), the values of g1 for consecutive
+% time instants are similar, therefore they build up on the histogram,
+% showing a small number of peaks in the histogram itself. These peaks are
+% the values of g1 around the instants nTc in which it has a local max or min.
+% If we take a sufficiently large time window, the number of maxima and
+% minima increases, and they can be considered independent if they are
+% enough (?).
+% Considering two different realizations of the channel impulse response,
+% two samples of g1 at the same time (taken from these two realizations)
+% are not only identically distributed, but also independent. Therefore
+% with as little as 1000 such samples we observe a distribution very close
+% to a Rayleigh distribution, as we expect from our model.
+
+% Uncomment the following code to see that variability
+
+% figure
+% width = 1000;
+% for i = 0:9
+%     histogram(abs(g_mat(2, (i*width + 1):((i+1)*width)).')/sqrt(pdp_gauss(2)), 100)
+%     axis([0 2.5 0 0.05*width])
+%     pause
+% end
 
 %% Autocorrelation of g_1
 
@@ -144,7 +186,7 @@ bess = besselj(0, z); %bessel function of order 0
 
 figure, plot(real(autoc_1_intime)), hold on, plot(bess*M_1)
 legend('Real(r_g(\Delta t))', 'Bessel function, first type, order 0')
-title('From t=0')
+title('Autoc from t=0')
 
 begin = 30000;
 end_factor = 0.5;
@@ -158,7 +200,7 @@ bess = besselj(0, z);
 
 figure, plot(real(autoc_1_intime)), hold on, plot(bess*M_1)
 legend('Real(r_g(\Delta t))', 'Bessel function, first type, order 0')
-title(sprintf('From t=%d', begin))
+title(sprintf('Autoc from t=%d', begin))
 
 
 %% Simulation
@@ -188,5 +230,4 @@ for k = 1:numexp
 end
 
 figure, histogram(abs(g_1), 50)
-
-
+title('|g1(151T_C)| over 1000 realizations')
