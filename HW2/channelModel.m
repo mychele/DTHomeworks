@@ -133,9 +133,9 @@ figure, histogram(abs(g_mat(2, 1:1000).')/sqrt(pdp_gauss(2)), 100)
 %% Autocorrelation of g_1
 
 begin = 1;
-end_factor = 0.5;
+end_factor = 0.2;
 g1_temp = g_mat(2, begin:end*end_factor).';
-N_corr = 12000; %floor(length(g1_temp/10)); % there are lot of samples!
+N_corr = 4000; %floor(length(g1_temp/10)); % there are lot of samples!
 
 autoc_1_intime = autocorrelation(g1_temp, N_corr);
 z = (0:length(autoc_1_intime)-1)*2*pi*fd; %support for bessel function, LAG not actual time
@@ -143,13 +143,13 @@ M_1 = autoc_1_intime(1); %stat power of g_1 over the considered support in time
 bess = besselj(0, z); %bessel function of order 0
 
 figure, plot(real(autoc_1_intime)), hold on, plot(bess*M_1)
-legend('Real(r_g(\Delta t)', 'Bessel function, first type, order 0')
+legend('Real(r_g(\Delta t))', 'Bessel function, first type, order 0')
 title('From t=0')
 
-begin = 2000;
+begin = 30000;
 end_factor = 0.5;
 g1_temp = g_mat(2, begin:end*end_factor).';
-N_corr = 12000; %floor(length(g1_temp/10)); % there are lot of samples!
+N_corr = 4000; %floor(length(g1_temp/10)); % there are lot of samples!
 
 autoc_1_intime = autocorrelation(g1_temp, N_corr);
 z = (0:length(autoc_1_intime)-1)*2*pi*fd;
@@ -157,7 +157,7 @@ M_1 = autoc_1_intime(1);
 bess = besselj(0, z);
 
 figure, plot(real(autoc_1_intime)), hold on, plot(bess*M_1)
-legend('Real(r_g(\Delta t)', 'Bessel function, first type, order 0')
+legend('Real(r_g(\Delta t))', 'Bessel function, first type, order 0')
 title(sprintf('From t=%d', begin))
 
 
