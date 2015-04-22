@@ -1,3 +1,6 @@
+% This script is just a double-check on the theoretical SNR related to the
+% truncation of the IR to Nh samples.
+
 %% Clear, initialize useful quantities
 % clear all
 % close all
@@ -140,13 +143,13 @@ xlabel('N_h'), ylabel('\Lambda_n [dB]')
 ylim([-5 15])
 
 
-%% TEMP: compare theoretical and simulation results
+%% PLOT: compare theoretical and simulation results
 
 load lambda_n.mat
 figure, hold on
-plot(1:length(lambda_n_simulation), 10*log10(lambda_n_simulation))
-plot(1:length(lambda_n_theoretical), 10*log10(lambda_n_theoretical))
+plot(1:length(lambda_n_theoretical), 10*log10(lambda_n_theoretical), 'd-')
+plot(1:length(lambda_n_simulation), 10*log10(lambda_n_simulation), 'x--') % We need to cavate this one!!!! Throw it away!!!!!1111
 grid on, title('\Lambda_n')
 xlabel('N_h'), ylabel('\Lambda_n [dB]')
-ylim([-5 15])
-legend('Simulation', 'Theoretical', 'Location', 'NorthWest')
+axis([1 4 -2 10]), ax = gca; ax.XTick = 1:5;
+legend('Theoretical', 'Simulation', 'Location', 'NorthWest')
