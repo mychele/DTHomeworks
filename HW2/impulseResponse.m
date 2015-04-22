@@ -11,8 +11,8 @@ clc
 % To observe L samples, we need to send L+N-1 samples of the training
 % sequence {x(0), ..., x((N-1)+(L-1))}
 % TODO Try multiple combinations. Generally, L = 2*N
-L = 3; % Length of the observation 
-N = 1; % Length of the impulse response of the channel
+L = 15; % Length of the observation
+N = 2; % Supposed length of the impulse response of the channel
 
 %% Generate training sequence
 % The x sequence must be a partially repeated M-L sequence of length L. We
@@ -22,7 +22,7 @@ r = log2(L+1);
 p = zeros(L,1);
 p(1:r) = ones(1,r).'; % Set arbitrary initial condition
 for l = r+1:(L)
-    p(l) = xor(p(l-1), p(l-2));
+    p(l) = xor(p(l-3), p(l-4)); % -1, -2 for L=3
 end
 clear l
 
@@ -33,7 +33,7 @@ x(x == 0) = -1;
 % h = commsrc.pn('GenPoly', [4 3 0]);
 % set(h, 'NumBitsOut', 1);
 % set(h, 'InitialStates', ones(4,1));
-% 
+%
 % mls = zeros(1,L);
 % for k = 1:L
 %     mls(k) = generate(h);
@@ -41,7 +41,7 @@ x(x == 0) = -1;
 
 %% Generate gi
 
-N_h = 4; 
+N_h = 3; % just to keep things simple, CHANGE IT to 3 when ready
 a_dopp = [1, -4.4153, 8.6283, -9.4592, 6.1051, -1.3542, -3.3622, 7.2390, ...
     -7.9361, 5.1221, -1.8401, 2.8706e-1];
 b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
@@ -82,7 +82,7 @@ transient = ceil(g_samples_needed/4);
 % variance
 %rng('default');
 g_mat = zeros(N_h, g_samples_needed - transient);
-for ray = 1:N_h    
+for ray = 1:N_h
     w = wgn(w_samples_needed,1,0,'complex');
     fprintf('variance of white noise=%d \n', var(w))
     % Filter the wgn with a narrowband filter. The filter will have the
@@ -116,35 +116,142 @@ end
 % Only for LOS component
 g_mat(1, :) = g_mat(1, :) + C;
 
+clear a_dopp b_dopp g_fine gprime h_dopp pdp_gauss t_dopp t_fine
+
 %% Generate desired signal via a polyphase implementation
+%!!! This implementation works for N_h <= 4 !!!
+
 d = zeros(T*length(x),1);
+g_used_coeff = zeros(4, length(x)); % check these dimensions
 for k = 0:length(x)-1
     % Generate white noise
-    w = wgn(4, 1, 10*log10(1/40), 'complex');
-    for idx = 0:N_h-1
-        d(k*T + idx*Tc + 1) = g_mat(idx+1,k*T + idx*Tc+1) * x(k+1) + w(idx+1); 
+    w = wgn(4, 1, 10*log10(sigma_w), 'complex');
+    for idx = 0:4-1 % actually idx varies between 0 and 4 since there are four branches
+        if (idx < N_h)
+            d(k*T + idx*Tc + 1) = g_mat(idx+1,k*T + idx*Tc+1) * x(k+1) + w(idx+1);
+            % store the coefficient actually used, it will be useful later on
+            g_used_coeff(idx + 1, k + 1) = g_mat(idx+1,k*T + idx*Tc+1);
+        else
+            d(k*T + idx*Tc + 1) = 0 + w(idx+1); % no ray, just the noise
+            g_used_coeff(idx + 1, k + 1) = 0;
+        end
     end
+end
+
+% remove the coefficients of the transient from the g_used_coeff matrix
+g_used_coeff = g_used_coeff(:, N-1 + 1:end); % N-1 is the transient, +1 because of MATLAB
+
+% create four different d_i vector, by sampling at step 4 the complete vector
+% d. Each of them is the output of the polyphase brach at "lag" i
+d_poly = zeros(length(d)/4, 4); % each column is a d_i
+for idx  = 1:4
+    d_poly(:, idx) = d(idx:4:end);
 end
 
 figure, stem(0:T:(length(d)-1), abs(x)), hold on, stem(0:Tc:length(d)-1, abs(d));
 legend('x', 'd');
 
 % Using the data matrix (page 246), easier implementation
-h_hat = zeros(N_h-1,1);
-for idx = 0:(N_h-1)
+h_hat = zeros(4,N); % estimate 4 polyphase represantations, each of N coeff
+for idx = 1:4
     I = zeros(L,N);
     for column = 1:N
         I(:,column) = x(N-column+1:(N+L-column));
     end
-    o = d((idx + 1):(N_h):end);
+    o = d_poly(N:end, idx);
     
     Phi = I'*I;
     theta = I'*o;
     
-    h_hat(idx+1) = inv(Phi) * theta.';
+    h_hat(idx, :) = inv(Phi) * theta;
 end
-figure, stem(abs(g_mat(:,1))), hold on, stem(abs(h_hat));
-legend('h', 'h_hat');
+
+% compute the mean coefficient of impulse response of each ray over the interval
+% of interest of L samples in order to compare them with the estimated
+% impulse response
+h_mean = mean(g_used_coeff, 2);
+
+
+figure, stem(abs(h_mean), 'DisplayName', 'First coefficient of each poly branch (mean)')
+legend('-DynamicLegend'), hold on,
+for k = 2:N
+    stem(zeros(4,1), 'DisplayName', strcat(num2str(k), ' coefficient of each poly branch'))
+    legend('-DynamicLegend'), hold on,
+end
+for k = 1:N
+    stem(abs(h_hat(:, k)), 'DisplayName', 'hhat')
+    legend('-DynamicLegend')
+end
+ax = gca; ax.XTick = 1:4;
+xlim([0.5, 4.5])
+
+
+%% Repeat the estimate 1000 times (note, this will be influenced by the actual
+% choice of N and L
+numsim = 1000;
+
+hhat_mat = zeros(4*N, numsim);
+for simiter = 1:numsim
+    disp(simiter);
+    
+    % it would be better to generate d offline?
+    d = zeros(T*length(x),1);
+    g_used_coeff = zeros(4, length(x)); % check these dimensions
+    for k = 0:length(x)-1
+        % Generate white noise
+        w = wgn(4, 1, 10*log10(sigma_w), 'complex');
+        for idx = 0:4-1 % actually idx varies between 0 and 4 since there are four branches
+            if (idx < N_h)
+                d(k*T + idx*Tc + 1) = g_mat(idx+1,k*T + idx*Tc+1) * x(k+1) + w(idx+1);
+            else
+                d(k*T + idx*Tc + 1) = 0 + w(idx+1); % no ray, just the noise
+            end
+        end
+    end
+    
+    % create four different d_i vector, by sampling at step 4 the complete vector
+    % d. Each of them is the output of the polyphase brach at "lag" i
+    d_poly = zeros(length(d)/4, 4); % each column is a d_i
+    for idx  = 1:4
+        d_poly(:, idx) = d(idx:4:end);
+    end
+    % Using the data matrix (page 246), easier implementation
+    h_hat = zeros(4,N); % estimate 4 polyphase represantations, each of N coeff
+    for idx = 1:4
+        I = zeros(L,N);
+        for column = 1:N
+            I(:,column) = x(N-column+1:(N+L-column));
+        end
+        o = d_poly(N:end, idx);
+        
+        Phi = I'*I;
+        theta = I'*o;
+        
+        h_hat(idx, :) = inv(Phi) * theta;
+    end
+    hhat_mat(:, simiter) = reshape(h_hat, 4*N, 1);
+end
+
+hhat_mat_mean = mean(hhat_mat, 2);
+% reshape it
+hhat_mat_mean = reshape(hhat_mat_mean, 4, N);
+
+
+figure, stem(abs(h_mean), 'DisplayName', 'First coefficient of each poly branch (mean)')
+legend('-DynamicLegend'), hold on,
+for k = 2:N
+    stem(zeros(4,1), 'DisplayName', strcat(num2str(k), ' coefficient of each poly branch'))
+    legend('-DynamicLegend'), hold on,
+end
+for k = 1:N
+    stem(abs(hhat_mat_mean(:, k)), 'DisplayName', 'hhat')
+    legend('-DynamicLegend')
+end
+ax = gca; ax.XTick = 1:4;
+xlim([0.5, 4.5])
+title('mean of hhat over 1000 estimates')
+
+
 
 % NOTE: the training sequence is defined in T, while the channel and the
 % receiver operate in Tc = T/4
@@ -161,7 +268,7 @@ legend('h', 'h_hat');
 % d = zeros(N+L, 1);
 % w = rand(N+L, 1);
 % for k = N:(N+L)
-%     %d(k) 
+%     %d(k)
 % end
 
 
@@ -170,23 +277,23 @@ legend('h', 'h_hat');
 %     for k = 0:length(x)-1
 %         % Generate white noise
 %         w = wgn(4, 1, 10*log10(1/40), 'complex');
-%         
+%
 %         % Generate d
 %         d(k*T + 1) = g_mat(1,(iii-1)*length(x)*T + k*T+1)*x(k+1) + w(1);
 %         d(k*T + Tc + 1) = g_mat(2,(iii-1)*length(x)*T +k*T + Tc+1) * x(k+1) + w(2);
 %         d(k*T + 2*Tc + 1) = g_mat(3,(iii-1)*length(x)*T +k*T + 2*Tc+1) * x(k+1) + w(3);
 %         d(k*T + 3*Tc + 1) = w(4); %g_mat(4,k*T + 3*Tc+1) * x(k+1) + w(4);
-%         
+%
 %         % Using the data matrix (page 246), easier implementation
 %         I = zeros(L,N);
 %         for column = 1:N
 %             I(:,column) = x(N-column+1:(N+L-column));
 %         end
 %         o = d(N:(N+L-1));
-%         
+%
 %         Phi = I'*I;
 %         theta = I'*o;
-%         
+%
 %         h_hat = inv(Phi) * theta;
 %     end
 %     davg = davg + abs(d).^2/NITER;
@@ -199,8 +306,8 @@ legend('h', 'h_hat');
 %             I(:,column) = x(N-column+1:(N+L-column));
 %         end
 %         o = d(N:(N+L-1));
-%         
+%
 %         Phi = I'*I;
 %         theta = I'*o;
-%         
-%         h_hat(idx+1, k*T + idx*Tc +1) = inv(Phi) * theta;        
+%
+%         h_hat(idx+1, k*T + idx*Tc +1) = inv(Phi) * theta;
