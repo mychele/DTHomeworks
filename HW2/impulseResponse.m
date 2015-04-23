@@ -12,7 +12,9 @@ clc
 % sequence {x(0), ..., x((N-1)+(L-1))}
 % TODO Try multiple combinations. Generally, L = 2*N
 L = 15; % Length of the observation
-N = 2; % Supposed length of the impulse response of the channel
+N = 3; % Supposed length of the impulse response of the channel
+N_branch = 1; % Supposed length of the impulse response of the channel in each polyphase branch
+
 
 %% Generate training sequence
 % The x sequence must be a partially repeated M-L sequence of length L. We
@@ -26,18 +28,8 @@ for l = r+1:(L)
 end
 clear l
 
-x = [p; p(1:N-1)];
+x = [p; p(1:N_branch-1)];
 x(x == 0) = -1;
-
-% Construct a PN object
-% h = commsrc.pn('GenPoly', [4 3 0]);
-% set(h, 'NumBitsOut', 1);
-% set(h, 'InitialStates', ones(4,1));
-%
-% mls = zeros(1,L);
-% for k = 1:L
-%     mls(k) = generate(h);
-% end
 
 %% Generate gi
 
@@ -70,7 +62,7 @@ M_d = sum(pdp_gauss);
 
 snr = 10; % db
 snr_lin = 10^(snr/10);
-sigma_w = 1/(T/Tc*snr);
+sigma_w = 1/(T/Tc*snr); % the PN sequence has power 1
 
 
 fprintf('fd * Tp = %d \n', Tp*fd);
@@ -139,7 +131,7 @@ for k = 0:length(x)-1
 end
 
 % remove the coefficients of the transient from the g_used_coeff matrix
-g_used_coeff = g_used_coeff(:, N-1 + 1:end); % N-1 is the transient, +1 because of MATLAB
+g_used_coeff = g_used_coeff(:, N_branch-1 + 1:end); % N-1 is the transient, +1 because of MATLAB
 
 % create four different d_i vector, by sampling at step 4 the complete vector
 % d. Each of them is the output of the polyphase brach at "lag" i
@@ -152,13 +144,14 @@ figure, stem(0:T:(length(d)-1), abs(x)), hold on, stem(0:Tc:length(d)-1, abs(d))
 legend('x', 'd');
 
 % Using the data matrix (page 246), easier implementation
-h_hat = zeros(4,N); % estimate 4 polyphase represantations, each of N coeff
+h_hat = zeros(4,N_branch); % estimate 4 polyphase represantations, each of N coeff
 for idx = 1:4
-    I = zeros(L,N);
-    for column = 1:N
-        I(:,column) = x(N-column+1:(N+L-column));
+    %len_fil_br = 
+    I = zeros(L,N_branch);
+    for column = 1:N_branch
+        I(:,column) = x(N_branch-column+1:(N_branch+L-column));
     end
-    o = d_poly(N:end, idx);
+    o = d_poly(N_branch:end, idx);
     
     Phi = I'*I;
     theta = I'*o;
@@ -171,26 +164,35 @@ end
 % impulse response
 h_mean = mean(g_used_coeff, 2);
 
-
 figure, stem(abs(h_mean), 'DisplayName', 'First coefficient of each poly branch (mean)')
 legend('-DynamicLegend'), hold on,
-for k = 2:N
+for k = 2:N_branch
     stem(zeros(4,1), 'DisplayName', strcat(num2str(k), ' coefficient of each poly branch'))
     legend('-DynamicLegend'), hold on,
 end
-for k = 1:N
+for k = 1:N_branch
     stem(abs(h_hat(:, k)), 'DisplayName', 'hhat')
     legend('-DynamicLegend')
 end
 ax = gca; ax.XTick = 1:4;
 xlim([0.5, 4.5])
 
+% compute 
+
+% just to ease computation set to 0 the unused coefficients
+% reshape hhat and h_mean
+h_hat_array = reshape(h_hat, 4*N_branch, 1);
+h_mean_long = [h_mean; zeros(4*(N_branch-1), 1)];
+errorpower = sum(abs(h_hat_array - h_mean_long).^2);
+
+
 
 %% Repeat the estimate 1000 times (note, this will be influenced by the actual
 % choice of N and L
 numsim = 1000;
 
-hhat_mat = zeros(4*N, numsim);
+hhat_mat = zeros(4*N_branch, numsim);
+errorpower_array = zeros(1, numsim);
 for simiter = 1:numsim
     disp(simiter);
     
@@ -216,34 +218,40 @@ for simiter = 1:numsim
         d_poly(:, idx) = d(idx:4:end);
     end
     % Using the data matrix (page 246), easier implementation
-    h_hat = zeros(4,N); % estimate 4 polyphase represantations, each of N coeff
+    h_hat = zeros(4,N_branch); % estimate 4 polyphase represantations, each of N coeff
     for idx = 1:4
-        I = zeros(L,N);
-        for column = 1:N
-            I(:,column) = x(N-column+1:(N+L-column));
+        I = zeros(L,N_branch);
+        for column = 1:N_branch
+            I(:,column) = x(N_branch-column+1:(N_branch+L-column));
         end
-        o = d_poly(N:end, idx);
+        o = d_poly(N_branch:end, idx);
         
         Phi = I'*I;
         theta = I'*o;
         
         h_hat(idx, :) = inv(Phi) * theta;
     end
-    hhat_mat(:, simiter) = reshape(h_hat, 4*N, 1);
+    hhat_mat(:, simiter) = reshape(h_hat, 4*N_branch, 1);
+    
+    % just to ease computation set to 0 the unused coefficients
+    % reshape hhat and h_mean
+    h_hat_array = reshape(h_hat, 4*N_branch, 1);
+    h_mean_long = [h_mean; zeros(4*(N_branch-1), 1)];
+    errorpower_array(simiter) = sum(abs(h_hat_array - h_mean_long).^2);
 end
 
-hhat_mat_mean = mean(hhat_mat, 2);
+hhat_array_est = mean(hhat_mat, 2);
 % reshape it
-hhat_mat_mean = reshape(hhat_mat_mean, 4, N);
+hhat_mat_mean = reshape(hhat_array_est, 4, N_branch);
 
 
 figure, stem(abs(h_mean), 'DisplayName', 'First coefficient of each poly branch (mean)')
 legend('-DynamicLegend'), hold on,
-for k = 2:N
+for k = 2:N_branch
     stem(zeros(4,1), 'DisplayName', strcat(num2str(k), ' coefficient of each poly branch'))
     legend('-DynamicLegend'), hold on,
 end
-for k = 1:N
+for k = 1:N_branch
     stem(abs(hhat_mat_mean(:, k)), 'DisplayName', 'hhat')
     legend('-DynamicLegend')
 end
@@ -251,63 +259,6 @@ ax = gca; ax.XTick = 1:4;
 xlim([0.5, 4.5])
 title('mean of hhat over 1000 estimates')
 
-
-
-% NOTE: the training sequence is defined in T, while the channel and the
-% receiver operate in Tc = T/4
-% Thus it is necessary to define the polyphase realization of the system
-% and perform 4 estimation problems "in parallel"
-
-% A trivial (very bad for Benvenuto) implementation in theory would be
-% d0(kT + 0Tc) = g0(kT + 0Tc)x(kT) + eventually other terms at distance 4
-% d1(kT + 1Tc) = g1(kT + 1Tc)x(kT)
-% d2(kT + 2Tc) = g1(kT + 2Tc)x(kT)
-% d3(kT + 1Tc) = g1(kT + 3Tc)x(kT) = 0 always?
-
-% h = rand(N,1);
-% d = zeros(N+L, 1);
-% w = rand(N+L, 1);
-% for k = N:(N+L)
-%     %d(k)
-% end
-
-
-% NITER = 5000;
-% for iii=1:NITER
-%     for k = 0:length(x)-1
-%         % Generate white noise
-%         w = wgn(4, 1, 10*log10(1/40), 'complex');
-%
-%         % Generate d
-%         d(k*T + 1) = g_mat(1,(iii-1)*length(x)*T + k*T+1)*x(k+1) + w(1);
-%         d(k*T + Tc + 1) = g_mat(2,(iii-1)*length(x)*T +k*T + Tc+1) * x(k+1) + w(2);
-%         d(k*T + 2*Tc + 1) = g_mat(3,(iii-1)*length(x)*T +k*T + 2*Tc+1) * x(k+1) + w(3);
-%         d(k*T + 3*Tc + 1) = w(4); %g_mat(4,k*T + 3*Tc+1) * x(k+1) + w(4);
-%
-%         % Using the data matrix (page 246), easier implementation
-%         I = zeros(L,N);
-%         for column = 1:N
-%             I(:,column) = x(N-column+1:(N+L-column));
-%         end
-%         o = d(N:(N+L-1));
-%
-%         Phi = I'*I;
-%         theta = I'*o;
-%
-%         h_hat = inv(Phi) * theta;
-%     end
-%     davg = davg + abs(d).^2/NITER;
-% end
-% figure, stem(abs(davg))
-
-% Using the data matrix (page 246), easier implementation
-%         I = zeros(L,N);
-%         for column = 1:N
-%             I(:,column) = x(N-column+1:(N+L-column));
-%         end
-%         o = d(N:(N+L-1));
-%
-%         Phi = I'*I;
-%         theta = I'*o;
-%
-%         h_hat(idx+1, k*T + idx*Tc +1) = inv(Phi) * theta;
+% an estimate of E(|hhat - h|^2) over 1000 realizations could be given by
+% the mean of E at each iteration
+errorpower_est = mean(errorpower_array);
