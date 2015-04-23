@@ -4,7 +4,7 @@
 
 % Note: As the receiver, we do _not_ know neither N_h nor sigma_w
 
-clear all
+clear
 close all
 clc
 
@@ -36,8 +36,6 @@ clear l
 
 x = [p; p(1:max(N_i)-1)];
 x(x == 0) = -1;
-x_toep = toeplitz(x);
-x_toep = x_toep(1:3, end-L+1:end);
 
 
 %% Generate gi
@@ -52,12 +50,12 @@ b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
 [h_dopp, ~] = impz(b_dopp, a_dopp);
 hds_nrg = sum(h_dopp.^2);
 b_dopp = b_dopp / sqrt(hds_nrg);
-Tc = 1; % This is the smallest time interval we want to simulate
+Tc = 1;     % This is the smallest time interval we want to simulate
 T = 4*Tc;   % Time sampling interval of the input of the channel
-Kdb = 3; % 3 dB
+Kdb = 3;    % 3 dB
 K = 10^(Kdb/10);
 fd = 5*10^-3/T; % doppler frequency
-Tq = Tc; % Fundamental sampling time. This is the same as Tc, right???
+Tq = Tc;    % Fundamental sampling time. This is the same as Tc, right???
 % We stick to anastasopolous chugg paper (1997) and choose Tp such that
 % fd*Tp = 0.1
 tau_rms = 0.3*T;  % Tc = 1, as it is the fundamental sampling time
@@ -81,13 +79,13 @@ g_samples_needed = 200000; % Some will be dropped because of transient
 w_samples_needed = ceil(g_samples_needed / Tp);
 transient = ceil(g_samples_needed/4);
 
-% Generate complex-valued Gaussian white noise with zero mean and unit
-% variance
+% Generate complex-valued Gaussian white noise with zero mean and unit variance
 %rng('default');
 g_mat = zeros(N_h, g_samples_needed - transient);
 for ray = 1:N_h
     w = wgn(w_samples_needed,1,0,'complex');
-    fprintf('variance of white noise=%d \n', var(w))
+    %fprintf('variance of white noise=%d \n', var(w))
+    
     % Filter the wgn with a narrowband filter. The filter will have the
     % classical Doppler spectrum in the frequency domain, with f_d * Tc = 1.25*10^-3
     % By using the approach suggested in anastchugg97 we use an iir filter
@@ -97,7 +95,7 @@ for ray = 1:N_h
     % following versions since it allows to start in steady state conditions
     % and avoid dropping about many samples (it is a very cool thing!)
     gprime = filter(b_dopp, a_dopp, w);
-    fprintf('g %d after iterpolation has mean %d and variance %d  \n', ray, mean(gprime), var(gprime));
+    fprintf('g%d after interpolation has mean %d and variance %d  \n', ray, mean(gprime), var(gprime));
     %Gpr = fft(gprime);
     %figure, plot(20*log10(abs(Gpr)))
     
@@ -106,7 +104,7 @@ for ray = 1:N_h
     t_fine = Tq/Tp:Tq/Tp:length(gprime);
     
     g_fine = interp1(t, gprime, t_fine, 'spline');
-    fprintf('g %d after iterpolation has mean %d and variance %d  \n', ray, mean(g_fine), var(g_fine));
+    fprintf('g%d after interpolation has mean %d and variance %d  \n', ray, mean(g_fine), var(g_fine));
     % Drop the transient
     g_mat(ray, :) = g_fine(transient+1:end);
 end
@@ -190,6 +188,51 @@ end
 %         
 %     end
 % end
+
+
+
+% We need to discard N-1-(T/Tc-1) = N - T/Tc = N-4 samples for the
+% transient. Actually we need to discard N_tr = max(0, N-4).
+% %We already disregarded ?? floor((N-4)/4)
+% x has L+max(N_i)-1 samples, we are considering L+1, that is we are
+% disregarding max(N_i)-2 samples of x. This is equivalent to discarding
+% 4*(max(N_i)-2) samples of d. We need to discard instead N-4 samples, so
+% we still have to discard some other samples of d. How many?
+% N_tr-4*max(N_i)+8 =
+%   = N-4*(max(N_i)-1) if N>4
+%   = -4*(max(N_i)-1) = 0  otherwise
+% that practically is computed as max(0, N-4)-4*ceil(N/4)+8. Note that this
+% yields a result that has a periodic ramp behaviour from 1 to 4, except
+% for the first 4 values (N<=4) in which it is constantly 4.
+% If max(N_i)=1 then we must keep all samples of x. What happens is that x
+% has L samples, we take these L samples with a 0 in the front, h_hat is a
+% column vector and x_toep is a row vector of length L+1. The resulting
+% d_hat is as follows. The first column is all zeros and in this case is
+% completely useless. The second column needs to be kept, since it is the
+% output of the system in the first 4 time instants, and they are all
+% useful because each branch of the filter has order 0 hence it does not
+% depend on past values of x. Indeed, 4 is the value we get from the
+% expression we derived above.
+x = [p; p(1:max(N_i)-1)];
+x(x == 0) = -1;
+x = [0; x];
+x_toep = toeplitz(x);
+x_toep = x_toep(1:max(N_i), end-L:end);
+% d_hat with the final part of the transient or with some useless zeros.
+d_hat = h_hat * x_toep;
+% Get d_hat in a line and then discard samples.
+d_hat = reshape(d_hat, numel(d_hat), 1);
+d_hat_discard_num = max(0, N-4)-4*ceil(N/4)+8;
+d_hat = d_hat(d_hat_discard_num + 1 : end);
+% Plot
+figure
+subplot 211, plot([real(d(end-length(d_hat)+1 : end)), real(d_hat)])
+legend('Re[d]', 'Re[d_{hat}]'), grid on
+title('Real part of actual and estimated desired signal')
+subplot 212, plot([imag(d(end-length(d_hat)+1 : end)), imag(d_hat)])
+legend('Im[d]', 'Im[d_{hat}]'), grid on
+title('Imaginary part of actual and estimated desired signal')
+
 
 
 % compute the mean coefficient of impulse response of each ray over the interval
