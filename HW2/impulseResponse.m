@@ -13,7 +13,13 @@ clc
 % TODO Try multiple combinations. Generally, L = 2*N
 L = 15; % Length of the observation
 N = 3; % Supposed length of the impulse response of the channel
-N_branch = 1; % Supposed length of the impulse response of the channel in each polyphase branch
+% Supposed length of the impulse response of the channel in each polyphase branch
+% the number of branches that have a coefficient less than the other
+% branches is
+n_short = mod(4-N, 4);
+% then the number of coefficients in each branch is
+N_branch(1:4-n_short) = ceil(N/4);
+N_branch(4-n_short + 1:4) = ceil(N/4) - 1;
 
 
 %% Generate training sequence
@@ -108,7 +114,7 @@ end
 % Only for LOS component
 g_mat(1, :) = g_mat(1, :) + C;
 
-clear a_dopp b_dopp g_fine gprime h_dopp pdp_gauss t_dopp t_fine
+clear a_dopp b_dopp g_fine gprime h_dopp pdp_gauss t_dopp t_fine g_samples_needed w_samples_needed
 
 %% Generate desired signal via a polyphase implementation
 %!!! This implementation works for N_h <= 4 !!!
@@ -131,7 +137,7 @@ for k = 0:length(x)-1
 end
 
 % remove the coefficients of the transient from the g_used_coeff matrix
-g_used_coeff = g_used_coeff(:, N_branch-1 + 1:end); % N-1 is the transient, +1 because of MATLAB
+g_used_coeff = g_used_coeff(:, max(N_branch) - 1 + 1:end); % N-1 is the max transient, +1 because of MATLAB
 
 % create four different d_i vector, by sampling at step 4 the complete vector
 % d. Each of them is the output of the polyphase brach at "lag" i
@@ -144,19 +150,23 @@ figure, stem(0:T:(length(d)-1), abs(x)), hold on, stem(0:Tc:length(d)-1, abs(d))
 legend('x', 'd');
 
 % Using the data matrix (page 246), easier implementation
-h_hat = zeros(4,N_branch); % estimate 4 polyphase represantations, each of N coeff
+h_hat = zeros(4,max(N_branch)); % estimate 4 polyphase represantations
+% this matrix is dimensioned to have the maximum number of coefficients
+% for each of the four branch, the unused (i.e. unestimated) ones will be
+% left zero
 for idx = 1:4
-    %len_fil_br = 
-    I = zeros(L,N_branch);
-    for column = 1:N_branch
-        I(:,column) = x(N_branch-column+1:(N_branch+L-column));
-    end
-    o = d_poly(N_branch:end, idx);
-    
-    Phi = I'*I;
-    theta = I'*o;
-    
-    h_hat(idx, :) = inv(Phi) * theta;
+    if N_branch(idx) > 0
+        I = zeros(L,N_branch(idx));
+        for column = 1:N_branch(idx)
+            I(:,column) = x(N_branch(idx)-column+1:(N_branch(idx)+L-column));
+        end
+        o = d_poly(N_branch(idx):N_branch(idx) + L - 1, idx);
+        
+        Phi = I'*I;
+        theta = I'*o;
+        
+        h_hat(idx, :) = inv(Phi) * theta;
+    end % if N_branch is 0 don't estimate and leave hhat to 0
 end
 
 % compute the mean coefficient of impulse response of each ray over the interval
@@ -177,13 +187,24 @@ end
 ax = gca; ax.XTick = 1:4;
 xlim([0.5, 4.5])
 
-% compute 
+% compute
 
 % just to ease computation set to 0 the unused coefficients
 % reshape hhat and h_mean
-h_hat_array = reshape(h_hat, 4*N_branch, 1);
-h_mean_long = [h_mean; zeros(4*(N_branch-1), 1)];
-errorpower = sum(abs(h_hat_array - h_mean_long).^2);
+h_hat_array = reshape(h_hat, 4*max(N_branch), 1); % this vector represents
+% the estimated hhat_i for n = 0, 1, ... N - 1. Its length is actually more
+% than N, but the last elements are just 0, therefore they can be removed
+h_hat_array = h_hat_array(1:N);
+h_mean_array = h_mean(1:N_h);
+% the vector to which I compare the estimate has length N_h, I should
+% resize the shortest vector to have the same length of the other by adding
+% some 0
+if N < N_h
+    h_hat_array = [h_hat_array; zeros(N_h - N, 1)];
+elseif N > N_h
+    h_mean_array = [h_mean_array; zeros(N - N_h, 1)];
+end % if N=N_h already ok
+errorpower = sum(abs(h_hat_array - h_mean_array).^2);
 
 
 
@@ -191,7 +212,7 @@ errorpower = sum(abs(h_hat_array - h_mean_long).^2);
 % choice of N and L
 numsim = 1000;
 
-hhat_mat = zeros(4*N_branch, numsim);
+hhat_mat = zeros(4*max(N_branch), numsim);
 errorpower_array = zeros(1, numsim);
 for simiter = 1:numsim
     disp(simiter);
@@ -217,32 +238,50 @@ for simiter = 1:numsim
     for idx  = 1:4
         d_poly(:, idx) = d(idx:4:end);
     end
+    
     % Using the data matrix (page 246), easier implementation
-    h_hat = zeros(4,N_branch); % estimate 4 polyphase represantations, each of N coeff
+    h_hat = zeros(4,max(N_branch)); % estimate 4 polyphase represantations
+    % this matrix is dimensioned to have the maximum number of coefficients
+    % for each of the four branch, the unused (i.e. unestimated) ones will be
+    % left zero
     for idx = 1:4
-        I = zeros(L,N_branch);
-        for column = 1:N_branch
-            I(:,column) = x(N_branch-column+1:(N_branch+L-column));
-        end
-        o = d_poly(N_branch:end, idx);
-        
-        Phi = I'*I;
-        theta = I'*o;
-        
-        h_hat(idx, :) = inv(Phi) * theta;
+        if N_branch(idx) > 0
+            I = zeros(L,N_branch(idx));
+            for column = 1:N_branch(idx)
+                I(:,column) = x(N_branch(idx)-column+1:(N_branch(idx)+L-column));
+            end
+            o = d_poly(N_branch(idx):N_branch(idx) + L - 1, idx);
+            
+            Phi = I'*I;
+            theta = I'*o;
+            
+            h_hat(idx, :) = inv(Phi) * theta;
+        end % if N_branch is 0 don't estimate and leave hhat to 0
     end
-    hhat_mat(:, simiter) = reshape(h_hat, 4*N_branch, 1);
+    hhat_mat(:, simiter) = reshape(h_hat, 4*max(N_branch), 1);
+    
     
     % just to ease computation set to 0 the unused coefficients
     % reshape hhat and h_mean
-    h_hat_array = reshape(h_hat, 4*N_branch, 1);
-    h_mean_long = [h_mean; zeros(4*(N_branch-1), 1)];
-    errorpower_array(simiter) = sum(abs(h_hat_array - h_mean_long).^2);
+    h_hat_array = reshape(h_hat, 4*max(N_branch), 1); % this vector represents
+    % the estimated hhat_i for n = 0, 1, ... N - 1. Its length is actually more
+    % than N, but the last elements are just 0, therefore they can be removed
+    h_hat_array = h_hat_array(1:N);
+    h_mean_array = h_mean(1:N_h);
+    % the vector to which I compare the estimate has length N_h, I should
+    % resize the shortest vector to have the same length of the other by adding
+    % some 0
+    if N < N_h
+        h_hat_array = [h_hat_array; zeros(N_h - N, 1)];
+    elseif N > N_h
+        h_mean_array = [h_mean_array; zeros(N - N_h, 1)];
+    end % if N=N_h already ok
+    errorpower_array(simiter) = sum(abs(h_hat_array - h_mean_array).^2);
 end
 
 hhat_array_est = mean(hhat_mat, 2);
 % reshape it
-hhat_mat_mean = reshape(hhat_array_est, 4, N_branch);
+hhat_mat_mean = reshape(hhat_array_est, 4, max(N_branch));
 
 
 figure, stem(abs(h_mean), 'DisplayName', 'First coefficient of each poly branch (mean)')
