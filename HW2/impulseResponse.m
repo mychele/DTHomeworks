@@ -12,14 +12,14 @@ clc
 % sequence {x(0), ..., x((N-1)+(L-1))}
 % TODO Try multiple combinations. Generally, L = 2*N
 L = 15; % Length of the observation
-N = 3; % Supposed length of the impulse response of the channel
+N = 10; % Supposed length of the impulse response of the channel
 % Supposed length of the impulse response of the channel in each polyphase branch
 % the number of branches that have a coefficient less than the other
 % branches is
 n_short = mod(4-N, 4);
 % then the number of coefficients in each branch is
-N_branch(1:4-n_short) = ceil(N/4);
-N_branch(4-n_short + 1:4) = ceil(N/4) - 1;
+N_i(1:4-n_short) = ceil(N/4);
+N_i(4-n_short + 1:4) = ceil(N/4) - 1;
 
 
 %% Generate training sequence
@@ -34,19 +34,24 @@ for l = r+1:(L)
 end
 clear l
 
-x = [p; p(1:N_branch-1)];
+x = [p; p(1:max(N_i)-1)];
 x(x == 0) = -1;
+x_toep = toeplitz(x);
+x_toep = x_toep(1:3, end-L+1:end);
+
 
 %% Generate gi
 
-N_h = 3; % just to keep things simple, CHANGE IT to 3 when ready
+N_h = 3;
 a_dopp = [1, -4.4153, 8.6283, -9.4592, 6.1051, -1.3542, -3.3622, 7.2390, ...
     -7.9361, 5.1221, -1.8401, 2.8706e-1];
 b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
     6.7852e-4, 1.3550e-3, 1.8076e-3, 1.3550e-3, 5.3726e-4, 6.1818e-5, -7.1294e-5, ...
     -9.5058e-5, -7.1294e-5, -2.5505e-5, 1.3321e-5, 4.5186e-5, 6.0248e-5, 4.5186e-5, ...
     1.8074e-5, 3.0124e-6];
-[h_dopp, t_dopp] = impz(b_dopp, a_dopp);
+[h_dopp, ~] = impz(b_dopp, a_dopp);
+hds_nrg = sum(h_dopp.^2);
+b_dopp = b_dopp / sqrt(hds_nrg);
 Tc = 1; % This is the smallest time interval we want to simulate
 T = 4*Tc;   % Time sampling interval of the input of the channel
 Kdb = 3; % 3 dB
@@ -137,7 +142,7 @@ for k = 0:length(x)-1
 end
 
 % remove the coefficients of the transient from the g_used_coeff matrix
-g_used_coeff = g_used_coeff(:, max(N_branch) - 1 + 1:end); % N-1 is the max transient, +1 because of MATLAB
+g_used_coeff = g_used_coeff(:, max(N_i) - 1 + 1:end); % N-1 is the max transient, +1 because of MATLAB
 
 % create four different d_i vector, by sampling at step 4 the complete vector
 % d. Each of them is the output of the polyphase brach at "lag" i
@@ -149,25 +154,43 @@ end
 figure, stem(0:T:(length(d)-1), abs(x)), hold on, stem(0:Tc:length(d)-1, abs(d));
 legend('x', 'd');
 
+%% 
+
 % Using the data matrix (page 246), easier implementation
-h_hat = zeros(4,max(N_branch)); % estimate 4 polyphase represantations
+h_hat = zeros(4,max(N_i)); % estimate 4 polyphase represantations
 % this matrix is dimensioned to have the maximum number of coefficients
 % for each of the four branch, the unused (i.e. unestimated) ones will be
 % left zero
 for idx = 1:4
-    if N_branch(idx) > 0
-        I = zeros(L,N_branch(idx));
-        for column = 1:N_branch(idx)
-            I(:,column) = x(N_branch(idx)-column+1:(N_branch(idx)+L-column));
+    if N_i(idx) > 0
+        I = zeros(L,N_i(idx));
+        for column = 1:N_i(idx)
+            I(:,column) = x(N_i(idx)-column+1:(N_i(idx)+L-column));
         end
-        o = d_poly(N_branch(idx):N_branch(idx) + L - 1, idx);
+        o = d_poly(N_i(idx):N_i(idx) + L - 1, idx);
         
         Phi = I'*I;
         theta = I'*o;
         
-        h_hat(idx, :) = inv(Phi) * theta;
+        h_hat(idx, 1:N_i(idx)) = inv(Phi) * theta;
     end % if N_branch is 0 don't estimate and leave hhat to 0
 end
+
+% tentative of computing d_hat
+% h_hat_array = reshape(h_hat, 4*max(N_i), 1); 
+% 
+% d_hat = zeros(T*length(x) - N,1);
+% h_used_coeff = zeros(4, length(x)); % check these dimensions
+% for k = max(N_i):length(x)-1
+%     % Generate white noise
+%     for idx = 0:4-1 % actually idx varies between 0 and 4 since there are four branches
+%         d_hat(k*T + idx*Tc + 1) = h_hat_array(idx*Tc+1:4:end).' * flipud(x(k+1-max(N_i) + 1:k+1));
+%         % store the coefficient actually used, it will be useful later on
+%         %h_used_coeff(idx + 1, k + 1) = g_mat(idx+1,k*T + idx*Tc+1);
+%         
+%     end
+% end
+
 
 % compute the mean coefficient of impulse response of each ray over the interval
 % of interest of L samples in order to compare them with the estimated
@@ -176,11 +199,11 @@ h_mean = mean(g_used_coeff, 2);
 
 figure, stem(abs(h_mean), 'DisplayName', 'First coefficient of each poly branch (mean)')
 legend('-DynamicLegend'), hold on,
-for k = 2:N_branch
+for k = 2:N_i
     stem(zeros(4,1), 'DisplayName', strcat(num2str(k), ' coefficient of each poly branch'))
     legend('-DynamicLegend'), hold on,
 end
-for k = 1:N_branch
+for k = 1:N_i
     stem(abs(h_hat(:, k)), 'DisplayName', 'hhat')
     legend('-DynamicLegend')
 end
@@ -191,7 +214,7 @@ xlim([0.5, 4.5])
 
 % just to ease computation set to 0 the unused coefficients
 % reshape hhat and h_mean
-h_hat_array = reshape(h_hat, 4*max(N_branch), 1); % this vector represents
+h_hat_array = reshape(h_hat, 4*max(N_i), 1); % this vector represents
 % the estimated hhat_i for n = 0, 1, ... N - 1. Its length is actually more
 % than N, but the last elements are just 0, therefore they can be removed
 h_hat_array = h_hat_array(1:N);
@@ -212,7 +235,7 @@ errorpower = sum(abs(h_hat_array - h_mean_array).^2);
 % choice of N and L
 numsim = 1000;
 
-hhat_mat = zeros(4*max(N_branch), numsim);
+hhat_mat = zeros(4*max(N_i), numsim);
 errorpower_array = zeros(1, numsim);
 for simiter = 1:numsim
     disp(simiter);
@@ -240,30 +263,30 @@ for simiter = 1:numsim
     end
     
     % Using the data matrix (page 246), easier implementation
-    h_hat = zeros(4,max(N_branch)); % estimate 4 polyphase represantations
+    h_hat = zeros(4,max(N_i)); % estimate 4 polyphase represantations
     % this matrix is dimensioned to have the maximum number of coefficients
     % for each of the four branch, the unused (i.e. unestimated) ones will be
     % left zero
     for idx = 1:4
-        if N_branch(idx) > 0
-            I = zeros(L,N_branch(idx));
-            for column = 1:N_branch(idx)
-                I(:,column) = x(N_branch(idx)-column+1:(N_branch(idx)+L-column));
+        if N_i(idx) > 0
+            I = zeros(L,N_i(idx));
+            for column = 1:N_i(idx)
+                I(:,column) = x(N_i(idx)-column+1:(N_i(idx)+L-column));
             end
-            o = d_poly(N_branch(idx):N_branch(idx) + L - 1, idx);
+            o = d_poly(N_i(idx):N_i(idx) + L - 1, idx);
             
             Phi = I'*I;
             theta = I'*o;
             
-            h_hat(idx, :) = inv(Phi) * theta;
+            h_hat(idx, 1:N_i(idx)) = inv(Phi) * theta;
         end % if N_branch is 0 don't estimate and leave hhat to 0
     end
-    hhat_mat(:, simiter) = reshape(h_hat, 4*max(N_branch), 1);
+    hhat_mat(:, simiter) = reshape(h_hat, 4*max(N_i), 1);
     
     
     % just to ease computation set to 0 the unused coefficients
     % reshape hhat and h_mean
-    h_hat_array = reshape(h_hat, 4*max(N_branch), 1); % this vector represents
+    h_hat_array = reshape(h_hat, 4*max(N_i), 1); % this vector represents
     % the estimated hhat_i for n = 0, 1, ... N - 1. Its length is actually more
     % than N, but the last elements are just 0, therefore they can be removed
     h_hat_array = h_hat_array(1:N);
@@ -281,16 +304,16 @@ end
 
 hhat_array_est = mean(hhat_mat, 2);
 % reshape it
-hhat_mat_mean = reshape(hhat_array_est, 4, max(N_branch));
+hhat_mat_mean = reshape(hhat_array_est, 4, max(N_i));
 
 
 figure, stem(abs(h_mean), 'DisplayName', 'First coefficient of each poly branch (mean)')
 legend('-DynamicLegend'), hold on,
-for k = 2:N_branch
+for k = 2:N_i
     stem(zeros(4,1), 'DisplayName', strcat(num2str(k), ' coefficient of each poly branch'))
     legend('-DynamicLegend'), hold on,
 end
-for k = 1:N_branch
+for k = 1:N_i
     stem(abs(hhat_mat_mean(:, k)), 'DisplayName', 'hhat')
     legend('-DynamicLegend')
 end
