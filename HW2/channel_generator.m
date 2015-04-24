@@ -30,8 +30,8 @@ snr_lin = 10^(snr/10);
 sigma_w = 1/(T/Tc*snr); % the PN sequence has power 1
 
 
-fprintf('fd * Tp = %d \n', Tp*fd);
-g_samples_needed = 200000; % Some will be dropped because of transient
+%fprintf('fd * Tp = %d \n', Tp*fd);
+g_samples_needed = 2000000; % Some will be dropped because of transient
 w_samples_needed = ceil(g_samples_needed / Tp);
 transient = ceil(g_samples_needed/4);
 

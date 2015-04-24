@@ -12,14 +12,16 @@ channel_generator;
 
 %% Loop to determine suitable values of N, L
 
-% To observe L samples, we need to send L+N-1 samples of the training
-% sequence {x(0), ..., x((N-1)+(L-1))}
-L = 15; % Length of the observation
-
 printmsg_delete = '';
+maxN = 10;
+
+% time counter that let the desired output d to be computed with a
+% different impulse response at every iteration, as it would happen in
+% reality. 
+time = 1;
 
 for L = [3, 15, 31]
-    for N = 1:10 % Supposed length of the impulse response of the channel
+    for N = 1:maxN % Supposed length of the impulse response of the channel
         printmsg = sprintf('L = %d, N = %d\n', L, N);
         fprintf([printmsg_delete, printmsg]);
         printmsg_delete = repmat(sprintf('\b'), 1, length(printmsg));
@@ -33,15 +35,22 @@ for L = [3, 15, 31]
         %% Generate training sequence
         % The x sequence must be a partially repeated M-L sequence of length L. We
         % need it to have size L+N-1.
+        % To observe L samples, we need to send L+N-1 samples of the training
+        % sequence {x(0), ..., x((N-1)+(L-1))}
         p = MLsequence(L);
         x = [p; p(1:max(N_i)-1)];
         x(x == 0) = -1;
         
         %% Estimation of h and d multiple times
-        numsim = 1000; % It seems to converge even with small values of numsim
+        numsim = 200; % It seems to converge even with small values of numsim,
+        % lowered down to 200 in order to make computation feasible with a
+        % veery big g_mat
         error_func_temp = zeros(numsim, 1);
         for k =1:numsim
-            [d, h_mean] = channel_output(x, T, Tc, sigma_w, N_h, g_mat);
+            [d, h_mean] = channel_output(x, T, Tc, sigma_w, N_h, g_mat(:, time:end));
+            time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and 
+            % there should be enough impulse responses. Probably we need
+            % less!
             [h_hat, d_hat] = h_estimation(x, d, L, N_i);
             d_no_trans = d(end-length(d_hat)+1 : end);
             error_func_temp(k) = sum(abs(d_hat - d_no_trans).^2);
@@ -49,7 +58,12 @@ for L = [3, 15, 31]
         error_func(N) = mean(error_func_temp);
     end
     
-    figure, plot(10*log10(error_func))
+    % NOTE: the receiver doesn't know the reference value to which the
+    % functional should tent to, it is plotted for debugging purposes
+    figure, plot(10*log10(error_func)), hold on, plot(1:N, ones(1, N)*10*log10(sigma_w*length(d_hat)))
+    xlabel('N')
+    ylabel('\epsilon [dB]')
+    legend('Error functional Eps', 'Theoretical value of Eps')
     grid on, title(['Error function with L=', int2str(L)])
 end
 
