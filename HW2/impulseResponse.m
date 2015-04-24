@@ -32,7 +32,7 @@ p(1:r) = ones(1,r).'; % Set arbitrary initial condition
 for l = r+1:(L)
     p(l) = xor(p(l-3), p(l-4)); % -1, -2 for L=3
 end
-clear l
+clear l r
 
 x = [p; p(1:max(N_i)-1)];
 x(x == 0) = -1;
@@ -66,8 +66,6 @@ pdp_gauss = 1/tau_rms * exp(-tau/tau_rms);
 C = sqrt(K/(K+1));
 % normalize pdp: it must be sum(E[|gtilde_i|^2]) = 1 - C^2
 pdp_gauss = pdp_gauss.*(1-C^2)/sum(pdp_gauss);
-
-M_d = sum(pdp_gauss);
 
 snr = 10; % db
 snr_lin = 10^(snr/10);
@@ -117,7 +115,7 @@ end
 % Only for LOS component
 g_mat(1, :) = g_mat(1, :) + C;
 
-clear a_dopp b_dopp g_fine gprime h_dopp pdp_gauss t_dopp t_fine g_samples_needed w_samples_needed
+clear tau tau_rms a_dopp b_dopp g_fine gprime h_dopp pdp_gauss t_dopp t_fine g_samples_needed w_samples_needed M_d k ray
 
 %% Generate desired signal via a polyphase implementation
 %!!! This implementation works for N_h <= 4 !!!
@@ -142,6 +140,11 @@ end
 % remove the coefficients of the transient from the g_used_coeff matrix
 g_used_coeff = g_used_coeff(:, max(N_i) - 1 + 1:end); % N-1 is the max transient, +1 because of MATLAB
 
+% compute the mean coefficient of impulse response of each ray over the interval
+% of interest of L samples in order to compare them with the estimated
+% impulse response
+h_mean = mean(g_used_coeff, 2);
+
 % create four different d_i vector, by sampling at step 4 the complete vector
 % d. Each of them is the output of the polyphase brach at "lag" i
 d_poly = zeros(length(d)/4, 4); % each column is a d_i
@@ -152,7 +155,7 @@ end
 figure, stem(0:T:(length(d)-1), abs(x)), hold on, stem(0:Tc:length(d)-1, abs(d));
 legend('x', 'd');
 
-%% 
+%% Estimate h
 
 % Using the data matrix (page 246), easier implementation
 h_hat = zeros(4,max(N_i)); % estimate 4 polyphase represantations
@@ -189,7 +192,7 @@ end
 %     end
 % end
 
-
+%% Compute d_hat
 
 % We need to discard N-1-(T/Tc-1) = N - T/Tc = N-4 samples for the
 % transient. Actually we need to discard N_tr = max(0, N-4).
@@ -224,21 +227,24 @@ d_hat = h_hat * x_toep;
 d_hat = reshape(d_hat, numel(d_hat), 1);
 d_hat_discard_num = max(0, N-4)-4*ceil(N/4)+8;
 d_hat = d_hat(d_hat_discard_num + 1 : end);
+d_no_trans = d(end-length(d_hat)+1 : end);
 % Plot
 figure
-subplot 211, plot([real(d(end-length(d_hat)+1 : end)), real(d_hat)])
+subplot 211, plot([real(d_no_trans), real(d_hat)])
 legend('Re[d]', 'Re[d_{hat}]'), grid on
 title('Real part of actual and estimated desired signal')
-subplot 212, plot([imag(d(end-length(d_hat)+1 : end)), imag(d_hat)])
+subplot 212, plot([imag(d_no_trans), imag(d_hat)])
 legend('Im[d]', 'Im[d_{hat}]'), grid on
 title('Imaginary part of actual and estimated desired signal')
 
 
+%% Error estimate
 
-% compute the mean coefficient of impulse response of each ray over the interval
-% of interest of L samples in order to compare them with the estimated
-% impulse response
-h_mean = mean(g_used_coeff, 2);
+error_func = sum(abs(d_hat - d_no_trans).^2);
+fprintf('EPSILON = %d\n', error_func);
+
+
+%% Plot h and h_hat
 
 figure, stem(abs(h_mean), 'DisplayName', 'First coefficient of each poly branch (mean)')
 legend('-DynamicLegend'), hold on,
@@ -253,7 +259,7 @@ end
 ax = gca; ax.XTick = 1:4;
 xlim([0.5, 4.5])
 
-% compute
+%% Compute estimation error |h - h_hat|^2
 
 % just to ease computation set to 0 the unused coefficients
 % reshape hhat and h_mean
