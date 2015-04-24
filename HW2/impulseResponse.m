@@ -20,7 +20,7 @@ maxN = 10;
 % reality. 
 time = 1;
 
-for L = [3, 15, 31]
+for L = [3, 7, 15, 31]
     for N = 1:maxN % Supposed length of the impulse response of the channel
         printmsg = sprintf('L = %d, N = %d\n', L, N);
         fprintf([printmsg_delete, printmsg]);
@@ -42,7 +42,7 @@ for L = [3, 15, 31]
         x(x == 0) = -1;
         
         %% Estimation of h and d multiple times
-        numsim = 200; % It seems to converge even with small values of numsim,
+        numsim = 300; % It seems to converge even with small values of numsim,
         % lowered down to 200 in order to make computation feasible with a
         % veery big g_mat
         error_func_temp = zeros(numsim, 1);
