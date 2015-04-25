@@ -92,7 +92,7 @@ that is
 $$ \M(iT_C) = \frac{1}{\bar{\tau}_{rms}} e^{-iT_C / \bar{\tau}_{rms}} $$
 with $i$ non-negative integer and $T_C = 1$. This quantity must be then normalized in such a way that
 $$\sum_{i=0}^{\infty} \M(iT_C) = 1 - C^2 $$
-where $C = \sqrt{K / (K+1)}$ is the deterministic component of the first ray (for $i=0$) and $K$ is the Rice factor. Note that we are considering an infinite number of rays, but as a matter of fact MATLAB approximates as zero all values $\M(iT_C)$ for $i > 894$, therefore we stop the summation to 894 (actually 899, LOL).
+where $C = \sqrt{K / (K+1)}$ is the deterministic component of the first ray (for $i=0$) and $K$ is the Rice factor. Note that we are considering an infinite number of rays, but as a matter of fact MATLAB approximates as zero all values $\M(iT_C)$ for $i > 894$, therefore we stop the summation to 894 (actually 899, LOL). % TODO Do not forget to fix this
 
 Knowing that the true impulse response of the channel has random properties described by the power delay profile $\M(iT_C)$ and by the quantity $C$, then we define the quality of the approximation due to truncation as
 $$ \Lambda_t(N_h) = \frac{E[||\mathbf{h}||^2]}{E[||\mathbf{\Delta h}||^2]} = \frac{C^2 + \sum_{i=0}^{\infty} \M(iT_C)}{\sum_{i=N_h}^{\infty} \M(iT_C)} $$
@@ -113,10 +113,26 @@ Looking at the plot of $\Lambda_n (N_h)_{\dB}$ against $N_h$ in Fig.~\ref{fig:p0
     \label{fig:p01_lambda_n}
 \end{figure}
 
+\subsection*{Determine $E[|h_i(nTc)|^2]$}
+Plot for i = 0, 1, \dots, N_h - 1 and put values in a table.
+
+\subsection*{Show the behavior of $|h_i(nTc)|$}
+Show the behavior for n = 0, 1, \dots, 1999.
+
+\subsection*{Plot the histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$}
+Plot the expected value based on values from 0 to 999.
+
+\subsection*{Plot the histogram of $\frac{h_1(151Tc)}{\sqrt{E[|h_1(151Tc)|^2]}}$ for 1000 realizations}
+Compare it with the theoretical result
 
 \section*{Problem 2}
 
 \subsection*{Setup of the receiver}
+% TODO
+Draw the polyphase implementation of the channel. This will help clarify what N_i and N are.
+
+At the receiver side, the LS method is used in order to estimate the impulse response of the channel. A known ML pseudo-noise sequence $x(kT)$ of length L + N - 1 is sent through the channel. In its polyphase implementation, the channel is a sequence of 4 parallel filters with common input. In order to go from the T to the Tc sampling times, these branches are followed by a parallel/series switch that selects the outputs of the filters, passing to the next branch every Tc seconds. This yields an output signal $d(kTc)$ at the receiver side, using which the receiver now has to estimate the coefficients $h_i$ by $\hat(h_i)$.
+
 \subsection*{Determine $L$ and $N$}
 \subsection*{Estimate of $E[||\mathbf{\hat{h}}-\mathbf{h}||^2]$ assuming $\mathbf{h}$ is known}
 
