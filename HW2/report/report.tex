@@ -165,7 +165,7 @@ At the receiver side, the LS method is used in order to estimate the impulse res
 
 The actual estimation is performed separately on the 4 branches, each denoted by its index $i = 0,\ldots,3$, where for each branch we consider $d(kT+iT_C)$ as output, $\mathbf{h}_i = [h(iT_C), h(T+iT_C), \ldots, h((N_i-1)T + iT_C)]$ as impulse response, and $x(kT)$ is the input for all branches. Note that in the following we will always refer to the different polyphase branches with the index $i$, the dependance on time of the impulse response of the channel will be implied, and the notation
 \begin{equation}\label{eq:def_ir_branch}
-h_i(k) = h(kT+iT_C), k=0,\ldots,N_i-1
+h_i(k) = h(kT+iT_C), \quad k=0,\ldots,N_i-1
 \end{equation}
 will mean the $k$-th sample of the impulse response of the $i$-th branch, i.e. the impulse response of the channel at lag $(4k+i)T_C$.
 
@@ -178,7 +178,7 @@ where $\mathbf{\Phi}_i$ is the autocorrelation $N_i \times N_i$ matrix of the in
 	\mathbf{\Phi}_i = [\Phi_i(j,n)] \quad \mathrm{ with } \quad \Phi_i(j,n) = \sum_{k=N_i-1}^{N_i-1+L-1} x^*(k-j)x(k-n), \quad j,n=0,\ldots,N_i-1
 \end{equation}
 \begin{equation}
-	\boldsymbol\vartheta_i ^T = [\vartheta_i(0),\ldots, \vartheta_i(N_i-1)] \quad \mathrm{ with } \quad \vartheta_i(n) = \sum_{k=N_i-1}^{N_i-1+L-1} d(k)x^*(k-n).
+	\boldsymbol\vartheta_i ^T = [\vartheta_i(0),\ldots, \vartheta_i(N_i-1)] \quad \mathrm{ with } \quad \vartheta_i(n) = \sum_{k=N_i-1}^{N_i-1+L-1} d_i(k)x^*(k-n).
 \end{equation}
 
 If $\mathbf{\Phi}_i^{-1}$ exists, i.e. $\mathbf{\Phi}_i$ is full rank, the LS solution is computed as
@@ -249,22 +249,33 @@ with $i=0,\ldots,3,\; j=0,\ldots,L$. The full $4 \times (L+1)$ matrix at time $k
 \hat{d}_3(k-L) & \hat{d}_3(k-L+1) & \cdots & \hat{d}_3(k) \\
  \end{bmatrix}
 \end{equation}
-and contains the last $4(L+1)$ values of the output $\hat{d}$ up to the time instant $kT+3T_C$. Recalling the definition in (\ref{eq:def_ir_branch}), that applies to $\hat{\mathbf{h}}$ as well, we can concatenate vertically all rows, from the left to the right, to obtain the vector
+and contains the last $4(L+1)$ values of the output $\hat{d}$ up to the time instant $kT+3T_C$. Recalling the definition in \eqref{eq:def_ir_branch}, that applies to $\hat{\mathbf{h}}$ as well, we can concatenate vertically all rows, from the left to the right, to obtain the vector
 \begin{equation}
 	\hat{\mathbf{d}}' (k) = \left[\hat{d}[(k-L)T],\; \hat{d}[(k-L)T + T_C], \ldots,\; \hat{d}[kT + 3T_C] \right]
 \end{equation}
 
 The transient of the whole system is $N-1$ samples long, if we consider the $T_C$ sampling period. However, after $N-1-(T/T_C - 1) = N-4$ samples we have already discarded all past samples of the signal $x$: we are still considering 3 initial conditions on $x$, but they do not contain samples of the signal, since it is defined with a sampling period equal to $4T_C$, thus they do not affect the output and we do not consider them as transient. Note that if $N \leq 4$ we do not need to discard any sample, therefore we define the number of samples of the transient in the $T_C$ domain as $N_{tr} = \max \{0, N-4\}$.
 
-The signal $x$ has $L+N_{max}-1$ samples, and we are now considering $L+1$ samples, which means that we are disregarding $N_{max}-2$ samples in the $T$ domain, that correspond to $4(N_{max}-2)$ samples of $\hat{d}$. We still need to discard $N_{tr} - 4(N_{max}-2) = \max \{ 0, N-4 \} - 4 \ceil{N/4} + 8$ samples of $\hat{d}$. Note that this also works with $N \leq 4$. In this case, $x$ has length $L$ and we need to keep all output samples, that is to say the transient is actually 0. This algorithm takes the whole signal $x$ with a 0 at the front, $\hat{\mathbf{h}}$ is a column vector, and the first column of $\hat{\mathbf{d}}$ is all zeros. While this first column is useless, the second one has to be entirely kept. According to the expression above, the number of samples that need to be discarded is indeed 4.
+The signal $x$ has $L+N_{max}-1$ samples, and we are now considering $L+1$ samples, which means that we are disregarding $N_{max}-2$ samples in the $T$ domain, that correspond to $4(N_{max}-2)$ samples of $\hat{d}$. We still need to discard
+\begin{equation}\label{eq:transientlen_dhat}
+N_{tr} - 4(N_{max}-2) = \max \{ 0, N-4 \} - 4 \left\lceil \frac{N}{4} \right\rceil + 8
+\end{equation}
+samples of $\hat{d}$. Note that this also works with $N \leq 4$. In this case, $x$ has length $L$ and we need to keep all output samples, that is to say the transient is actually 0. This algorithm takes the whole signal $x$ with a 0 at the front, $\hat{\mathbf{h}}$ is a column vector, and the first column of $\hat{\mathbf{d}}$ is all zeros. While this first column is useless, the second one has to be entirely kept. According to the expression above, the number of samples that need to be discarded is indeed 4.
 
 
 \subsection*{Determine $L$ and $N$}
 
-For each considered pair $(L,N)$, we run 100 (TODO) simulations in which we take subsequent disjoint time interval of the time-varying channel, evaluate its output $d(nT_C)$, compute an LS estimate of $\mathbf{h}_i \; \forall i$, and compute the error function defined as
+For each considered pair $(L,N)$, we run 100 (TODO) simulations in which we take subsequent disjoint time intervals of the time-varying channel, evaluate its output $d(kT_C)$, compute an LS estimate of $\mathbf{h}_i \; \forall i$, and compute the error function defined as the sum of the squared errors at the output:
 \begin{equation}
-	\mathcal{E} = \sum 
+	\mathcal{E} = \sum_{k \in \mathcal{K}} |d(k)-\hat{d}(k)|^2
 \end{equation}
+where $\mathcal{K}$ denotes the set of indices over the $T_C$ time domain for which a sample of $\hat{d}(kT_C)$ is available. Note that according to \eqref{eq:transientlen_dhat} the cardinality of the set $\mathcal{K}$ is $\max \{ 0, N-4 \} - 4 \ceil{N/4} + 8$.
+
+
+TODO:\\
+Define theoretical value of $\mathcal{E}$, plot it together with the experimental values and comment.\\
+Comment on the fact that we're using subsequent disjoint intervals of the channel.
+
 
 \subsection*{Estimate of $E[||\mathbf{\hat{h}}-\mathbf{h}||^2]$ assuming $\mathbf{h}$ is known}
 
