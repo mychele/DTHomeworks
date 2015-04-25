@@ -42,7 +42,6 @@ end
 
 % We need to discard N-1-(T/Tc-1) = N - T/Tc = N-4 samples for the
 % transient. Actually we need to discard N_tr = max(0, N-4).
-% %We already disregarded ?? floor((N-4)/4)
 % x has L+max(N_i)-1 samples, we are considering L+1, that is we are
 % disregarding max(N_i)-2 samples of x. This is equivalent to discarding
 % 4*(max(N_i)-2) samples of d. We need to discard instead N-4 samples, so
