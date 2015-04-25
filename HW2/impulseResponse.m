@@ -73,7 +73,6 @@ for L = [3, 7, 15, 31]
     legend('Error functional Eps', 'Theoretical value of Eps')
     grid on, title(['Error function with L=', int2str(L)])
 end
-return
 
 %% Estimate E(|h-hhat|^2) by repeating the estimate 1000 times and assuming
 % h known
@@ -88,7 +87,8 @@ errorpower_est = zeros(4, maxN);
 % reality.
 time = 1;
 iter = 1;
-for L = [3, 7, 15, 31]
+Lvalues = [3, 7, 15, 31];
+for L = Lvalues
     for N = 1:maxN % Supposed length of the impulse response of the channel
         printmsg = sprintf('L = %d, N = %d\n', L, N);
         fprintf([printmsg_delete, printmsg]);
@@ -145,13 +145,34 @@ for L = [3, 7, 15, 31]
     iter = iter + 1;
 end
 
+%% Compare with theoretical
+% uses code from theoret_estimerror.m
 
-for i = 1:4
-    figure, plot(10*log10(errorpower_est(i, :)))
-    xlabel('N which tracks the real N_h')
-    ylabel('Estimate of E(|h - hhat|^2) across 1000 realizations [dB]')
-    ax = gca; ax.XTick = 1:maxN;
+exp_deltahsqr = zeros(length(Lvalues), maxN);
+for lindex = 1:length(Lvalues)
+    L = Lvalues(lindex);
+    for N = 1:maxN
+        n_short = mod(4-N, 4); % Num branches with a shorter filter than others
+        % N_i is the number of coefficients of the filter of the i-th branch.
+        N_i(1:4-n_short) = ceil(N/4);
+        N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
+        
+        exp_deltahsqr(lindex, N) = sigma_w / (L+1) * sum(N_i .* (L+2-N_i) ./ (L+1-N_i));
+    end
 end
+
+% Plot results
+figure, hold on
+for i = 1:4
+    plot(10*log10(errorpower_est(i, :)), 'DisplayName', sprintf('L=%d experimental', Lvalues(i)))
+    plot(10*log10(exp_deltahsqr(i, :)),'-.' , 'DisplayName', sprintf('L=%d theoretical', Lvalues(i)))
+    legend('-DynamicLegend')
+end
+xlabel('N that tracks the real N_h'), ylabel('Estimate of E(|h - hhat|^2) [dB]')
+title('Estimate of E(|h - hhat|^2) across 1000 realizations')
+ax = gca; ax.XTick = 1:maxN;
+ylim([-30 -10])
+grid on, box on
 
 return;
 

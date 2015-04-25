@@ -68,6 +68,7 @@ basicstyle=\footnotesize\ttfamily
 \DeclareMathOperator*{\argmax}{arg\,max}
 \newcommand{\M} {\mathtt{M}}
 \newcommand{\dB} {\mathrm{dB}}
+\newcommand{\tr} {\mathrm{tr}}
 
 \graphicspath{ {figures/} }
 
@@ -111,6 +112,42 @@ Looking at the plot of $\Lambda_n (N_h)_{\dB}$ against $N_h$ in Fig.~\ref{fig:p0
 	\caption{Plot of $\Lambda_n (N_h)$ in dB for the choice of $N_h$.}
     \label{fig:p01_lambda_n}
 \end{figure}
+
+
+\section*{Problem 2}
+
+\subsection*{Setup of the receiver}
+\subsection*{Determine $L$ and $N$}
+\subsection*{Estimate of $E[||\mathbf{\hat{h}}-\mathbf{h}||^2]$ assuming $\mathbf{h}$ is known}
+
+\subsection*{Comparing the estimate of $E[||\mathbf{\hat{h}}-\mathbf{h}||^2]$ with its theoretical value}
+
+We can now give a theoretical value of the estimation error yielded by this implementation of the LS method. It is the average error on the estimate of the impulse response $\mathbf{h}$ if we assume that we are using $N$ coefficients, $L$ input samples of the ML sequence, and that $N=N_h$. With $L$ fixed, this estimation error becomes worse as $N$ increases, but of course this holds for $N=N_h$ only, otherwise this result does not apply. In fact, when estimating $\mathbf{h}$ with $N>N_h$ we are somehow wasting coefficients, and the estimate gets worse because of the noise in the system. On the other hand, the actual error becomes even larger if $N<N_h$ since we have less degrees of freedom with respect to the ones of the system.
+
+Formally, the estimation error is given by
+$$ E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = E[||\mathbf{\Delta h}||^2] = E[\sum_{i=0}^{3} ||\mathbf{\Delta h}_i||^2] = \sum_{i=0}^{3} E[||\mathbf{\Delta h}_i||^2]$$
+where we split the formula according to the 4 branches of the polyphase implementation. Following the rationale presented in \cite{bc}, for each branch with index $i=0,\ldots,3$ we get
+$$\mathbf{\Phi}_i^{-1} = \frac{1}{L+1} \left( \mathbf{I} + \frac{\mathbf{1}_{N_i \times N_i}}{L+1-N_i} \right)$$
+where $\mathbf{1}_{N_i \times N_i}$ is the $N_i \times N_i$ matrix with all elements equal to $1$, and therefore
+$$ \tr [\mathbf{\Phi}_i^{-1}] = \frac{N_i(L+2-N_i)}{(L+1)(L+1-N_i)}. $$
+Finally, we can express the estimation error of the $i$-th branch as
+$$ E[||\mathbf{\Delta h}_i||^2] = \sigma_w^2 \; \tr [(\mathbf{\Phi}_i^*)^{-1}] = \sigma_w^2 \; \tr [\mathbf{\Phi}_i^{-1}] = \sigma_w^2 \frac{N_i(L+2-N_i)}{(L+1)(L+1-N_i)}$$
+where $\mathbf{\Phi}_i$ is Hermitian. Going back to the overall estimation error we have
+$$ E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = \sum_{i=0}^{3} E[||\mathbf{\Delta h}_i||^2] = \frac{\sigma_w^2}{L+1} \sum_{i=0}^{3} \frac{N_i (L+2-N_i)}{L+1-N_i}.$$
+
+TODO: Explain plot in figure \ref{fig:p02_comparetheoreticaldeltah}.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.52\textwidth]{p02_comparetheoreticaldeltah}
+	\caption{Experimental estimation error $E[||\mathbf{\Delta h}||^2]$ with different values of $L$ and $N$, compared with its theoretical value.}
+    \label{fig:p02_comparetheoreticaldeltah}
+\end{figure}
+
+TODO: considerations on when this formula (and the one on the book with one branch only) holds.
+
+NB: non si e' detto nulla su $N_i$ perche' ne parleremo nei punti precenti.
+
 
 \begin{thebibliography}{10}
 
