@@ -131,6 +131,20 @@ Compare it with the theoretical result
 % TODO
 Draw the polyphase implementation of the channel. This will help clarify what $N_i$ and $N$ are.
 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.75\textwidth]{channel_model}
+	\caption{.}
+    \label{fig:channel_model}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.75\textwidth]{polyphase}
+	\caption{.}
+    \label{fig:polyphase}
+\end{figure}
+
 At the receiver side, the LS method is used in order to estimate the impulse response of the channel. A known ML pseudo-noise sequence $x(kT)$ of length $L + N - 1$ is sent through the channel. In its polyphase implementation, the channel is a sequence of 4 parallel filters with common input. In order to change the sampling period from $T$ to $T_C$, these branches are followed by a parallel/series switch that selects the outputs of the filters, passing to the next branch every $T_C$ seconds. This yields an output signal $d(kT_C)$ that is used by the receiver to estimate the coefficients $h_i$ by $\hat(h_i)$.
 
 The solution of the LS problem, for the estimation of the channel coefficients for the $i$-th polyphase branch, is given by
