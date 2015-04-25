@@ -13,7 +13,7 @@ channel_generator;
 %% Loop to determine suitable values of N, L
 
 printmsg_delete = ''; % Just to display progress updates
-maxN = 12;
+maxN = 25;
 % Note that with maxN<13 we don't have problems with the condition N<=L.
 
 % Time counter that allows the output d to be computed with a different
@@ -62,7 +62,7 @@ for L = [3, 7, 15, 31]
             d_no_trans = d(end-length(d_hat)+1 : end);
             error_func_temp(k) = sum(abs(d_hat - d_no_trans).^2);
         end
-        error_func(N) = mean(error_func_temp);
+        error_func(N) = mean(error_func_temp); %#ok<SAGROW>
     end
     
     % NOTE: the receiver doesn't know the reference value to which the
@@ -77,7 +77,6 @@ end
 %% Estimate E(|h-hhat|^2) by repeating the estimate 1000 times and assuming
 % h known
 
-maxN = 10;
 printmsg_delete = '';
 
 errorpower_est = zeros(4, maxN);
@@ -93,6 +92,11 @@ for L = Lvalues
         printmsg = sprintf('L = %d, N = %d\n', L, N);
         fprintf([printmsg_delete, printmsg]);
         printmsg_delete = repmat(sprintf('\b'), 1, length(printmsg));
+        
+        % Save some time by breaking the for loop now.
+        if(ceil(N/4) > L)
+            break
+        end
         
         % Supposed length of the impulse response of the channel in each polyphase branch.
         n_short = mod(4-N, 4); % Num branches with a shorter filter than others
@@ -152,6 +156,11 @@ exp_deltahsqr = zeros(length(Lvalues), maxN);
 for lindex = 1:length(Lvalues)
     L = Lvalues(lindex);
     for N = 1:maxN
+        
+        if(ceil(N/4) > L)
+            break
+        end
+        
         n_short = mod(4-N, 4); % Num branches with a shorter filter than others
         % N_i is the number of coefficients of the filter of the i-th branch.
         N_i(1:4-n_short) = ceil(N/4);
@@ -171,7 +180,7 @@ end
 xlabel('N that tracks the real N_h'), ylabel('Estimate of E(|h - hhat|^2) [dB]')
 title('Estimate of E(|h - hhat|^2) across 1000 realizations')
 ax = gca; ax.XTick = 1:maxN;
-ylim([-30 -10])
+ylim([-30 -5])
 grid on, box on
 
 return;
