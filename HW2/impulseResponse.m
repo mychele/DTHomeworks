@@ -17,7 +17,7 @@ maxN = 10;
 
 % time counter that let the desired output d to be computed with a
 % different impulse response at every iteration, as it would happen in
-% reality. 
+% reality.
 time = 1;
 
 for L = [3, 7, 15, 31]
@@ -42,13 +42,13 @@ for L = [3, 7, 15, 31]
         x(x == 0) = -1;
         
         %% Estimation of h and d multiple times
-        numsim = 300; % It seems to converge even with small values of numsim,
+        numsim = 100; % It seems to converge even with small values of numsim,
         % lowered down to 200 in order to make computation feasible with a
         % veery big g_mat
         error_func_temp = zeros(numsim, 1);
         for k =1:numsim
             [d, h_mean] = channel_output(x, T, Tc, sigma_w, N_h, g_mat(:, time:end));
-            time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and 
+            time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and
             % there should be enough impulse responses. Probably we need
             % less!
             [h_hat, d_hat] = h_estimation(x, d, L, N_i);
@@ -67,7 +67,90 @@ for L = [3, 7, 15, 31]
     grid on, title(['Error function with L=', int2str(L)])
 end
 
-return
+
+%% Estimate E(|h-hhat|^2) by repeating the estimate 1000 times and assuming
+% h known
+
+maxN = 10;
+printmsg_delete = '';
+
+errorpower_est = zeros(4, maxN);
+
+% time counter that let the desired output d to be computed with a
+% different impulse response at every iteration, as it would happen in
+% reality.
+time = 1;
+iter = 1;
+for L = [3, 7, 15, 31]
+    for N = 1:maxN % Supposed length of the impulse response of the channel
+        printmsg = sprintf('L = %d, N = %d\n', L, N);
+        fprintf([printmsg_delete, printmsg]);
+        printmsg_delete = repmat(sprintf('\b'), 1, length(printmsg));
+        
+        % Supposed length of the impulse response of the channel in each polyphase branch.
+        n_short = mod(4-N, 4); % Num branches with a shorter filter than others
+        % N_i is the number of coefficients of the filter of the i-th branch.
+        N_i(1:4-n_short) = ceil(N/4);
+        N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
+        
+        %% Generate training sequence
+        % The x sequence must be a partially repeated M-L sequence of length L. We
+        % need it to have size L+N-1.
+        % To observe L samples, we need to send L+N-1 samples of the training
+        % sequence {x(0), ..., x((N-1)+(L-1))}
+        p = MLsequence(L);
+        x = [p; p(1:max(N_i)-1)];
+        x(x == 0) = -1;
+        
+        %% Estimation of h and d multiple times
+        numsim = 300; 
+        hhat_mat = zeros(4*max(N_i), numsim);
+        % this matrix is dimensioned to have the maximum number of coefficients
+        % for each of the four branch, the unused (i.e. unestimated) ones will be
+        % left zero
+        
+        errorpower_array_temp = zeros(numsim, 1);
+        for k =1:numsim
+            [d, h_mean] = channel_output(x, T, Tc, sigma_w, N_h, g_mat(:, time:end));
+            time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and
+            % there should be enough impulse responses. Probably we need
+            % less!
+            [h_hat, ~] = h_estimation(x, d, L, N_i);
+            
+            h_hat_array = reshape(h_hat, 4*max(N_i), 1);
+            hhat_mat(:, k) = h_hat_array; % this vector represents
+            % the estimated hhat_i for n = 0, 1, ... N - 1. Its length is actually more
+            % than N, but the last elements are just 0, therefore they can be removed
+            h_hat_array = h_hat_array(1:N);
+            h_mean_array = h_mean(1:N_h);
+            % the vector to which I compare the estimate has length N_h, I should
+            % resize the shortest vector to have the same length of the other by adding
+            % some 0
+            if N < N_h
+                h_hat_array = [h_hat_array; zeros(N_h - N, 1)];
+            elseif N > N_h
+                h_mean_array = [h_mean_array; zeros(N - N_h, 1)];
+            end % if N=N_h already ok
+            errorpower_array_temp(k) = sum(abs(h_hat_array - h_mean_array).^2);
+        end
+        errorpower_est(iter, N) = mean(errorpower_array_temp);
+    end
+    iter = iter + 1;
+end
+
+
+for i = 1:4
+    figure, plot(10*log10(errorpower_est(i, :)))
+    xlabel('N which tracks the real N_h')
+    ylabel('Estimate of E(|h - hhat|^2) across 1000 realizations [dB]')
+    ax = gca; ax.XTick = 1:maxN;
+end
+
+return;
+
+
+
+%% Old stuff
 
 %% Plot h and h_hat
 
