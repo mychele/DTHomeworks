@@ -114,10 +114,10 @@ Looking at the plot of $\Lambda_n (N_h)_{\dB}$ against $N_h$ in Fig.~\ref{fig:p0
 \end{figure}
 
 \subsection*{Determine $E[|h_i(nTc)|^2]$}
-Plot for i = 0, 1, \dots, N_h - 1 and put values in a table.
+Plot for $i = 0, 1, \dots, N_h - 1$ and put values in a table.
 
 \subsection*{Show the behavior of $|h_i(nTc)|$}
-Show the behavior for n = 0, 1, \dots, 1999.
+Show the behavior for $n = 0, 1, \dots, 1999$.
 
 \subsection*{Plot the histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$}
 Plot the expected value based on values from 0 to 999.
@@ -129,9 +129,34 @@ Compare it with the theoretical result
 
 \subsection*{Setup of the receiver}
 % TODO
-Draw the polyphase implementation of the channel. This will help clarify what N_i and N are.
+Draw the polyphase implementation of the channel. This will help clarify what $N_i$ and $N$ are.
 
-At the receiver side, the LS method is used in order to estimate the impulse response of the channel. A known ML pseudo-noise sequence $x(kT)$ of length L + N - 1 is sent through the channel. In its polyphase implementation, the channel is a sequence of 4 parallel filters with common input. In order to go from the T to the Tc sampling times, these branches are followed by a parallel/series switch that selects the outputs of the filters, passing to the next branch every Tc seconds. This yields an output signal $d(kTc)$ at the receiver side, using which the receiver now has to estimate the coefficients $h_i$ by $\hat(h_i)$.
+At the receiver side, the LS method is used in order to estimate the impulse response of the channel. A known ML pseudo-noise sequence $x(kT)$ of length $L + N - 1$ is sent through the channel. In its polyphase implementation, the channel is a sequence of 4 parallel filters with common input. In order to change the sampling period from $T$ to $T_C$, these branches are followed by a parallel/series switch that selects the outputs of the filters, passing to the next branch every $T_C$ seconds. This yields an output signal $d(kT_C)$ that is used by the receiver to estimate the coefficients $h_i$ by $\hat(h_i)$.
+
+The solution of the LS problem, for the estimation of the channel coefficients for the $i$-th polyphase branch, is given by
+\begin{equation}
+	\mathbf{\Phi}_i \mathbf{\hat{h}}_i = \boldsymbol\vartheta_i
+\end{equation}
+where $\mathbf{\Phi}_i$ is the autocorrelation $N_i \times N_i$ matrix of the input signal, $ \boldsymbol\vartheta_i$ is the cross-correlation vector between the input signal and the desired output (i.e. the output of the filter), and $\mathbf{\hat{h}}_i$ is the vector of the estimated coefficients for branch $i$. More precisely,
+\begin{equation}
+	\mathbf{\Phi}_i = [\Phi_i(j,n)] \quad \mathrm{ with } \quad \Phi_i(j,n) = \sum_{k=N_i-1}^{N_i-1+L-1} x^*(k-j)x(k-n), \quad j,n=0,\ldots,N_i-1
+\end{equation}
+\begin{equation}
+	\boldsymbol\vartheta_i ^T = [\vartheta_i(0),\ldots, \vartheta_i(N_i-1)] \quad \mathrm{ with } \quad \vartheta_i(n) = \sum_{k=N_i-1}^{N_i-1+L-1} d(k)x^*(k-n)
+\end{equation}
+
+If $\mathbf{\Phi}_i^{-1}$ exists, i.e. $\mathbf{\Phi}_i$ is full rank, the LS solution is explicitly computed as
+\begin{equation}
+	\mathbf{\hat{h}}_i = \mathbf{\Phi}_i^{-1} \boldsymbol\vartheta_i.
+\end{equation}
+We note that the condition of $\mathbf{\Phi}_i$ being full rank requires that its dimension $N_i$ be at most equal to the periodicity $L$ of the ML sequence we are using. In fact, if $N_i > L$ we have
+\begin{equation}
+	\Phi_i(j+L, n) = \sum_{k=N_i-1}^{N_i-1+L-1} x^*(k-j-L)x(k-n) = \Phi_i(j, n), \quad n=0,\ldots,N_i-1, \quad j = 0,\ldots,N_i-1-L
+\end{equation}
+which means that there can only be $L$ independent rows or, equivalently, that the rank of $\mathbf{\Phi}_i$ is $\min \left\lbrace N_i, L \right\rbrace$. Therefore, if $N_i > L$ then the rank of $\mathbf{\Phi}_i$ is less than $N_i$ and $\mathbf{\Phi}_i^{-1}$ does not exist. In conclusion, this consideration places a bound on the number $N$ of coefficients of the overall system, that is
+\begin{equation}
+	\left\lceil\frac{N}{4}\right\rceil = \max \{N_i, i=0,\ldots,3\} \leq L.
+\end{equation}
 
 \subsection*{Determine $L$ and $N$}
 \subsection*{Estimate of $E[||\mathbf{\hat{h}}-\mathbf{h}||^2]$ assuming $\mathbf{h}$ is known}
@@ -141,15 +166,25 @@ At the receiver side, the LS method is used in order to estimate the impulse res
 We can now give a theoretical value of the estimation error yielded by this implementation of the LS method. It is the average error on the estimate of the impulse response $\mathbf{h}$ if we assume that we are using $N$ coefficients, $L$ input samples of the ML sequence, and that $N=N_h$. With $L$ fixed, this estimation error becomes worse as $N$ increases, but of course this holds for $N=N_h$ only, otherwise this result does not apply. In fact, when estimating $\mathbf{h}$ with $N>N_h$ we are somehow wasting coefficients, and the estimate gets worse because of the noise in the system. On the other hand, the actual error becomes even larger if $N<N_h$ since we have less degrees of freedom with respect to the ones of the system.
 
 Formally, the estimation error is given by
-$$ E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = E[||\mathbf{\Delta h}||^2] = E[\sum_{i=0}^{3} ||\mathbf{\Delta h}_i||^2] = \sum_{i=0}^{3} E[||\mathbf{\Delta h}_i||^2]$$
+\begin{equation}
+	E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = E[||\mathbf{\Delta h}||^2] = E[\sum_{i=0}^{3} ||\mathbf{\Delta h}_i||^2] = \sum_{i=0}^{3} E[||\mathbf{\Delta h}_i||^2]
+\end{equation}
 where we split the formula according to the 4 branches of the polyphase implementation. Following the rationale presented in \cite{bc}, for each branch with index $i=0,\ldots,3$ we get
-$$\mathbf{\Phi}_i^{-1} = \frac{1}{L+1} \left( \mathbf{I} + \frac{\mathbf{1}_{N_i \times N_i}}{L+1-N_i} \right)$$
+\begin{equation}
+	\mathbf{\Phi}_i^{-1} = \frac{1}{L+1} \left( \mathbf{I} + \frac{\mathbf{1}_{N_i \times N_i}}{L+1-N_i} \right)
+\end{equation}
 where $\mathbf{1}_{N_i \times N_i}$ is the $N_i \times N_i$ matrix with all elements equal to $1$, and therefore
-$$ \tr [\mathbf{\Phi}_i^{-1}] = \frac{N_i(L+2-N_i)}{(L+1)(L+1-N_i)}. $$
+\begin{equation}
+	\tr [\mathbf{\Phi}_i^{-1}] = \frac{N_i(L+2-N_i)}{(L+1)(L+1-N_i)}.
+\end{equation}
 Finally, we can express the estimation error of the $i$-th branch as
-$$ E[||\mathbf{\Delta h}_i||^2] = \sigma_w^2 \; \tr [(\mathbf{\Phi}_i^*)^{-1}] = \sigma_w^2 \; \tr [\mathbf{\Phi}_i^{-1}] = \sigma_w^2 \frac{N_i(L+2-N_i)}{(L+1)(L+1-N_i)}$$
+\begin{equation}
+	E[||\mathbf{\Delta h}_i||^2] = \sigma_w^2 \; \tr [(\mathbf{\Phi}_i^*)^{-1}] = \sigma_w^2 \; \tr [\mathbf{\Phi}_i^{-1}] = \sigma_w^2 \frac{N_i(L+2-N_i)}{(L+1)(L+1-N_i)}
+\end{equation}
 where $\mathbf{\Phi}_i$ is Hermitian. Going back to the overall estimation error we have
-$$ E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = \sum_{i=0}^{3} E[||\mathbf{\Delta h}_i||^2] = \frac{\sigma_w^2}{L+1} \sum_{i=0}^{3} \frac{N_i (L+2-N_i)}{L+1-N_i}.$$
+\begin{equation}
+	E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = \sum_{i=0}^{3} E[||\mathbf{\Delta h}_i||^2] = \frac{\sigma_w^2}{L+1} \sum_{i=0}^{3} \frac{N_i (L+2-N_i)}{L+1-N_i}.
+\end{equation}
 
 TODO: Explain plot in figure \ref{fig:p02_comparetheoreticaldeltah}.
 
@@ -159,10 +194,6 @@ TODO: Explain plot in figure \ref{fig:p02_comparetheoreticaldeltah}.
 	\caption{Experimental estimation error $E[||\mathbf{\Delta h}||^2]$ with different values of $L$ and $N$, compared with its theoretical value.}
     \label{fig:p02_comparetheoreticaldeltah}
 \end{figure}
-
-TODO: considerations on when this formula (and the one on the book with one branch only) holds.
-
-NB: non si e' detto nulla su $N_i$ perche' ne parleremo nei punti precenti.
 
 
 \begin{thebibliography}{10}

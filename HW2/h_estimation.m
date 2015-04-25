@@ -2,7 +2,6 @@ function [ h_hat, d_hat ] = h_estimation( x, d, L, N_i )
 %H_ESTIMATION
 
 % In this case the estimation cannot be performed.
-% TODO: WHY???????? POR****O
 if max(N_i) > L
     h_hat = [];
     d_hat = [];
