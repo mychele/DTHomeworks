@@ -54,7 +54,7 @@ for L = [3, 7, 15, 31]
         % veery big g_mat
         error_func_temp = zeros(numsim, 1);
         for k =1:numsim
-            [d, h_mean] = channel_output(x, T, Tc, sigma_w, N_h, g_mat(:, time:end));
+            [d, ~] = channel_output(x, T, Tc, sigma_w, N_h, g_mat(:, time:end));
             time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and
             % there should be enough impulse responses. Probably we need
             % less!
@@ -66,7 +66,7 @@ for L = [3, 7, 15, 31]
     end
     
     % NOTE: the receiver doesn't know the reference value to which the
-    % functional should tent to, it is plotted for debugging purposes
+    % functional should tend to, it is plotted for debugging purposes
     figure, plot(10*log10(error_func)), hold on, plot(1:N, ones(1, N)*10*log10(sigma_w*length(d_hat)))
     xlabel('N')
     ylabel('\epsilon [dB]')
