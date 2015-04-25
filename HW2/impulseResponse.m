@@ -12,16 +12,18 @@ channel_generator;
 
 %% Loop to determine suitable values of N, L
 
-printmsg_delete = '';
-maxN = 10;
+printmsg_delete = ''; % Just to display progress updates
+maxN = 12;
+% Note that with maxN<13 we don't have problems with the condition N<=L.
 
-% time counter that let the desired output d to be computed with a
-% different impulse response at every iteration, as it would happen in
-% reality.
+% Time counter that allows the output d to be computed with a different
+% impulse response at every iteration, as it would happen in reality.
 time = 1;
 
 for L = [3, 7, 15, 31]
     for N = 1:maxN % Supposed length of the impulse response of the channel
+        
+        % Print progress update
         printmsg = sprintf('L = %d, N = %d\n', L, N);
         fprintf([printmsg_delete, printmsg]);
         printmsg_delete = repmat(sprintf('\b'), 1, length(printmsg));
@@ -32,7 +34,12 @@ for L = [3, 7, 15, 31]
         N_i(1:4-n_short) = ceil(N/4);
         N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
         
-        %% Generate training sequence
+        % Save some time by breaking the for loop now.
+        if(ceil(N/4) > L)
+            break
+        end
+        
+        % --- Generate training sequence
         % The x sequence must be a partially repeated M-L sequence of length L. We
         % need it to have size L+N-1.
         % To observe L samples, we need to send L+N-1 samples of the training
@@ -41,7 +48,7 @@ for L = [3, 7, 15, 31]
         x = [p; p(1:max(N_i)-1)];
         x(x == 0) = -1;
         
-        %% Estimation of h and d multiple times
+        % --- Estimation of h and d multiple times
         numsim = 100; % It seems to converge even with small values of numsim,
         % lowered down to 200 in order to make computation feasible with a
         % veery big g_mat
@@ -66,7 +73,7 @@ for L = [3, 7, 15, 31]
     legend('Error functional Eps', 'Theoretical value of Eps')
     grid on, title(['Error function with L=', int2str(L)])
 end
-
+return
 
 %% Estimate E(|h-hhat|^2) by repeating the estimate 1000 times and assuming
 % h known
@@ -93,7 +100,7 @@ for L = [3, 7, 15, 31]
         N_i(1:4-n_short) = ceil(N/4);
         N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
         
-        %% Generate training sequence
+        % --- Generate training sequence
         % The x sequence must be a partially repeated M-L sequence of length L. We
         % need it to have size L+N-1.
         % To observe L samples, we need to send L+N-1 samples of the training
@@ -102,8 +109,8 @@ for L = [3, 7, 15, 31]
         x = [p; p(1:max(N_i)-1)];
         x(x == 0) = -1;
         
-        %% Estimation of h and d multiple times
-        numsim = 300; 
+        % --- Estimation of h and d multiple times
+        numsim = 20; 
         hhat_mat = zeros(4*max(N_i), numsim);
         % this matrix is dimensioned to have the maximum number of coefficients
         % for each of the four branch, the unused (i.e. unestimated) ones will be

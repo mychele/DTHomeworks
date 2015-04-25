@@ -8,7 +8,7 @@ for L = Lvalues
         N_i(1:4-n_short) = ceil(N/4);
         N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
         
-        exp_deltahsqr(N) = sigma_w / (L+1) * sum(N_i .* (L+2-N_i) ./ (L+1-N_i));
+        exp_deltahsqr(N) = sigma_w / (L+1) * sum(N_i .* (L+2-N_i) ./ (L+1-N_i)); %#ok<SAGROW>
     end
     plot(10*log10(exp_deltahsqr), 'DisplayName', sprintf('L=%d', L))
     legend('-DynamicLegend')

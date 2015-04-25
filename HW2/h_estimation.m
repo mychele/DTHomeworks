@@ -1,20 +1,28 @@
 function [ h_hat, d_hat ] = h_estimation( x, d, L, N_i )
 %H_ESTIMATION
 
+% In this case the estimation cannot be performed.
+% TODO: WHY???????? POR****O
+if max(N_i) > L
+    h_hat = [];
+    d_hat = [];
+    return
+end
+
 %% Estimate h
 
-% create four different d_i vector, by sampling at step 4 the complete vector
-% d. Each of them is the output of the polyphase brach at "lag" i
+% Create four different d_i vectors, by sampling with step 4 the complete
+% vector d. Each of them is the output of the branch that has "lag" i.
 d_poly = zeros(length(d)/4, 4); % each column is a d_i
 for idx  = 1:4
     d_poly(:, idx) = d(idx:4:end);
 end
 
 % Using the data matrix (page 246), easier implementation
-h_hat = zeros(4,max(N_i)); % estimate 4 polyphase represantations
-% this matrix is dimensioned to have the maximum number of coefficients
-% for each of the four branch, the unused (i.e. unestimated) ones will be
-% left zero
+h_hat = zeros(4,max(N_i));
+% We're estimating 4 branches of the polyphase representation.
+% This matrix has the maximum number of coefficients for each of the four
+% branches. The unused (i.e. unestimated) ones will be left zero.
 for idx = 1:4
     if N_i(idx) > 0
         I = zeros(L,N_i(idx));
@@ -26,7 +34,7 @@ for idx = 1:4
         Phi = I'*I;
         theta = I'*o;
         
-        h_hat(idx, 1:N_i(idx)) = inv(Phi) * theta;
+        h_hat(idx, 1:N_i(idx)) = Phi \ theta;
     end % if N_branch is 0 don't estimate and leave hhat to 0
 end
 
