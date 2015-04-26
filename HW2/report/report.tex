@@ -88,7 +88,7 @@ basicstyle=\footnotesize\ttfamily
 
 \subsection*{Choice of $N_h$}
 
-In order to determine a suitable length $N_h$ of the impulse response, we consider the noise that we would introduce by performing the truncation of the power delay profile (that corresponds to a truncation of the random impulse response). The given discrete power delay profile of the channel is a sampled version of
+In order to determine a suitable $N_h$ (number of rays of the impulse response), we consider the noise that we would introduce by performing the truncation of the power delay profile \textit{PDP} (that corresponds to a truncation of the random impulse response). The given discrete power delay profile of the channel is a sampled version of
 \begin{equation}
 \M(\tau) = \frac{1}{\bar{\tau}_{rms}} e^{-\tau / \bar{\tau}_{rms}}
 \end{equation}
@@ -96,11 +96,11 @@ that is
 \begin{equation}
 \M(iT_C) = \frac{1}{\bar{\tau}_{rms}} e^{-iT_C / \bar{\tau}_{rms}}
 \end{equation}
-with $i$ non-negative integer and $T_C = 1$. This quantity must be then normalized in such a way that
+with $i$ non-negative integer, $\tau_{rms} = 0.3T$ the average rms delay spread and $T_C = 1 = T/4$. This quantity must be then normalized in such a way that
 \begin{equation}
 \sum_{i=0}^{\infty} \M(iT_C) = 1 - C^2
 \end{equation}
-where $C = \sqrt{K / (K+1)}$ is the deterministic component of the first ray (for $i=0$) and $K$ is the Rice factor. Note that we are considering an infinite number of rays, but as a matter of fact MATLAB approximates as zero all values $\M(iT_C)$ for $i > 894$, therefore we stop the summation to 894 (actually 899, LOL). % TODO Do not forget to fix this
+where $C = \sqrt{K / (K+1)}$ is the deterministic line of sight (\textit{LOS}) component of the first ray (for $i=0$) and $K$ is the provided Rice factor. Note that we are considering an infinite number of rays, but as a matter of fact MATLAB approximates as zero all values $\M(iT_C)$ for $i > 894$, therefore we stop the summation to 894 (actually 899, LOL). % TODO Do not forget to fix this
 
 Knowing that the true impulse response of the channel has random properties described by the power delay profile $\M(iT_C)$ and by the quantity $C$, then we define the quality of the approximation due to truncation as
 \begin{equation}
@@ -116,7 +116,7 @@ The noise in the system is
 \end{equation}
 where $\M_x$ is the statistical power of the input signal. Finally, we define the normalized ratio
 \begin{equation}
-\Lambda_n (N_h) = \frac{\Lambda_t}{\Lambda} = \frac{4 \sigma_w^2}{\M_x \sum_{i=N_h}^{\infty} \M(iT_C)} 
+\Lambda_n (N_h) = \frac{\Lambda_t}{\Lambda} = \frac{4 \sigma_w^2}{\M_x \sum_{i=N_h}^{\infty} \M(iT_C)}
 \end{equation}
 to compare the noise of the system with the noise we are introducing by truncating $\M(iT_C)$ to $N_h$ samples.
 
@@ -129,16 +129,40 @@ Looking at the plot of $\Lambda_n (N_h)_{\dB}$ against $N_h$ in Fig.~\ref{fig:p0
     \label{fig:p01_lambda_n}
 \end{figure}
 
-\subsection*{Determine $E[|h_i(nTc)|^2]$}
-Plot for $i = 0, 1, \dots, N_h - 1$ and put values in a table.
+\subsection*{Determine $E[|h_i(nT_c)|^2]$}
+Given $N_h = 3$, the PDP of the channel $E[|h_i(nT_c)|^2], i = 0, \dots, 2$ in $\dB$ is reported in Fig. \ref{fig:pdp} and in Table \ref{table:pdp}. Note that this power delay profile includes the power of aleatory $\tilde{h}_i(nT_c)$ components and the deterministic LOS component added on ray $i = 0$.
 
-\subsection*{Show the behavior of $|h_i(nTc)|$}
-Show the behavior for $n = 0, 1, \dots, 1999$.
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{c|c|c|c}
+    $ i $ & $ 0 $ & $ 1 $ & $ 2 $ \\ \hline
+    $E[|h_i(nT_c)|^2]$ [$\dB$] & -0.596 & -10.488 & -14.107
+  \end{tabular}
+  \caption{$E[|h_i(nT_c)|^2], i = 0, \dots, N_h-1$ in $\dB$ (PDP)}
+  \label{table:pdp}
+\end{table}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width = 0.6\textwidth]{p01_pdp}
+  \caption{Plot of the values $E[|h_i(nT_c)|^2]$ [$\dB$] of PDP for each ray $ i \in [0,2]$}
+  \label{fig:pdp}
+\end{figure}
+
+\subsection*{Show the behavior of $|h_1(nT_c)|$}
+The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig. \ref{fig:h1}.
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width = 0.6\textwidth]{p01_h1}
+  \caption{$|h_1(nT_c)|, n = 0, 1, \dots, 1999$}
+  \label{fig:h1}
+\end{figure}
 
 \subsection*{Plot the histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$}
 Plot the expected value based on values from 0 to 999.
 
-\subsection*{Plot the histogram of $\frac{h_1(151Tc)}{\sqrt{E[|h_1(151Tc)|^2]}}$ for 1000 realizations}
+\subsection*{Plot the histogram of $\frac{h_1(151T_c)}{\sqrt{E[|h_1(151T_c)|^2]}}$ for 1000 realizations}
 Compare it with the theoretical result
 
 \section*{Problem 2}
