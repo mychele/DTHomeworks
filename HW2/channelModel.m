@@ -17,8 +17,8 @@ b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
     1.8074e-5, 3.0124e-6];
 [h_dopp, t_dopp] = impz(b_dopp, a_dopp);
 figure, plot(t_dopp, h_dopp), title('Impulse response of IIR filter h_{ds}')
-hds_nrg = sum(h_dopp.^2)
-b_dopp = b_dopp / sqrt(hds_nrg);
+hds_nrg = sum(h_dopp.^2);
+b_dopp = b_dopp / sqrt(hds_nrg); % now it is normalized
 
 %% Display the PDP for the channel
 
@@ -26,31 +26,24 @@ b_dopp = b_dopp / sqrt(hds_nrg);
 % tau_rms / T = 0.3, so tau_rms / Tc = 1.2
 % See 4.224 for reference
 tau_rms = 0.3*T;  % Tc = 1, as it is the fundamental sampling time
-
-N_h = 3; % To be determined
-% note that for this choice of final_tau
-residual_power = exp(-N_h*Tc/tau_rms);
-if (residual_power > 0.1)
-    disp('Consider increasing final_tau, since the exp is truncated too early')
-end
+N_h = 3; % as determined
 tau = 0:Tc:N_h-1;
-pdp_gauss = 1/tau_rms * exp(-tau/tau_rms);
-
+M_iTc = 1/tau_rms * exp(-tau/tau_rms); % 
 C = sqrt(K/(K+1));
-% normalize pdp: it must be sum(E[|gtilde_i|^2]) = 1 - C^2
-pdp_gauss = pdp_gauss.*(1-C^2)/sum(pdp_gauss);
+% normalize pdp: it must be sum(E[|htilde_i|^2]) = 1 - C^2
+M_iTc = M_iTc.*(1-C^2)/sum(M_iTc);
+M_d = sum(M_iTc);
 
-M_d = sum(pdp_gauss);
-
-% Determine suitable length for h, N_h, define criterion
-% N_h is final_tau, the criterion is linked to the truncation of
-% exp(t/taurms)
-
-pdp = pdp_gauss;
+pdp = M_iTc;
+% add LOS component power
 pdp(1) = pdp(1) + C^2;
+pdp_log = 10*log10(pdp); 
 
-% Plot the normalised PDP
-figure, stem(tau,10*log10(pdp)), title('Gaussian part of PDP'), xlabel('tau'), ylabel('E[|gtilde_i|^2]');
+% plot the normalised PDP
+figure, stem(tau, pdp_log), title('PDP'), xlabel('iTc'), ylabel('E[|h_i(nTc)|^2]');
+grid on;
+axis([-0.25 2.25 -15 0]), ax = gca; ax.XTick = 0:2;
+legend('PDP', 'Location', 'SouthWest')
 
 %% We now have to generate the time behavior of the i-th coefficient. For
 % this, we use the model in figure 4.36, page 315.
@@ -77,7 +70,7 @@ title('Frequency response of the Doppler filter')
 % variance
 rng('default');
 
-g_mat = zeros(N_h, g_samples_needed - transient);
+h_mat = zeros(N_h, g_samples_needed - transient);
 for ray = 1:N_h
     
     w = wgn(w_samples_needed,1,0,'complex');
@@ -102,18 +95,18 @@ for ray = 1:N_h
     g_fine = interp1(t, gprime, t_fine, 'spline');
     fprintf('g %d after iterpolation has mean %d and variance %d  \n', ray, mean(g_fine), var(g_fine));
     % Drop the transient
-    g_mat(ray, :) = g_fine(transient+1:end);
+    h_mat(ray, :) = g_fine(transient+1:end);
 end
 
 % Energy scaling
 for k = 1:N_h
-    g_mat(k, :) = g_mat(k, :)*sqrt(pdp_gauss(k));
+    h_mat(k, :) = h_mat(k, :)*sqrt(M_iTc(k));
 end
 
 % Only for LOS component
-g_mat(1, :) = g_mat(1, :) + C;
+h_mat(1, :) = h_mat(1, :) + C;
 
-G = fft(g_mat, [], 2);
+G = fft(h_mat, [], 2);
 
 figure, plot((0:size(G, 2)-1)/size(G,2), 20*log10(abs(G.')));
 title('Magnitude of DFT of g_i')
@@ -121,15 +114,15 @@ title('Magnitude of DFT of g_i')
 %% Show the behavior of |g_1(nTc)| for n = 0:1999, dropping the transient
 
 figure, hold on
-plot(0:1999, 20*log10(abs(g_mat(2, 1:2000).')))
-grid on, box on, xlabel('Time samples'), ylabel('|g_1(nT_C)|_{dB}')
-title('|g_1(nT_C)|')
+plot(0:1999, abs(h_mat(2, 1:2000).'))
+grid on, box on, xlabel('nT_c'), ylabel('|h_1(nT_c)|')
+title('|h_1(nT_C)|')
 
 
 %% Show all |g_i|'s
 
 figure, hold on
-plot(0:9999, 20*log10(abs(g_mat(:, 1:10000).')))
+plot(0:9999, 20*log10(abs(h_mat(:, 1:10000).')))
 grid on, box on, xlabel('Time samples'), ylabel('|g_i(nT_C)|_{dB}')
 legend('g_0', 'g_1', 'g_2'), ylim([-40 10])
 title('|g_i|')
@@ -141,7 +134,7 @@ title('|g_i|')
 
 %% Histogram of g_1
 
-figure, histogram(abs(g_mat(2, 1:1000).')/sqrt(pdp_gauss(2)), 100)
+figure, histogram(abs(h_mat(2, 1:1000).')/sqrt(M_iTc(2)), 100)
 title('1000 samples of |g_1|')
 
 %% Histograms of g_1 in subsequent disjoint intervals
@@ -176,7 +169,7 @@ title('1000 samples of |g_1|')
 
 begin = 1;
 end_factor = 0.2;
-g1_temp = g_mat(2, begin:end*end_factor).';
+g1_temp = h_mat(2, begin:end*end_factor).';
 N_corr = 4000; %floor(length(g1_temp/10)); % there are lot of samples!
 
 autoc_1_intime = autocorrelation(g1_temp, N_corr);
@@ -190,7 +183,7 @@ title('Autoc from t=0')
 
 begin = 30000;
 end_factor = 0.5;
-g1_temp = g_mat(2, begin:end*end_factor).';
+g1_temp = h_mat(2, begin:end*end_factor).';
 N_corr = 4000; %floor(length(g1_temp/10)); % there are lot of samples!
 
 autoc_1_intime = autocorrelation(g1_temp, N_corr);
