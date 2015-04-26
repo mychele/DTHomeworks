@@ -41,14 +41,14 @@ hds_nrg = sum(h_dopp.^2);
 b_dopp = b_dopp / sqrt(hds_nrg);
 
 %% Generation of impulse responses
-h_samples_needed = 2000000; % Some will be dropped because of transient, since
+h_samples_needed = 2000000 + ceil(Tp/Tc*length(h_dopp)); % Some will be dropped because of transient, since
 % enough time, memory and computational power are available 
 w_samples_needed = ceil(h_samples_needed / Tp);
 % The filter is IIR, from Anastasopoulos and Chugg (1997) it appears that 
 % the effect of the transient is present in about 2000 samples for an interpolation
 % factor Q = 100. This model uses Q = 80, since memory and computational power
-% are not an issue, in order to be conservative it drops 500000 samples. 
-transient = ceil(h_samples_needed/4);
+% are not an issue, in order to be conservative it drops 80*length(h_dopp) samples. 
+transient = ceil(Tp/Tc*length(h_dopp));
 
 h_mat = zeros(N_h, h_samples_needed - transient);
 for ray = 1:N_h
