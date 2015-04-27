@@ -3,22 +3,50 @@ clear all
 close all
 clc
 
-Tc = 1; % This is the smallest time interval we want to simulate
+%% Data
+
+% Sampling times
+Tc = 1;     % This is the smallest time interval we want to simulate
 T = 4*Tc;   % Time sampling interval of the input of the channel
+Tq = Tc;    % Fundamental sampling time. This is the same as Tc
+fd = 5*10^-3/T; % doppler spread
+Tp = 1/10 * (1/fd) * Tq; % Sampling time used for filtering the white noise, 
+% in order to apply Anastasopoulos and Chugg (1997) filter it must be Tp =
+% 0.1
+
 Kdb = 3; % 3 dB
 K = 10^(Kdb/10);
-fd = 5*10^-3/T; % doppler frequency
 % these are the coefficients proposed by the authors of anastchugg97
+% snr and noise power
+snr = 10; % db
+snr_lin = 10^(snr/10);
+sigma_w = 1/(T/Tc*snr); % the PN sequence has power 1
+
+% Filter for doppler spectrum. The filter will have the
+% classical Doppler spectrum in the frequency domain, with f_d * T = 5*10^-3
+% By using the approach suggested in Anastasopoulos and Chugg (1997) we use an iir filter
+% with known coefficients which is the convolution of a Cheby lowpass and a shaping filter.
 a_dopp = [1, -4.4153, 8.6283, -9.4592, 6.1051, -1.3542, -3.3622, 7.2390, ...
     -7.9361, 5.1221, -1.8401, 2.8706e-1];
 b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
     6.7852e-4, 1.3550e-3, 1.8076e-3, 1.3550e-3, 5.3726e-4, 6.1818e-5, -7.1294e-5, ...
     -9.5058e-5, -7.1294e-5, -2.5505e-5, 1.3321e-5, 4.5186e-5, 6.0248e-5, 4.5186e-5, ...
     1.8074e-5, 3.0124e-6];
-[h_dopp, t_dopp] = impz(b_dopp, a_dopp);
-figure, plot(t_dopp, h_dopp), title('Impulse response of IIR filter h_{ds}')
+% The energy needs to be normalized to 1
+[h_dopp, ~] = impz(b_dopp, a_dopp);
 hds_nrg = sum(h_dopp.^2);
-b_dopp = b_dopp / sqrt(hds_nrg); % now it is normalized
+b_dopp = b_dopp / sqrt(hds_nrg);
+% Plot residual energy of IIR filter (determine transient)
+[h_dopp, ~] = impz(b_dopp, a_dopp);
+residual_nrg = sum(h_dopp.^2) - cumsum(h_dopp.^2);
+plot(0:length(residual_nrg)-1, 10*log10(residual_nrg)), 
+xlim([0 100]), grid on, box on, title('Residual energy of I.R. of the IIR filter')
+xlabel('Transient length (samples)'), ylabel('Residual energy (dB)')
+% Doppler filter shape
+[Hf, f] = freqz(b_dopp, a_dopp, 1000, 'whole');
+figure, plot(f/(2*pi), 20*log10(abs(Hf)))
+ylim([0, 12])
+title('Frequency response of the Doppler filter')
 
 %% Display the PDP for the channel
 
@@ -45,57 +73,34 @@ grid on;
 axis([-0.25 2.25 -15 0]), ax = gca; ax.XTick = 0:2;
 legend('PDP', 'Location', 'SouthWest')
 
-%% We now have to generate the time behavior of the i-th coefficient. For
-% this, we use the model in figure 4.36, page 315.
-% The transient will have length equal to the length of the convolution of
-% the filter cascade. We will drop that quantity of samples.
-% The book suggests using 1/10 < f_d*Tp < 1/5. (Benvenuto said Tp/Tq = 50 or
-% more)
 
-Tq = Tc; % Fundamental sampling time. This is the same as Tc, right???
-% We stick to anastasopolous chugg paper (1997) and choose Tp such that
-% fd*Tp = 0.1
-Tp = 1/10 * (1/fd) * Tq; % Sampling time used for filtering the white noise
-fprintf('fd * Tp = %d \n', Tp*fd);
-g_samples_needed = 200000; % Some will be dropped because of transient
-w_samples_needed = ceil(g_samples_needed / Tp);
-transient = ceil(g_samples_needed/4);
 
-% Doppler filter shape
-[Hf, f] = freqz(b_dopp, a_dopp, 1000, 'whole');
-figure, plot(f/(2*pi), 20*log10(abs(Hf)))
-title('Frequency response of the Doppler filter')
-
-% Generate complex-valued Gaussian white noise with zero mean and unit
-% variance
-rng('default');
-
-h_mat = zeros(N_h, g_samples_needed - transient);
+%% Generation of impulse responses
+h_samples_needed = 200000 + ceil(Tp/Tc*length(h_dopp)); % Some will be dropped because of transient, since
+% enough time, memory and computational power are available 
+w_samples_needed = ceil(h_samples_needed / Tp);
+% The filter is IIR, from Anastasopoulos and Chugg (1997) it appears that 
+% the effect of the transient is present in about 2000 samples for an interpolation
+% factor Q = 100. This model uses Q = 80, since memory and computational power
+% are not an issue, in order to be conservative it drops 80*length(h_dopp) samples. 
+transient = ceil(Tp/Tc*length(h_dopp));
+h_mat = zeros(N_h, h_samples_needed - transient);
 for ray = 1:N_h
-    
+    % Generate complex-valued Gaussian white noise with zero mean and unit variance
     w = wgn(w_samples_needed,1,0,'complex');
-    fprintf('variance of white noise=%d \n', var(w))
-    % Filter the wgn with a narrowband filter. The filter will have the
-    % classical Doppler spectrum in the frequency domain, with f_d * Tc = 1.25*10^-3
-    % By using the approach suggested in anastchugg97 we use an iir filter
-    % with known coefficients which is the convolution of a Cheby lowpass and a shaping filter.
-    % Note that it is
-    % possible to initialize properly the filters, consider doing it in
-    % following versions since it allows to start in steady state conditions
-    % and avoid dropping about many samples (it is a very cool thing!)
-    gprime = filter(b_dopp, a_dopp, w);
-    fprintf('g %d after iterpolation has mean %d and variance %d  \n', ray, mean(gprime), var(gprime));
-    %Gpr = fft(gprime);
-    %figure, plot(20*log10(abs(Gpr)))
+    %fprintf('variance of white noise=%d \n', var(w))
+    
+    hprime = filter(b_dopp, a_dopp, w);
+    %fprintf('h%d before interpolation has mean %d and variance %d  \n', ray, mean(hprime), var(hprime));
     
     % Interpolation
-    t = 1:length(gprime);
-    t_fine = Tq/Tp:Tq/Tp:length(gprime);
+    t = 1:length(hprime);
+    t_fine = Tq/Tp:Tq/Tp:length(hprime);
     
-    g_fine = interp1(t, gprime, t_fine, 'spline');
-    fprintf('g %d after iterpolation has mean %d and variance %d  \n', ray, mean(g_fine), var(g_fine));
+    h_fine = interp1(t, hprime, t_fine, 'spline');
+    %fprintf('h%d after interpolation has mean %d and variance %d  \n', ray, mean(h_fine), var(h_fine));
     % Drop the transient
-    h_mat(ray, :) = g_fine(transient+1:end);
+    h_mat(ray, :) = h_fine(transient+1:end);
 end
 
 % Energy scaling
@@ -105,11 +110,6 @@ end
 
 % Only for LOS component
 h_mat(1, :) = h_mat(1, :) + C;
-
-G = fft(h_mat, [], 2);
-
-figure, plot((0:size(G, 2)-1)/size(G,2), 20*log10(abs(G.')));
-title('Magnitude of DFT of g_i')
 
 %% Show the behavior of |g_1(nTc)| for n = 0:1999, dropping the transient
 
@@ -123,14 +123,12 @@ title('|h_1(nT_C)|')
 
 figure, hold on
 plot(0:9999, 20*log10(abs(h_mat(:, 1:10000).')))
-grid on, box on, xlabel('Time samples'), ylabel('|g_i(nT_C)|_{dB}')
-legend('g_0', 'g_1', 'g_2'), ylim([-40 10])
-title('|g_i|')
+grid on, box on, xlabel('Time samples'), ylabel('|h_i(nT_C)|_{dB}')
+legend('h_0', 'h_1', 'h_2'), ylim([-40 10])
+title('|h_i|')
 
 % g_mean = mean(g_mat(:, 1:5000).');
 % g_var = 10*log10(var(g_mat(:, :).'));
-
-
 
 %% Histogram of g_1
 
@@ -157,7 +155,7 @@ hold on
 a = 0:0.01:3;
 plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
 hold off
-legend('g1', 'Rayleigh pdf');
+legend('h1', 'Rayleigh pdf');
 subplot 212
 histogram(abs(h_mat(2, 1: 100000).')/sqrt(M_iTc(2)), 20,'Normalization','pdf', 'DisplayStyle', 'stairs')
 title('100000 samples of |h_1|')
@@ -165,7 +163,7 @@ hold on
 a = 0:0.01:3;
 plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
 hold off
-legend('g1', 'Rayleigh pdf');
+legend('h1', 'Rayleigh pdf');
 
 %% Histograms of g_1 in subsequent disjoint intervals
 % The variability shows that these intervals of 1000 samples are too small.
@@ -190,7 +188,7 @@ legend('g1', 'Rayleigh pdf');
 % figure
 % width = 1000;
 % for i = 0:9
-%     histogram(abs(g_mat(2, (i*width + 1):((i+1)*width)).')/sqrt(pdp_gauss(2)), 100)
+%     histogram(abs(h_mat(2, (i*width + 1):((i+1)*width)).')/sqrt(pdp_gauss(2)), 100)
 %     axis([0 2.5 0 0.05*width])
 %     pause
 % end
@@ -199,10 +197,10 @@ legend('g1', 'Rayleigh pdf');
 
 begin = 1;
 end_factor = 0.2;
-g1_temp = h_mat(2, begin:end*end_factor).';
+h1_temp = h_mat(2, begin:end*end_factor).';
 N_corr = 4000; %floor(length(g1_temp/10)); % there are lot of samples!
 
-autoc_1_intime = autocorrelation(g1_temp, N_corr);
+autoc_1_intime = autocorrelation(h1_temp, N_corr);
 z = (0:length(autoc_1_intime)-1)*2*pi*fd; %support for bessel function, LAG not actual time
 M_1 = autoc_1_intime(1); %stat power of g_1 over the considered support in time
 bess = besselj(0, z); %bessel function of order 0
@@ -213,16 +211,16 @@ title('Autoc from t=0')
 
 begin = 30000;
 end_factor = 0.5;
-g1_temp = h_mat(2, begin:end*end_factor).';
+h1_temp = h_mat(2, begin:end*end_factor).';
 N_corr = 4000; %floor(length(g1_temp/10)); % there are lot of samples!
 
-autoc_1_intime = autocorrelation(g1_temp, N_corr);
+autoc_1_intime = autocorrelation(h1_temp, N_corr);
 z = (0:length(autoc_1_intime)-1)*2*pi*fd;
 M_1 = autoc_1_intime(1);
 bess = besselj(0, z);
 
 figure, plot(real(autoc_1_intime)), hold on, plot(bess*M_1)
-legend('Real(r_g(\Delta t))', 'Bessel function, first type, order 0')
+legend('Real(r_h(\Delta t))', 'Bessel function, first type, order 0')
 title(sprintf('Autoc from t=%d', begin))
 
 
@@ -230,33 +228,33 @@ title(sprintf('Autoc from t=%d', begin))
 
 rng('default') % for reproducibility
 numexp = 1000;
-g_1 = zeros(numexp, 1);
+h_1 = zeros(numexp, 1);
 for k = 1:numexp
     disp(k)
     w = wgn(w_samples_needed,1,0,'complex');
     
-    gprime = filter(b_dopp, a_dopp, w);
+    hprime = filter(b_dopp, a_dopp, w);
     
     % Interpolation
-    t = 1:length(gprime);
-    t_fine = Tq/Tp:Tq/Tp:length(gprime);
+    t = 1:length(hprime);
+    t_fine = Tq/Tp:Tq/Tp:length(hprime);
     
-    g_fine = interp1(t, gprime, t_fine, 'spline');
+    h_fine = interp1(t, hprime, t_fine, 'spline');
     
     % Drop the transient
-    g_notrans = g_fine(50000:end);
+    h_notrans = h_fine(50000:end);
     
     % Energy scaling
-    g_1(k) = g_notrans(152);  % it should be multiplied by sqrt(pdp(2)) but since
+    h_1(k) = h_notrans(152);  % it should be multiplied by sqrt(pdp(2)) but since
     % for the histogram it is required to divide for the same factor then
     % we drop this computation to save computational time
 end
 
 figure, 
-histogram(abs(g_1), 20, 'Normalization','pdf', 'DisplayStyle', 'stairs')
-title('|g1(151T_C)| over 1000 realizations vs Rayleigh pdf')
+histogram(abs(h_1), 20, 'Normalization','pdf', 'DisplayStyle', 'stairs')
+title('|h1(151T_C)| over 1000 realizations vs Rayleigh pdf')
 hold on
 a = 0:0.01:3;
 plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
 hold off
-legend('g1', 'Rayleigh pdf');
+legend('h1', 'Rayleigh pdf');
