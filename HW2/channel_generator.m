@@ -40,6 +40,13 @@ b_dopp = [1.3651e-4, 8.1905e-4, 2.0476e-3, 2.7302e-3, 2.0476e-3, 9.0939e-4, ...
 hds_nrg = sum(h_dopp.^2);
 b_dopp = b_dopp / sqrt(hds_nrg);
 
+% Plot residual energy of IIR filter (determine transient)
+[h_dopp, ~] = impz(b_dopp, a_dopp);
+residual_nrg = sum(h_dopp.^2) - cumsum(h_dopp.^2);
+plot(0:length(residual_nrg)-1, 10*log10(residual_nrg)), 
+xlim([0 100]), grid on, box on, title('Residual energy of I.R. of the IIR filter')
+xlabel('Transient length (samples)'), ylabel('Residual energy (dB)')
+
 %% Generation of impulse responses
 h_samples_needed = 2000000 + ceil(Tp/Tc*length(h_dopp)); % Some will be dropped because of transient, since
 % enough time, memory and computational power are available 
