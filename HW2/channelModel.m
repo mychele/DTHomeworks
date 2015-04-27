@@ -134,16 +134,38 @@ title('|g_i|')
 
 %% Histogram of g_1
 
-figure, histogram(abs(h_mat(2, 1:1000).')/sqrt(M_iTc(2)), 100)
-title('1000 samples of |g_1|')
+% Plot of the required histogram
+figure, histogram(abs(h_mat(2, 1:1000)).'/sqrt(M_iTc(2)), 100, 'Normalization','pdf', 'DisplayStyle', 'stairs');
+title('Experimental PDF from 1000 samples of |h_1|/sqrt(E[|h_1|^2])')
 
+% This plot can be used to explain that because of the correlation we can't
+% get a nice pdf (too little samples, correlation in peaks)
+figure, 
+subplot 211
+histogram(abs(h_mat(2, 1:1000).'), 100, 'Normalization','pdf', 'DisplayStyle', 'stairs');
+title('1000 samples of |h_1|')
+subplot 212
+plot(0:999, abs(h_mat(2, 1:1000).'));
+title('Realization of h_1 over which the histogram is computed');
+
+% Here we show that the experimental PDF gets better with more samples
 figure
-subplot 121
-histogram(abs(h_mat(2, 1: 10000).')/sqrt(M_iTc(2)), 100)
-title('10000 samples of |g_1|')
-subplot 122
-histogram(abs(h_mat(2, 1: 100000).')/sqrt(M_iTc(2)), 100)
-title('100000 samples of |g_1|')
+subplot 211
+histogram(abs(h_mat(2, 1: 10000).')/sqrt(M_iTc(2)), 20,'Normalization','pdf', 'DisplayStyle', 'stairs')
+title('10000 samples of |h_1|')
+hold on
+a = 0:0.01:3;
+plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
+hold off
+legend('g1', 'Rayleigh pdf');
+subplot 212
+histogram(abs(h_mat(2, 1: 100000).')/sqrt(M_iTc(2)), 20,'Normalization','pdf', 'DisplayStyle', 'stairs')
+title('100000 samples of |h_1|')
+hold on
+a = 0:0.01:3;
+plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
+hold off
+legend('g1', 'Rayleigh pdf');
 
 %% Histograms of g_1 in subsequent disjoint intervals
 % The variability shows that these intervals of 1000 samples are too small.
@@ -230,5 +252,11 @@ for k = 1:numexp
     % we drop this computation to save computational time
 end
 
-figure, histogram(abs(g_1), 50)
-title('|g1(151T_C)| over 1000 realizations')
+figure, 
+histogram(abs(g_1), 20, 'Normalization','pdf', 'DisplayStyle', 'stairs')
+title('|g1(151T_C)| over 1000 realizations vs Rayleigh pdf')
+hold on
+a = 0:0.01:3;
+plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
+hold off
+legend('g1', 'Rayleigh pdf');
