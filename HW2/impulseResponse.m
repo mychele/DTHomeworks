@@ -9,6 +9,7 @@ rng default
 
 %% Generate gi
 channel_generator;
+sigma_w = 1/(T/Tc*snr); % the PN sequence has power 1
 
 %% Loop to determine suitable values of N, L
 
