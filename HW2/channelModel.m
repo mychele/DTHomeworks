@@ -137,6 +137,14 @@ title('|g_i|')
 figure, histogram(abs(h_mat(2, 1:1000).')/sqrt(M_iTc(2)), 100)
 title('1000 samples of |g_1|')
 
+figure
+subplot 121
+histogram(abs(h_mat(2, 1: 10000).')/sqrt(M_iTc(2)), 100)
+title('10000 samples of |g_1|')
+subplot 122
+histogram(abs(h_mat(2, 1: 100000).')/sqrt(M_iTc(2)), 100)
+title('100000 samples of |g_1|')
+
 %% Histograms of g_1 in subsequent disjoint intervals
 % The variability shows that these intervals of 1000 samples are too small.
 % Looking at |g1| in one of these intervals, we observe that this quantity
