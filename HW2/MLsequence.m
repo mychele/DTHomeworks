@@ -14,6 +14,8 @@ for l = r+1:(L)
             p(l) = xor(p(l-3), p(l-4));
         case 31
             p(l) = xor(p(l-3), p(l-5));
+        case 127
+            p(l) = xor(p(l-6), p(l-7));
     end
 end
 end
