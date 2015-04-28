@@ -52,10 +52,10 @@ for L = [3, 7, 15, 31]
         % --- Estimation of h and d multiple times
         numsim = 100; % It seems to converge even with small values of numsim,
         % lowered down to 200 in order to make computation feasible with a
-        % veery big g_mat
+        % veery big h_mat
         error_func_temp = zeros(numsim, 1);
         for k =1:numsim
-            [d, ~] = channel_output(x, T, Tc, sigma_w, N_h, g_mat(:, time:end));
+            [d, ~] = channel_output(x, T, Tc, sigma_w, N_h, h_mat(:, time:end));
             time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and
             % there should be enough impulse responses. Probably we need
             % less!
@@ -123,7 +123,7 @@ for L = Lvalues
         
         errorpower_array_temp = zeros(numsim, 1);
         for k =1:numsim
-            [d, h_mean] = channel_output(x, T, Tc, sigma_w, N_h, g_mat(:, time:end));
+            [d, h_mean] = channel_output(x, T, Tc, sigma_w, N_h, h_mat(:, time:end));
             time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and
             % there should be enough impulse responses. Probably we need
             % less!
@@ -243,7 +243,7 @@ for simiter = 1:numsim
         w = wgn(4, 1, 10*log10(sigma_w), 'complex');
         for idx = 0:4-1 % actually idx varies between 0 and 4 since there are four branches
             if (idx < N_h)
-                d(k*T + idx*Tc + 1) = g_mat(idx+1,k*T + idx*Tc+1) * x(k+1) + w(idx+1);
+                d(k*T + idx*Tc + 1) = h_mat(idx+1,k*T + idx*Tc+1) * x(k+1) + w(idx+1);
             else
                 d(k*T + idx*Tc + 1) = 0 + w(idx+1); % no ray, just the noise
             end
