@@ -14,67 +14,76 @@ sigma_w = 1/(T/Tc*snr); % the PN sequence has power 1
 %% Loop to determine suitable values of N, L
 
 printmsg_delete = ''; % Just to display progress updates
-maxN = 25;
+maxN = 10;
 % Note that with maxN<13 we don't have problems with the condition N<=L.
 
 % Time counter that allows the output d to be computed with a different
 % impulse response at every iteration, as it would happen in reality.
 time = 1;
-
-for L = [3, 7, 15, 31]
-    for N = 1:maxN % Supposed length of the impulse response of the channel
+iter = 1;
+L_vec = [3, 7, 15, 31, 63, 127];
+error_func = zeros(length(L_vec), maxN);
+error_func_var = zeros(length(L_vec), maxN);
+for iter = 1:length(L_vec)
+    L = L_vec(iter);
+    
+    
+    
+    % --- Generate training sequence
+    % The x sequence must be a partially repeated M-L sequence of length L. We
+    % need it to have size L+N-1.
+    % To observe L samples, we need to send L+N-1 samples of the training
+    % sequence {x(0), ..., x((N-1)+(L-1))}
+    p = MLsequence(L);
+    x = [p; p(1:ceil(maxN/4)-1)]; % crsate a seq which is long enough for the maximum N
+    x(x == 0) = -1;
+    
+    % --- Estimation of h and d multiple times
+    numsim = 100; % It seems to converge even with small values of numsim,
+    % lowered down to 200 in order to make computation feasible with a
+    % veery big h_mat
+    error_func_temp = zeros(maxN, numsim);
+    for k =1:numsim
         
         % Print progress update
-        printmsg = sprintf('L = %d, N = %d\n', L, N);
+        printmsg = sprintf('L = %d, simulation number %d\n', L, k);
         fprintf([printmsg_delete, printmsg]);
         printmsg_delete = repmat(sprintf('\b'), 1, length(printmsg));
         
-        % Supposed length of the impulse response of the channel in each polyphase branch.
-        n_short = mod(4-N, 4); % Num branches with a shorter filter than others
-        % N_i is the number of coefficients of the filter of the i-th branch.
-        N_i(1:4-n_short) = ceil(N/4);
-        N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
-        
-        % Save some time by breaking the for loop now.
-        if(ceil(N/4) > L)
-            break
-        end
-        
-        % --- Generate training sequence
-        % The x sequence must be a partially repeated M-L sequence of length L. We
-        % need it to have size L+N-1.
-        % To observe L samples, we need to send L+N-1 samples of the training
-        % sequence {x(0), ..., x((N-1)+(L-1))}
-        p = MLsequence(L);
-        x = [p; p(1:max(N_i)-1)];
-        x(x == 0) = -1;
-        
-        % --- Estimation of h and d multiple times
-        numsim = 100; % It seems to converge even with small values of numsim,
-        % lowered down to 200 in order to make computation feasible with a
-        % veery big h_mat
-        error_func_temp = zeros(numsim, 1);
-        for k =1:numsim
-            [d, ~] = channel_output(x, T, Tc, sigma_w, N_h, h_mat(:, time:end));
-            time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and
-            % there should be enough impulse responses. Probably we need
-            % less!
-            [h_hat, d_hat] = h_estimation(x, d, L, N_i);
+        % transmit only one time and estimate h for different N
+        [d, ~] = channel_output(x, T, Tc, sigma_w, N_h, h_mat(:, time:end));
+        time = time + 50*(L+maxN)*T/Tc; %(L+maxN)*4, they shouldn't overlap and
+        % there should be enough impulse responses. Probably we need
+        % less!
+        for N = 1:maxN % Supposed length of the impulse response of the channel
+            % Compute the supposed length of each branch
+            n_short = mod(4-N, 4); % Num branches with a shorter filter than others
+            % N_i is the number of coefficients of the filter of the i-th branch.
+            N_i(1:4-n_short) = ceil(N/4);
+            N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
+            [h_hat, d_hat] = h_estimation(x(end-(L+max(N_i)-1) + 1:end), d(end - 4*(L+max(N_i)-1) + 1: end), L, N_i);
             d_no_trans = d(end-length(d_hat)+1 : end);
-            error_func_temp(k) = sum(abs(d_hat - d_no_trans).^2);
+            error_func_temp(N, k) = sum(abs(d_hat - d_no_trans).^2)/length(d_hat);
         end
-        error_func(N) = mean(error_func_temp); %#ok<SAGROW>
     end
-    
-    % NOTE: the receiver doesn't know the reference value to which the
-    % functional should tend to, it is plotted for debugging purposes
-    figure, plot(10*log10(error_func)), hold on, plot(1:N, ones(1, N)*10*log10(sigma_w*length(d_hat)))
-    xlabel('N')
-    ylabel('\epsilon [dB]')
-    legend('Error functional Eps', 'Theoretical value of Eps')
-    grid on, title(['Error function with L=', int2str(L)])
+    error_func(iter, :) = mean(error_func_temp, 2);
+    error_func_var(iter, :) = var(error_func_temp, 0, 2);
 end
 
+% NOTE: the receiver doesn't know the reference value to which the
+% functional should tend to, it is plotted for debugging purposes
+figure
+for i = 1:length(L_vec)
+    plot(10*log10(error_func(i, :)), 'DisplayName', strcat('L=', num2str(L_vec(i))))
+    legend('-DynamicLegend'), hold on
+end
+plot(1:N, ones(1, N)*10*log10(sigma_w))
+xlabel('N')
+ylabel('\epsilon [dB]')
+grid on, title('Error function')
+ylim([-20, -10])
+
+return
 %% Estimate E(|h-hhat|^2) by repeating the estimate 1000 times and assuming
 % h known
 
@@ -115,7 +124,7 @@ for L = Lvalues
         x(x == 0) = -1;
         
         % --- Estimation of h and d multiple times
-        numsim = 20; 
+        numsim = 20;
         hhat_mat = zeros(4*max(N_i), numsim);
         % this matrix is dimensioned to have the maximum number of coefficients
         % for each of the four branch, the unused (i.e. unestimated) ones will be
