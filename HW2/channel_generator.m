@@ -11,7 +11,7 @@ C = sqrt(K/(K+1));
 M_iTc = M_iTc.*(1-C^2)/sum(M_iTc);
 
 %% Generation of impulse responses
-h_samples_needed = 200000 + ceil(Tp/Tc*length(h_dopp)); % Some will be dropped because of transient, since
+h_samples_needed = 8000000 + ceil(Tp/Tc*length(h_dopp)); % Some will be dropped because of transient, since
 % enough time, memory and computational power are available 
 w_samples_needed = ceil(h_samples_needed / Tp);
 % The filter is IIR, from Anastasopoulos and Chugg (1997) it appears that 
