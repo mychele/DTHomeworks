@@ -185,12 +185,12 @@ The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig. \re
 \end{figure}
 
 \subsection*{Plot the histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$}
-
-The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$ computed over a window of 1000 samples of a single realization of the channel's impulse response is shown in Fig.~\ref{fig:h1hist}. We can observe that the empirical pdf does not approximate the Rayleigh distribution. Indeed, as Fig.~\ref{} shows, whenever $h_1$ shows a local maximum or minimum, its values for consecutive time instants are similar, therefore they build up in the histogram to create peaks.
+The values of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$ are distributed according to a Rayleigh distribution in the form TODO.
+The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$ computed over a window of 1000 samples of a single realization of the channel's impulse response is shown in Fig.~\ref{fig:h1hist}. We can observe that the empirical pdf does not approximate the Rayleigh distribution. Indeed, as Fig.~\ref{} shows, whenever $h_1$ shows a local maximum or minimum, the values for consecutive time instants are similar, therefore they build up in the histogram to create peaks. In order to explain this behavior let's consider the coherence time of the channel. This is a parameter defined as the inverse of the Doppler spread $f_d$, therefore $T_{coh} = 1/f_d = \frac{T}{5*10^{-3}}$ but since the channel is defined in the time domain $T_c = T/4$ the coherence time with respect to the channel sampling time is $T_{coh} = 1/f_d = \frac{4T_c}{5*10^{-3}} \approx 833T_c$. The coherence time is the range in which the autocorrelation of the impulse response of ray $h_1$ is approximately non zero. Therefore, two samples of $h_1$ at a lag which is less than $T_{coh}$ are correlated and not statistically indipendent, even though drawn from the same distribution. Since the interval of 1000 consecutive samples over which the histogram is evaluated contains just one coherence interval and thus correlated samples, then it isn't representative of the complete distribution of $h_1$ values. On the other hand, if we increase the window of observed samples to (TODO) value, it can ben seen that the histogram approaches the expected Rayleigh distribution, since the number of independent samples observed grows. The histogram is an estimator of the probability density function, which is the derivative of the CDF. According to Glivenko-Cantelli theorem (TODO needs citation), the empirical CDF computed as $\hat{F}_n(x) = \frac{1}{x}\sum_{i = 0}^n \texttt{I}_x(i)$, with $\texttt{I}_x(i)$ the indicator function, converges to the real CDF as the number of indipendent observations of the process grows. 
 
 \begin{figure}[h!]
   \centering
-  %\includegraphics[width = 0.6\textwidth]{p01_h1hist}
+  %\includegraphics[width = 0.6\textwidth]{p01_h1hist} (TODO) add image
   \caption{Histogram of $\frac{h_1(nT_C)}{\sqrt{E[|h_1|^2]}}, n = 0, 1, \dots, 999$}
   \label{fig:h1hist}
 \end{figure}

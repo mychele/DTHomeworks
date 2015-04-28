@@ -77,7 +77,7 @@ for i = 1:length(L_vec)
     plot(10*log10(error_func(i, :)), 'DisplayName', strcat('L=', num2str(L_vec(i))))
     legend('-DynamicLegend'), hold on
 end
-plot(1:N, ones(1, N)*10*log10(sigma_w))
+%plot(1:N, ones(1, N)*10*log10(sigma_w))
 xlabel('N')
 ylabel('\epsilon [dB]')
 grid on, title('Error function')
