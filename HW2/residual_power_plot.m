@@ -12,12 +12,13 @@ M_d = 1-C^2;
 snr = 10; %dB
 snr_lin = 10^(snr/10);
 
+% TODO Fix this (what does wrong mean???)
 % wrong
 for N_h = 1:20; % To be determined
     % note that for this choice of final_tau
-    h = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
+    h = 1/tau_rms*exp(-(0:895)*Tc/tau_rms);
     h = h/sum(h); % complete & normalized pdp, without truncation
-    hhat = zeros(1, 900);
+    hhat = zeros(1, 896);
     hhat(1:N_h) = 1/tau_rms*exp(-(0:N_h-1)*Tc/tau_rms);
     hhat = hhat/sum(hhat); % truncated & normalized pdp
     deltah = h - hhat; %NOTE: h = E(|g_i|^2)
@@ -47,8 +48,8 @@ ylim([-5, 5])
 
 for N_h = 1:20; % To be determined
     % note that for this choice of final_tau
-    h = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
-    hhat = zeros(1, 900);
+    h = 1/tau_rms*exp(-(0:895)*Tc/tau_rms);
+    hhat = zeros(1, 896);
     hhat(1:N_h) = 1/tau_rms*exp(-(0:N_h-1)*Tc/tau_rms);
     deltah = h - hhat; %NOTE: h = E(|g_i|^2)
     
@@ -76,8 +77,8 @@ ylim([-10, 10])
 
 for N_h = 1:20
     tau = 0:Tc:N_h-1;
-    tau_long = 0:Tc:899; % for bigger values MATLAB put the thing to 0
-    pdp_gauss = zeros(1, 900);
+    tau_long = 0:Tc:895; % for bigger values MATLAB put the thing to 0
+    pdp_gauss = zeros(1, 896);
     pdp_gauss(1:N_h) = 1/tau_rms * exp(-tau/tau_rms);
     pdp_complete = 1/tau_rms * exp(-tau_long/tau_rms);
     
@@ -101,7 +102,7 @@ ylim([-5, 5])
 %% Fourth version
 % Normalize the complete exp but consider just the queue
 
-h = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
+h = 1/tau_rms*exp(-(0:895)*Tc/tau_rms);
 h = h.*(1-C^2)/sum(h);
 %figure, plot(h)
 

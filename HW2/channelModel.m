@@ -84,19 +84,22 @@ title('|h_i|')
 %% Histogram of h_1
 
 % Plot of the required histogram
-figure, histogram(abs(h_mat(2, 1:1000)).'/sqrt(M_iTc(2)), 100, 'Normalization','pdf', 'DisplayStyle', 'stairs');
+figure, histogram(abs(h_mat(2, 1:1000)).'/sqrt(M_iTc(2)), 20, 'Normalization','pdf', 'DisplayStyle', 'stairs');
 title('Experimental PDF from 1000 samples of |h_1|/sqrt(E[|h_1|^2])')
+xlabel('|h_1|/sqrt(E[|h_1|^2]');
 
 % This plot can be used to explain that because of the correlation we can't
 % get a nice pdf (too little samples, correlation in peaks)
 figure, 
 subplot 121
-histogram(abs(h_mat(2, 1:1000).'), 100, 'Normalization','pdf', 'DisplayStyle', 'stairs');
+histogram(abs(h_mat(2, 1:1000).'), 20, 'Normalization','pdf', 'DisplayStyle', 'stairs');
 camroll(90)
 title('1000 samples of |h_1|')
 subplot 122
 plot(0:999, abs(h_mat(2, 1:1000).'));
 title('Realization of h_1 over which the histogram is computed');
+xlabel('Samples');
+ylabel('h_1');
 grid on
 
 % Here we show that the experimental PDF gets better with more samples
@@ -117,35 +120,6 @@ a = 0:0.01:3;
 plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
 hold off
 legend('h1', 'Rayleigh pdf');
-
-%% Histograms of h_1 in subsequent disjoint intervals
-% TODO: bring it in the report
-% The variability shows that these intervals of 1000 samples are too small.
-% Looking at |g1| in one of these intervals, we observe that this quantity
-% has an oscillatory trend. In fact, h1(nTc) for different n's are
-% identically distributed rv's, but they are not independent. Whenever
-% there is a peak (max or min), the values of g1 for consecutive
-% time instants are similar, therefore they build up on the histogram,
-% showing a small number of peaks in the histogram itself. These peaks are
-% the values of g1 around the instants nTc in which it has a local max or min.
-% If we take a sufficiently large time window, the number of maxima and
-% minima increases, and they can be considered independent if they are
-% enough (?).
-% Considering two different realizations of the channel impulse response,
-% two samples of g1 at the same time (taken from these two realizations)
-% are not only identically distributed, but also independent. Therefore
-% with as little as 1000 such samples we observe a distribution very close
-% to a Rayleigh distribution, as we expect from our model.
-
-% Uncomment the following code to see that variability
-
-% figure
-% width = 1000;
-% for i = 0:9
-%     histogram(abs(h_mat(2, (i*width + 1):((i+1)*width)).')/sqrt(pdp_gauss(2)), 100)
-%     axis([0 2.5 0 0.05*width])
-%     pause
-% end
 
 %% Autocorrelation of h_1
 % TODO remove, just for debugging
@@ -211,3 +185,5 @@ a = 0:0.01:3;
 plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
 hold off
 legend('h1', 'Rayleigh pdf');
+xlabel('a');
+ylabel('p_{|h1(151T_C)|}(a)');

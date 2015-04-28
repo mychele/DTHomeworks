@@ -88,7 +88,7 @@ basicstyle=\footnotesize\ttfamily
 
 \subsection*{Choice of $N_h$}
 
-In order to determine a suitable $N_h$ (number of rays of the impulse response), we consider the noise that we would introduce by performing the truncation of the power delay profile \textit{PDP} (that corresponds to a truncation of the random impulse response). The given discrete power delay profile of the channel is a sampled version of
+In order to determine a suitable $N_h$ (i.e., the number of rays of the impulse response we will keep), we consider the noise that we would introduce by performing the truncation of the power delay profile \textit{PDP} (that corresponds to a truncation of the random impulse response). The aleatory part of the discrete power delay profile of the channel is given as the sampled version of
 \begin{equation}
 \M(\tau) = \frac{1}{\bar{\tau}_{rms}} e^{-\tau / \bar{\tau}_{rms}}
 \end{equation}
@@ -100,7 +100,7 @@ with $i$ non-negative integer, $\tau_{rms} = 0.3T$ the average rms delay spread 
 \begin{equation}
 \sum_{i=0}^{\infty} \M(iT_C) = 1 - C^2
 \end{equation}
-where $C = \sqrt{K / (K+1)}$ is the deterministic line of sight (\textit{LOS}) component of the first ray (for $i=0$) and $K$ is the provided Rice factor. Note that we are considering an infinite number of rays, but as a matter of fact MATLAB approximates as zero all values $\M(iT_C)$ for $i > 894$, therefore we stop the summation to 894 (actually 899, LOL). % TODO Do not forget to fix this
+where $C = \sqrt{K / (K+1)}$ is the deterministic line of sight (\textit{LOS}) component of the first ray (for $i=0$) and $K$ is the provided Rice factor. In order to compute the infinite sum above, only the initial 900 samples are actually used, as MATLAB approximates all $\M(iT_C)$ values for $i > 895$ to zero.
 
 Knowing that the true impulse response of the channel has random properties described by the power delay profile $\M(iT_C)$ and by the quantity $C$, then we define the quality of the approximation due to truncation as
 \begin{equation}
@@ -130,7 +130,7 @@ Looking at the plot of $\Lambda_n (N_h)_{\dB}$ against $N_h$ in Fig.~\ref{fig:p0
 \end{figure}
 
 \subsection*{Determine $E[|h_i(nT_c)|^2]$}
-Given $N_h = 3$, the PDP of the channel $E[|h_i(nT_c)|^2], i = 0, \dots, 2$ in $\dB$ is reported in Fig. \ref{fig:pdp} and in Table \ref{table:pdp}. Note that this power delay profile includes the power of aleatory $\tilde{h}_i(nT_c)$ components and the deterministic LOS component added on ray $i = 0$.
+Given $N_h = 3$, the PDP of the channel $E[|h_i(nT_c)|^2], i = 0, 1, 2$ in $\dB$ is reported in Fig.~\ref{fig:pdp} and in Table~\ref{table:pdp}. Note that this power delay profile includes the power of aleatory $\tilde{h}_i(nT_c)$ components and the deterministic LOS component added on ray $i = 0$.
 
 \begin{table}[h!]
   \centering
@@ -150,7 +150,7 @@ Given $N_h = 3$, the PDP of the channel $E[|h_i(nT_c)|^2], i = 0, \dots, 2$ in $
 \end{figure}
 
 \subsection*{Channel simulation}
-In order to generate the impulse response of the channel we used the model proposed in \cite{bc} and reported in Fig. \ref{fig:chimp}.
+In order to generate the impulse response of the channel we used the model proposed in \cite{bc} and reported in Fig.~\ref{fig:chimp}.
 \begin{figure}[h!]
   \centering
   \includegraphics[width = 0.7\textwidth]{p01_channelmodel}
@@ -158,23 +158,23 @@ In order to generate the impulse response of the channel we used the model propo
   \label{fig:chimp}
 \end{figure}
 
-For each ray $i = 0, 1, \dots, N_h -1$ the system is fed with $w_i(lT_p)$, which is complex white noise with zero mean and unit power generated with the MATLAB function \texttt{wgn}. This signal is filtered with a narrowband shaping filter in order to impose the shape of classical Doppler spectrum
+For each ray $i = 0, 1, \dots, N_h -1$ the system is fed with $w_i(lT_p)$, which is complex white noise with zero mean and unit power, generated with the MATLAB function \texttt{wgn}. This signal is filtered with a narrowband shaping filter in order to impose the shape of classical Doppler spectrum
 \begin{equation}
   \mathcal{D}(f) =  \begin{cases} \frac{1}{\pi f_d} \frac{1}{\sqrt{1-(f/f_d)^2}}, & |f| \le f_d \\
                                   0                                              & \mbox{otherwise}
                    \end{cases}
 \end{equation}
-The filter $h_{ds}$ is such that $|\mathcal{H}_{ds}|^2 = \mathcal{D}(f)$. Since the Doppler spread $f_d = 5*10^{-3}\frac{1}{T} = 5*10^{-3}\frac{1}{4T_c}$ is very close to DC it is an hard task to design a digital lowpass filter that approximate the desired function while working with $T_c$ as the sampling period. Therefore it is necessary to generate the white noise $w_i(lT_p)$ and filter it using a different sampling period $T_p = Q_{int}T_c$. In particular in order to use the filter designed in \cite{anachugg} let $T_p f_d = 0.1$ thus $T_p = 0.1 \frac{4 T_c}{5*10^{-3}} = 80 T_c$.
+The filter $h_{ds}$ is such that $|\mathcal{H}_{ds}|^2 = \mathcal{D}(f)$. Since the Doppler spread $f_d = 5*10^{-3}\frac{1}{T} = 5*10^{-3}\frac{1}{4T_c}$ is very close to DC it is an hard task to design a digital lowpass filter that approximate the desired function while working with $T_c$ as the sampling period. Therefore it is necessary to generate the white noise $w_i(lT_p)$ and filter it using a different sampling period $T_p = Q_{int}T_c$. In particular, in order to use the filter designed in \cite{anachugg}, let $T_p f_d = 0.1$ thus $T_p = 0.1 \frac{4 T_c}{5*10^{-3}} = 80 T_c$.
 
-This filter is an IIR narrowband filter which is the convolution of a filter that approximates the classical Doppler spectrum for $f \le f_d$ and of a Chebychev lowpass filter with cutoff frequency $f_d$. Since $h_{ds}$ is an IIR filter the effect of transient on the filtered signal is potentially infinite, however the impulse response of $h_{ds}$ is approximated to zero by MATLAB for $i > 282$. Therefore to discard the transient effect at the output of the scheme in Fig. \ref{fig:chimp} the simulator drops $282*Q_{int}$ samples. This is a conservative choice: in order to keep the noise generated by truncation of IIR impulse response below system noise less than 282 coefficients would be enough. However, since the generation of the impulse response of radio channel is performed offline and there aren't memory or computational constraints we stick to this choice. The filter is normalized by its energy $E_{h_{ds}} = \sum_{i = 0}^{\infty} h_{ds} (iT_p) \approx \sum_{i = 0}^{282} h_{ds} (iT_p)$.
+This filter is an IIR narrowband filter which is the convolution of a filter that approximates the classical Doppler spectrum for $f \le f_d$ and of a Chebychev lowpass filter with cutoff frequency $f_d$. Since $h_{ds}$ is an IIR filter the effect of transient on the filtered signal is potentially infinite, however the impulse response of $h_{ds}$ is approximated to zero by MATLAB for $i > 282$. Therefore to discard the transient effect at the output of the scheme in Fig.~\ref{fig:chimp} the simulator drops $282*Q_{int}$ samples. This is a conservative choice: in order to keep the noise generated by truncation of IIR impulse response below system noise less than 282 coefficients would be enough. However, since the generation of the impulse response of radio channel is performed offline and there aren't memory or computational constraints we stick to this choice. The filter is normalized by its energy $E_{h_{ds}} = \sum_{i = 0}^{\infty} h_{ds} (iT_p) \approx \sum_{i = 0}^{282} h_{ds} (iT_p)$.
 
-The interpolator filter $h_{int}$ performs interpolation using spline algorithm, then each impulse response $h'_i(kT_c)$ is multiplied by $\sigma_i = sqrt{E[|\tilde{h}_i(nT_c)|^2]}$ in order to apply the desired power delay profile. Note $E[|\tilde{h}_i(nT_c)|^2], i = 0, \dots, N_h -1$ is the PDP obtained by sampling the continuous $M(\tau)$ PDP and normalizing it to $1-C^2$, thus it describes the power of the aleatory component of each ray. Finally for the ray $i = 0$ the LOS component $C$ is added.
+The interpolator filter $h_{int}$ performs interpolation using the spline algorithm, then each impulse response $h'_i(kT_c)$ is multiplied by $\sigma_i = \sqrt{E[|\tilde{h}_i(nT_c)|^2]}$ in order to apply the desired power delay profile. Note that $E[|\tilde{h}_i(nT_c)|^2], i = 0, \dots, N_h -1$ is the PDP obtained by sampling the continuous $M(\tau)$ PDP and normalizing it to $1-C^2$, thus it describes the power of the aleatory component of each ray. Finally, for the ray $i = 0$ the LOS component $C$ is added.
 
 This procedure is repeated for each ray $i = 0, 1, 2$ and the generated impulse response $h_i(nT_c)$ is stored without the transient in the $i$-th row of the matrix \texttt{h\_mat}. As a matter of fact, the simulation requires on average 6 ms for the generation of transient samples and 0.35 s for the generation of $2*10^6$ useful samples, therefore even with a conservative choice for the transient its computation requires about $1.7\%$ of the whole simulation time.
 
 
 \subsection*{Show the behavior of $|h_1(nT_c)|$}
-The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig. \ref{fig:h1}.
+The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig.~\ref{fig:h1}.
 % TODO smth on coherence time?
 
 \begin{figure}[h!]
@@ -184,19 +184,37 @@ The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig. \re
   \label{fig:h1}
 \end{figure}
 
-\subsection*{Plot the histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$}
-The values of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$ are distributed according to a Rayleigh distribution in the form TODO.
-The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$ computed over a window of 1000 samples of a single realization of the channel's impulse response is shown in Fig.~\ref{fig:h1hist}. We can observe that the empirical pdf does not approximate the Rayleigh distribution. Indeed, as Fig.~\ref{} shows, whenever $h_1$ shows a local maximum or minimum, the values for consecutive time instants are similar, therefore they build up in the histogram to create peaks. In order to explain this behavior let's consider the coherence time of the channel. This is a parameter defined as the inverse of the Doppler spread $f_d$, therefore $T_{coh} = 1/f_d = \frac{T}{5*10^{-3}}$ but since the channel is defined in the time domain $T_c = T/4$ the coherence time with respect to the channel sampling time is $T_{coh} = 1/f_d = \frac{4T_c}{5*10^{-3}} \approx 833T_c$. The coherence time is the range in which the autocorrelation of the impulse response of ray $h_1$ is approximately non zero. Therefore, two samples of $h_1$ at a lag which is less than $T_{coh}$ are correlated and not statistically indipendent, even though drawn from the same distribution. Since the interval of 1000 consecutive samples over which the histogram is evaluated contains just one coherence interval and thus correlated samples, then it isn't representative of the complete distribution of $h_1$ values. On the other hand, if we increase the window of observed samples to (TODO) value, it can ben seen that the histogram approaches the expected Rayleigh distribution, since the number of independent samples observed grows. The histogram is an estimator of the probability density function, which is the derivative of the CDF. According to Glivenko-Cantelli theorem (TODO needs citation), the empirical CDF computed as $\hat{F}_n(x) = \frac{1}{x}\sum_{i = 0}^n \texttt{I}_x(i)$, with $\texttt{I}_x(i)$ the indicator function, converges to the real CDF as the number of indipendent observations of the process grows. 
+\subsection*{Plot the histogram of $\frac{|h_1|}{\sqrt{E[|h_1|^2]}}$}
+Since $\frac{|h_1|}{\sqrt{E[|h_1|^2]}}$ is the scaled absolute value of a complex gaussian random variable, it is distributed according to a Rayleigh distribution with PDF
+$$p_{|\bar{g}_i|}(a) = 2a e^{-a^2} 1(a)$$
+
+The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$, computed over a window of 1000 samples of a single realization of the channel's impulse response, is shown in Fig.~\ref{fig:h1hist}. We can observe that the empirical pdf does not approximate the Rayleigh distribution. Indeed, as Fig.~\ref{fig:h1histvstime} shows, whenever $h_1$ shows a local maximum or minimum, the values for consecutive time instants are similar, therefore they build up in the histogram to create peaks. In order to explain this behavior let's consider the coherence time of the channel. This is a parameter defined as the inverse of the Doppler spread $f_d$, therefore $T_{coh} = 1/f_d = \frac{T}{5*10^{-3}}$ but since the channel is defined in the time domain $T_c = T/4$ the coherence time with respect to the channel sampling time actually is $T_{coh} = 1/f_d = \frac{4T_c}{5*10^{-3}} \approx 833T_c$. The coherence time is the range over which the autocorrelation of the impulse response of ray $h_1$ is approximately non zero. Therefore, two samples of $h_1$ at a lag less than $T_{coh}$ are correlated and not statistically independent, even though drawn from the same distribution. Since the interval of 1000 consecutive samples over which the histogram is evaluated contains just one coherence interval and thus correlated samples, it is not representative of the complete distribution of $h_1$ values. On the other hand, if we increase the window of observed samples to (TODO) value, it can ben seen that the histogram approaches the expected Rayleigh distribution, since the number of independent samples observed grows. The histogram is an estimator of the probability density function, which is the derivative of the CDF. According to Glivenko-Cantelli theorem (TODO needs citation), the empirical CDF computed as $\hat{F}_n(x) = \frac{1}{x}\sum_{i = 0}^n \texttt{I}_x(i)$, with $\texttt{I}_x(i)$ the indicator function, converges to the real CDF as the number of independent observations of the process grows.
+% TODO Also include pics of hist getting better with more samples or it didn't happen
 
 \begin{figure}[h!]
   \centering
-  %\includegraphics[width = 0.6\textwidth]{p01_h1hist} (TODO) add image
+  \includegraphics[width = 0.6\textwidth]{p01_h1hist}
   \caption{Histogram of $\frac{h_1(nT_C)}{\sqrt{E[|h_1|^2]}}, n = 0, 1, \dots, 999$}
   \label{fig:h1hist}
 \end{figure}
 
-\subsection*{Plot the histogram of $\frac{h_1(151T_c)}{\sqrt{E[|h_1(151T_c)|^2]}}$ for 1000 realizations}
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width = 0.8\textwidth]{p02_h1hist}
+  \caption{Comparison between the histogram and the time domain data it was derived from}
+  \label{fig:h1histvstime}
+\end{figure}
+
+\subsection*{Plot the histogram of $\frac{|h_1(151T_c)|}{\sqrt{E[|h_1(151T_c)|^2]}}$ for 1000 realizations}
+The histogram can be seen in Fig.~\ref{h1hist1000realizations}.
 Compare it with the theoretical result
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width = 0.8\textwidth]{p03_h1hist}
+  \caption{Histogram of a single sample of $h_1$ across different realizations vs the expected Rayleigh pdf}
+  \label{fig:h1hist1000realizations}
+\end{figure}
 
 \section*{Problem 2}
 
