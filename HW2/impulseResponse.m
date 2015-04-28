@@ -20,7 +20,6 @@ maxN = 10;
 % Time counter that allows the output d to be computed with a different
 % impulse response at every iteration, as it would happen in reality.
 time = 1;
-iter = 1;
 L_vec = [3, 7, 15, 31, 63, 127];
 error_func = zeros(length(L_vec), maxN);
 error_func_var = zeros(length(L_vec), maxN);
@@ -83,7 +82,7 @@ ylabel('\epsilon [dB]')
 grid on, title('Error function')
 ylim([-20, -10])
 
-return
+
 %% Estimate E(|h-hhat|^2) by repeating the estimate 1000 times and assuming
 % h known
 
@@ -124,15 +123,15 @@ for L = Lvalues
         x(x == 0) = -1;
         
         % --- Estimation of h and d multiple times
-        numsim = 20;
+        numsim = 150;
         hhat_mat = zeros(4*max(N_i), numsim);
         % this matrix is dimensioned to have the maximum number of coefficients
         % for each of the four branch, the unused (i.e. unestimated) ones will be
         % left zero
         
-        errorpower_array_temp = zeros(numsim, 1);
+        errorpower_array_sim = zeros(numsim, 1);
         for k =1:numsim
-            [d, h_mean] = channel_output(x, T, Tc, sigma_w, N_h, h_mat(:, time:end));
+            [d, h_mean, h_used_coeff] = channel_output_verbose(x, T, Tc, sigma_w, N_h, h_mat(:, time:end));
             time = time + (L+N)*T/Tc; %(L+N)*4, they shouldn't overlap and
             % there should be enough impulse responses. Probably we need
             % less!
@@ -144,6 +143,7 @@ for L = Lvalues
             % than N, but the last elements are just 0, therefore they can be removed
             h_hat_array = h_hat_array(1:N);
             h_mean_array = h_mean(1:N_h);
+            h_used_coeff = h_used_coeff(1:N_h, :);
             % the vector to which I compare the estimate has length N_h, I should
             % resize the shortest vector to have the same length of the other by adding
             % some 0
@@ -151,10 +151,13 @@ for L = Lvalues
                 h_hat_array = [h_hat_array; zeros(N_h - N, 1)];
             elseif N > N_h
                 h_mean_array = [h_mean_array; zeros(N - N_h, 1)];
+                h_used_coeff = [h_used_coeff; zeros(N - N_h, size(h_used_coeff,2))];
             end % if N=N_h already ok
-            errorpower_array_temp(k) = sum(abs(h_hat_array - h_mean_array).^2);
+            errorpower_array_sim(k) = sum(abs(h_hat_array - h_mean_array).^2);
+            errorpower2_array_sim(k) = sum(sum(abs( repmat(h_hat_array, 1, size(h_used_coeff, 2)) - h_used_coeff).^2)) / size(h_used_coeff, 2);
         end
-        errorpower_est(iter, N) = mean(errorpower_array_temp);
+        errorpower_est(iter, N) = mean(errorpower_array_sim);
+        errorpower2_est(iter, N) = mean(errorpower2_array_sim);
     end
     iter = iter + 1;
 end
@@ -189,6 +192,19 @@ for i = 1:4
 end
 xlabel('N that tracks the real N_h'), ylabel('Estimate of E(|h - hhat|^2) [dB]')
 title('Estimate of E(|h - hhat|^2) across 1000 realizations')
+ax = gca; ax.XTick = 1:maxN;
+ylim([-30 -5])
+grid on, box on
+
+% Plot 2
+figure, hold on
+for i = 1:4
+    plot(10*log10(errorpower2_est(i, :)), 'DisplayName', sprintf('L=%d experimental', Lvalues(i)))
+    plot(10*log10(exp_deltahsqr(i, :)),'-.' , 'DisplayName', sprintf('L=%d theoretical', Lvalues(i)))
+    legend('-DynamicLegend')
+end
+xlabel('N that tracks the real N_h'), ylabel('Estimate of E(|h - hhat|^2) [dB]')
+title('Estimate2 of E(|h - hhat|^2) across 1000 realizations')
 ax = gca; ax.XTick = 1:maxN;
 ylim([-30 -5])
 grid on, box on
