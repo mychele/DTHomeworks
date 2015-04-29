@@ -100,15 +100,15 @@ xlabel('|h_1|/sqrt(E[|h_1|^2]');
 % get a nice pdf (too little samples, correlation in peaks)
 figure, 
 subplot 121
-histogram(abs(h_mat(2, 1:1000).'), 20, ...
+histogram(abs(h_mat(2, 1:1000).')/sqrt(M_iTc(2)), 20, ...
     'Normalization','pdf', 'DisplayStyle', 'stairs');
 camroll(90)
-title('1000 samples of |h_1|')
+title('1000 samples of hbar_1')
 subplot 122
-plot(0:999, abs(h_mat(2, 1:1000).'));
-title('Realization of h_1 over which the histogram is computed');
+plot(0:999, abs(h_mat(2, 1:1000).')/sqrt(M_iTc(2)));
+title('Realization of hbar_1 over which the histogram is computed');
 xlabel('Samples');
-ylabel('h_1');
+ylabel('hbar_1');
 grid on
 
 % Here we show that the experimental PDF gets better with more samples
