@@ -88,7 +88,7 @@ basicstyle=\footnotesize\ttfamily
 
 \subsection*{Choice of $N_h$}
 
-In order to determine a suitable $N_h$ (i.e., the number of rays of the impulse response we will keep), we consider the noise that we would introduce by performing the truncation of the power delay profile \textit{PDP} (that corresponds to a truncation of the number of rays of the channel impulse response). The aleatory part of the discrete power delay profile of the channel is given as the sampled version of
+In order to determine a suitable $N_h$ (i.e., the number of rays of the impulse response we will keep), we consider the noise introduced by performing the truncation of the power delay profile \textit{PDP} (that corresponds to a truncation of the number of rays of the channel impulse response). The aleatory part of the discrete power delay profile of the channel is given as the sampled version of
 \begin{equation}
 \M(\tau) = \frac{1}{\bar{\tau}_{rms}} e^{-\tau / \bar{\tau}_{rms}}
 \end{equation}
@@ -102,7 +102,7 @@ with $i$ non-negative integer, $\tau_{rms} = 0.3T$ the average rms delay spread 
 \end{equation}
 where $C = \sqrt{K / (K+1)}$ is the deterministic line of sight (\textit{LOS}) component of the first ray (for $i=0$) and $K$ is the provided Rice factor. In order to compute the infinite sum above, only the initial 895 samples are actually used, as MATLAB approximates all $\M(iT_C)$ values for $i > 895$ to zero.
 
-Knowing that the true impulse response of the channel has random properties described by the power delay profile $\M(iT_C)$ and by the quantity $C$, then we define the quality of the approximation due to truncation as
+Knowing that the true impulse response of the channel has random properties described by the power delay profile $\M(iT_C)$ and by the quantity $C$, we then define the quality of the approximation due to truncation as
 \begin{equation}
 \Lambda_t(N_h) = \frac{E[||\mathbf{h}||^2]}{E[||\mathbf{\Delta h}||^2]} = \frac{C^2 + \sum_{i=0}^{\infty} \M(iT_C)}{\sum_{i=N_h}^{\infty} \M(iT_C)}
 \end{equation}
@@ -118,7 +118,7 @@ where $\M_x$ is the statistical power of the input signal. Finally, we define th
 \begin{equation}
 \Lambda_n (N_h) = \frac{\Lambda_t}{\Lambda} = \frac{4 \sigma_w^2}{\M_x \sum_{i=N_h}^{\infty} \M(iT_C)}
 \end{equation}
-to compare the noise of the system with the noise we are introducing by truncating $\M(iT_C)$ to $N_h$ samples.
+to compare the noise of the system with the noise we are introducing by truncating $\M(iT_C)$ to $N_h$ samples. The value of $\frac{M_x}{4\sigma_w^2}$ is the provided system SNR $\Gamma = 10 \dB$.
 
 Looking at the plot of $\Lambda_n (N_h)_{\dB}$ against $N_h$ in Fig.~\ref{fig:p01_lambda_n}, we can maintain that $N_h = 3$ is a good choice, since we have $\Lambda_n(2) \approx 2~\dB$ and $\Lambda_n(3) \approx 5.6~\dB$.
 
@@ -130,7 +130,7 @@ Looking at the plot of $\Lambda_n (N_h)_{\dB}$ against $N_h$ in Fig.~\ref{fig:p0
 \end{figure}
 
 \subsection*{Determine $E[|h_i(nT_C)|^2]$}
-Given $N_h = 3$, the PDP of the channel $E[|h_i(nT_C)|^2], i = 0, 1, 2$ in $\dB$ is reported in Fig.~\ref{fig:pdp} and in Table~\ref{table:pdp}. Note that this power delay profile includes the power of aleatory $\tilde{h}_i(nT_C)$ components and the deterministic LOS component added on ray $i = 0$.
+Given $N_h = 3$, the PDP of the channel $E[|h_i(nT_C)|^2], i = 0, 1, 2$ in $\dB$ is reported in Fig.~\ref{fig:pdp} and in Table~\ref{table:pdp}. Note that this power delay profile includes the power of aleatory $\tilde{h}_i(nT_C)$ components and of the deterministic LOS component added on ray $i = 0$.
 
 \begin{table}[h!]
   \centering
@@ -138,7 +138,7 @@ Given $N_h = 3$, the PDP of the channel $E[|h_i(nT_C)|^2], i = 0, 1, 2$ in $\dB$
     $ i $ & $ 0 $ & $ 1 $ & $ 2 $ \\ \hline
     $E[|h_i(nT_C)|^2]$ [$\dB$] & -0.596 & -10.488 & -14.107
   \end{tabular}
-  \caption{$E[|h_i(nT_C)|^2], i = 0, \dots, N_h-1$ in $\dB$ (PDP)}
+  \caption{$E[|h_i(nT_C)|^2]$ [$\dB$] of PDP for each ray $ i \in [0,2]$}
   \label{table:pdp}
 \end{table}
 
@@ -365,9 +365,7 @@ The signal $x$ has $L+N_{max}-1$ samples, and we are now considering $L+1$ sampl
 \begin{equation}\label{eq:transientlen_dhat}
 N_{tr} - 4(N_{max}-2) = \max \{ 0, N-4 \} - 4 \left\lceil \frac{N}{4} \right\rceil + 8
 \end{equation}
-samples of $\hat{d}$. Note that this also works with $N \leq 4$. Indeed, $x$ in this case has length $L$ and we need to keep all output samples, that is to say the transient is actually 0.
-% TODO which algorithm? Not clear
-This algorithm takes the whole signal $x$ with a 0 at the front, $\hat{\mathbf{h}}$ is a column vector, and the first column of $\hat{\mathbf{d}}$ is all zeros. While this first column is useless, the second one has to be entirely kept. According to the expression above, the number of samples that need to be discarded is indeed 4.
+samples of $\hat{d}$.
 
 As a final remark, we point out some details on our implementation. Firstly, we implemented the LS solution as in \cite[p.~246]{bc}, i.e. using a $L \times N$ observation matrix
 \begin{equation}
