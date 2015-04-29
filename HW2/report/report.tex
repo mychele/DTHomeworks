@@ -260,7 +260,7 @@ The actual channel used throughout this exercise is the time-varying channel of 
   d^{(i)}(kT) = 0              & \mbox{for } i = 3 \\
   \end{cases}
 \end{equation}
-and the output in the domain $T_C$ is given by the parallel to series conversion of the 4 branches. 
+and the output in the domain $T_C$ is given by the parallel to series conversion of the 4 branches.
 
 Note that for convenience in the following we will change the notation for the branch index, that up until now was represented as superscript between parentheses. From now on, we will always refer to the different polyphase branches with the subscript $i \in \{0,\ldots,3\}$, the dependance on time of the impulse response of the channel will be implied, and the notation
 \begin{equation}\label{eq:def_ir_branch}
@@ -389,7 +389,6 @@ Therefore we can solve the LS problem for the $i$-th branch as
 
 Secondly, for a fixed value of $L$ we chose to generate a number of samples of $x$ that is sufficient to perform the estimation of $\mathbf{h}$ for all desired values of $N$. Specifically, if $x$ is a $(L+\ceil{\bar{N}/4} - 1)$ samples long ML sequence, then we can estimate the impulse response of the channel assuming it has $N$ coefficients, with any positive $N \leq \bar{N}$. This way we need to generate, for each $L$, one ML sequence, and in each simulation we estimate the channel for all $N \leq \bar{N}$.
 
-
 \subsection*{Determine $L$ and $N$}
 Let $\bar{N}$ be 10. For each $L \in \{3, 7, 15, 31, 63, 127\}$ we transmit 100 ML sequences over disjoint intervals of the time-varying channel, evaluate the output $d(kT_C)$, and as previously mentioned we compute a LS estimate of the channel impulse response $\mathbf{h}_i \; i \in [0,3]$ for each $N \leq \bar{N}$. In order to evaluate the quality of the estimate we compute the error function defined as the sum of the squared errors at the output:
 \begin{equation}
@@ -401,11 +400,26 @@ where $\mathcal{K}$ denotes the set of indices over the $T_C$ time domain for wh
 \end{equation}
 
 
-
-TODO\\
-
-% in my (Michele) opinion this isn't required. Note that the receiver doesn't know this value since it depends on the noise of the channel. Therefore it's ok that in our implementation the $\mathcal{E}$ tends to the theoretical value, but it isn't smth that can be exploited by the receiver or by us in order to make analysis
 Note that the simulation of the transmission is performed over disjoint time intervals of the time-varying channel, in order to mimic a real situation in which in order to perform more than once the estimation it is necessary to repeat the transmission multiple times. In particular the distance between two simulated transmissions is set to $50*(L+\bar{N})*T/T_C$ in order to try to consider uncorrelated impulse response, even if the actual coherence time of the channel isn't known at this point by the transmitter-receiver setup. This distance is a trade-off between a long waiting time between transmissions, which would more likely yield uncorrelated impulse responses, and computational and memory constraints of the system.
+
+Note also the estimation is performed considering the channel constant over the interval of interest.
+
+The rationale behind the choice of the $L, N$ that are the most efficient to estimate the channel impulse response is given by the following facts. As first, the functional that measures the difference between the real output and the estimated one $\mathcal{E}$ should be as small as possible. As second, the trend of $\mathcal{E}$ as $N$ grows should be decreasing until $N=N_h$ and then it should be approximately constant.
+Generally, if $N \ge N_h$, then by extending the channel impulse response $[h_0, h_1, \dots, h_{N_h - 1}]$ to a vector $\mathbf{h} = [h_0, h_1, \dots, h_{N_h - 1}, 0, \dots, 0]$ of size $N$ the desired output is $d(k) = h_0x(k) + h_1x(k-1) + \dots + h_{N_h - 1}x(k-N_h + 1) + w(k) = \mathbf{h}^T\mathbf{x}(k) + w(k)$ with $w(k)$ a white noise which is statistically independent on the input $\mathbf{x}$.
+By recalling the Wiener theory, in an ideal situation, in which the input $\mathbf{x}$ is white noise with statistical power $r_x(0)$, the correlation matrix is $\mathbf{R} = E[\mathbf{x}^*(k)\mathbf{x}^T(k)] = r_x(0)\mathbf{I}$ and the correlation between desired output and input at the same instant is $\mathbf{p} = E[d(k)\mathbf{x}^*(k)] = r_x(0)\mathbf{h}$ since $x$ and $w$ are statistically independent. The Wiener-Hopf solution is then $\hat{\mathbf{h}}_{opt} =\mathbf{R}^{-1} \mathbf{p} = \mathbf{h}$
+and the functional is given just by the noise variance $\sigma_w^2$ and doesn't change as $N$ grows. Instead, if $N < N_h$, the optimum solution is given just by first $N$ elements of the impulse response and this induces a greater value on the functional which is now $J = \sigma_w^2 + r_x(0)||\mathbf{\Delta h}(\infty)||^2$ with the second term representing the residual error vector which decreases as $N$ tends to $N_h$.
+
+Since LS tries to approximate the optimal Wiener-Hopf solution, then the behavior of the functional $\mathcal{E}$ is the same as $J$ and this can be seen in Fig.~\ref{fig:LN} where a knee is present for $N = 3$, which is the value we choose. As far as it regards $L$, we choose $L=3$ since it's the value that minimizes $\mathcal{E}$ for $N=3$. In an ideal situation with a constant channel, the bigger is $L$ the better the estimate is. However in this case the channel is time-varying and the estimate doesn't take this factor into account. Indeed, if we consider $L = 63, 127$ the functional assumes much greater values than the ones for lower values of $L$, and also the knee behavior is less marked. Moreover a $L=3$ allows to evaluate the channel over a small interval, where the impulse response shouldn't change too much. Finally, consider that for $N=3$ the maximum number of coefficients of each branch is $\max(N_i) = 1$ and since the estimate is performed with $L=3$ for each single branch the relation $L > N_i$ remains valid.
+
+\begin{figure}
+  \centering
+  %\includegraphics[width = 0.6\textwidth]{}
+  %TODO add plot!!
+
+  \caption{Functional $\mathcal{e}$ for different $L, N$ values}
+  \label{fig:LN}
+\end{figure}
+
 
 
 \subsection*{Estimate of $E[||\mathbf{\hat{h}}-\mathbf{h}||^2]$ assuming $\mathbf{h}$ is known}
