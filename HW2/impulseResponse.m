@@ -25,9 +25,7 @@ error_func = zeros(length(L_vec), maxN);
 error_func_var = zeros(length(L_vec), maxN);
 for iter = 1:length(L_vec)
     L = L_vec(iter);
-    
-    
-    
+
     % --- Generate training sequence
     % The x sequence must be a partially repeated M-L sequence of length L. We
     % need it to have size L+N-1.
@@ -65,7 +63,9 @@ for iter = 1:length(L_vec)
             error_func_temp(N, k) = sum(abs(d_hat - d_no_trans).^2)/length(d_hat);
         end
     end
+    % sample mean
     error_func(iter, :) = mean(error_func_temp, 2);
+    %sample variance (unbiased)
     error_func_var(iter, :) = var(error_func_temp, 0, 2);
 end
 
@@ -82,6 +82,23 @@ ylabel('\epsilon [dB]')
 grid on, title('Error function')
 ylim([-20, -10])
 
+figure
+for i = 1:length(L_vec)
+    plot(10*log10(error_func_var(i, :)), 'DisplayName', strcat('L=', num2str(L_vec(i))))
+    legend('-DynamicLegend'), hold on
+end
+xlabel('N')
+ylabel('unbiased estimate of var(\epsilon) [dB]')
+grid on, title('Variance of Error function')
+
+figure
+for i = 1:length(L_vec)
+    errorbar(1:maxN, error_func(i, :), 1.96*sqrt(error_func_var(i, :)/numsim), 'DisplayName', strcat('L=', num2str(L_vec(i))))
+    legend('-DynamicLegend'), hold on
+end
+xlabel('N')
+ylabel('\epsilon')
+grid on, title('Error function (sample mean) with confidence interval for the mean')
 
 %% Estimate E(|h-hhat|^2) by repeating the estimate 1000 times and assuming
 % h known
