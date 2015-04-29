@@ -27,7 +27,7 @@ title('Frequency response of the Doppler filter')
 % the sampled exp function that describes the aleatory part of the PDP. The
 % entire function is normalized to sum to 1-C^2.
 
-M_complete = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
+M_complete = 1/tau_rms*exp(-(0:894)*Tc/tau_rms);
 M_complete = M_complete.*(1-C^2)/sum(M_complete);
 
 for N_h = 1:10
@@ -167,15 +167,15 @@ legend('h1', 'Rayleigh pdf');
 % script as before but generate only the required impulse response.
 % Moreover, since we are interested in the 151th sample after the transient
 % we can generate shorter impulse responses at each iteration.
-numexp = 1000;
+numsim = 1000;
 h_samples_needed = 200000 + ceil(Tp/Tc*length(h_dopp)); 
 % Some will be dropped because of transient, since
 % enough time, memory and computational power are available 
 w_samples_needed = ceil(h_samples_needed / Tp);
 transient = ceil(Tp/Tc*length(h_dopp));
 
-h_1 = zeros(numexp, 1);
-for k = 1:numexp
+h_1 = zeros(numsim, 1);
+for k = 1:numsim
     disp(k)
     w = wgn(w_samples_needed,1,0,'complex');
     hprime = filter(b_dopp, a_dopp, w);
@@ -183,16 +183,14 @@ for k = 1:numexp
     t = 1:length(hprime);
     t_fine = Tq/Tp:Tq/Tp:length(hprime);
     h_fine = interp1(t, hprime, t_fine, 'spline');
-    % Drop the transient
-    h_notrans = h_fine(50000:end);
+    % Drop the transient and energy scaling
+    h_notrans = h_fine(50000:end)*sqrt(M_iTc(2));
     % Energy scaling
-    h_1(k) = h_notrans(152);  % it should be multiplied by sqrt(pdp(2)) but since
-    % for the histogram it is required to divide for the same factor then
-    % we drop this computation
+    h_1(k) = h_notrans(152);  
 end
 
 figure, 
-histogram(abs(h_1), 20, 'Normalization','pdf', 'DisplayStyle', 'stairs')
+histogram(abs(h_1)/sqrt(sum(abs(h_1).^2)/length(h_1)), 20, 'Normalization','pdf', 'DisplayStyle', 'stairs')
 title('|h1(151T_C)| over 1000 realizations vs Rayleigh pdf')
 hold on
 a = 0:0.01:3;
