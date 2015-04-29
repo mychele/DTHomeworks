@@ -93,8 +93,8 @@ title('|h_i|')
 % Plot of the required histogram
 figure, histogram(abs(h_mat(2, 1:1000)).'/sqrt(M_iTc(2)), 20, ...
     'Normalization','pdf', 'DisplayStyle', 'stairs');
-title('Experimental PDF from 1000 samples of |h_1|/sqrt(E[|h_1|^2])')
-xlabel('|h_1|/sqrt(E[|h_1|^2]');
+title('Experimental PDF from 1000 samples of hbar_1')
+xlabel('hbar_1');
 
 % This plot can be used to explain that because of the correlation we can't
 % get a nice pdf (too little samples, correlation in peaks)
@@ -115,12 +115,14 @@ grid on
 figure
 histogram(abs(h_mat(2, 1: 100000).')/sqrt(M_iTc(2)), 20, ...
     'Normalization','pdf', 'DisplayStyle', 'stairs')
-title('100000 samples of |h_1|')
+title('100000 samples of hbar_1 vs Rayleigh pdf')
 hold on
 a = 0:0.01:3;
 plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
 hold off
-legend('h1', 'Rayleigh pdf');
+legend('hbar_1', 'Rayleigh pdf');
+ylabel('p_{hbar_1(kT_C)}(a)')
+xlabel('a');
 
 %% Simulation in order to compute the histogram of |h1(151Tc)|/sqrt(E(|h1(151Tc)|^2))
 % This simulation repeats for numexp times, indipendently, the generation
@@ -155,11 +157,11 @@ end
 figure, 
 histogram(abs(h_1)/sqrt(sum(abs(h_1).^2)/length(h_1)), 20, ...
     'Normalization','pdf', 'DisplayStyle', 'stairs')
-title('|h1(151T_C)| over 1000 realizations vs Rayleigh pdf')
+title('hbar_1(151T_C) over 1000 realizations vs Rayleigh pdf')
 hold on
 a = 0:0.01:3;
 plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
 hold off
-legend('h1', 'Rayleigh pdf');
+legend('hbar_1', 'Rayleigh pdf');
 xlabel('a');
-ylabel('p_{|h1(151T_C)|}(a)');
+ylabel('p_{hbar_1(151T_C)}(a)');
