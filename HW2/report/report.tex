@@ -185,9 +185,10 @@ The behavior of $|h_1(nT_C)|, n = 0, 1, \dots, 1999$ can be observed in Fig.~\re
 
 \subsection*{Plot the histogram of $\frac{|h_1|}{\sqrt{E[|h_1|^2]}}$}
 Since $\frac{|h_1|}{\sqrt{E[|h_1|^2]}}$ is the scaled absolute value of a complex gaussian random variable, it is distributed according to a Rayleigh distribution with PDF
-$$p_{|\bar{g}_i|}(a) = 2a e^{-a^2} 1(a)$$
-
-The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$, computed over a window of 1000 samples of a single realization of the channel's impulse response, is shown in Fig.~\ref{fig:h1hist}. We can observe that the empirical pdf does not approximate the Rayleigh distribution. Indeed, as Fig.~\ref{fig:h1histvstime} shows, whenever $h_1$ shows a local maximum or minimum, the values for consecutive time instants are similar, therefore they build up in the histogram to create peaks. In order to explain this behavior let's consider the coherence time of the channel. This is a parameter defined as the inverse of the Doppler spread $f_d$, therefore $T_{coh} = 1/f_d = \frac{T}{5*10^{-3}}$ but since the channel is defined in the time domain $T_C = T/4$ the coherence time with respect to the channel sampling time actually is $T_{coh} = 1/f_d = \frac{4T_C}{5*10^{-3}} \approx 833T_C$.
+\begin{equation}
+  p_{|\bar{g}_i|}(a) = 2a e^{-a^2} 1(a)
+\end{equation}
+The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$, computed over a window of 1000 samples of a single realization of the channel's impulse response, is shown in Fig.~\ref{fig:h1hist}. We can observe that the empirical pdf does not approximate the Rayleigh distribution. Indeed, as Fig.~\ref{fig:h1histvstime} shows, whenever $h_1$ shows a local maximum or minimum, the values for consecutive time instants are similar, therefore they build up in the histogram to create peaks. In order to explain this behavior let's consider the coherence time of the channel. This is a parameter defined in \cite{bc} as the inverse of the Doppler spread $f_d$, therefore $T_{coh} = 1/f_d = \frac{T}{5*10^{-3}}$ but since the channel is defined in the time domain $T_C = T/4$ the coherence time with respect to the channel sampling time actually is $T_{coh} = 1/f_d = \frac{4T_C}{5*10^{-3}} \approx 833T_C$.
 The coherence time is the range over which the autocorrelation of the impulse response of ray $h_1$ is approximately non zero. Therefore, two samples of $h_1$ at a lag less than $T_{coh}$ are correlated and not statistically independent, even though drawn from the same distribution. Since the interval of 1000 consecutive samples over which the histogram is evaluated contains just one coherence interval and thus correlated samples, it is not representative of the complete distribution of $h_1$ values. On the other hand, if we increase the window of observed samples to 100000 values, it can ben seen that the histogram approaches the expected Rayleigh distribution, since the number of independent samples observed grows. The histogram is an estimator of the probability density function, which is the derivative of the CDF. According to Glivenko-Cantelli theorem (TODO needs citation), the empirical CDF computed as $\hat{F}_n(x) = \frac{1}{x}\sum_{i = 0}^n \texttt{I}_x(i)$, with $\texttt{I}_x(i)$ the indicator function, converges to the real CDF as the number of independent observations of the process grows.
 
 \begin{figure}[h!]
@@ -230,7 +231,7 @@ In this section we adopt a different approach to study the distribution of the v
 \section*{Problem 2}
 
 \subsection*{Setup of the receiver}
-The channel can be simulated using the model depicted in Fig.~\ref{fig:channel_model}. If $x(kT)$ is the sequence the sender wants to transmit over the channel, $x(kT_C)$ is the sequence obtained by interposing $L - 1 = \frac{T}{T_C} - 1 = 3$ zeros between consecutive samples of $x(kT)$. The $h_i$ coefficients are those of the impulse response of the channel derived at Problem 1, and $y(kT_C)$ is the output of the channel at the receiver side. The diagram was drawn for the sake of example by using $N = 6$ coefficients for the channel impulse response. This implementation would actually be quite inefficient, as for each non-zero sample of $x(kT_C)$ there are 3 samples equal to zero, for which the multiplication by the $h_i$ coefficients should also be performed.
+The channel can be simulated using the model depicted in Fig.~\ref{fig:channel_model}. If $x(kT)$ is the sequence the sender wants to transmit over the channel, $x(kT_C)$ is the sequence obtained by interposing $L - 1 = \frac{T}{T_C} - 1 = 3$ zeros between consecutive samples of $x(kT)$. The $h_i$ coefficients are those of the impulse response of the channel, and $d(kT_C)$ is the noisy output of the channel at the receiver side. The additive noise term $w(kT_C)$ is a complex white gaussian noise with zero mean and variance computed with the provided SNR $\Gamma$ of the channel, i.e. $\sigma^2_w = \frac{M_x}{4\Gamma}$. The diagram was drawn for the sake of example by using $N = 6$ coefficients for the channel impulse response. This implementation would actually be quite inefficient, as for each non-zero sample of $x(kT_C)$ there are 3 samples equal to zero, for which the multiplication by the $h_i$ coefficients should also be performed.
 
 \begin{figure}[ht]
 	\centering
@@ -246,17 +247,30 @@ The channel can be simulated using the model depicted in Fig.~\ref{fig:channel_m
     \label{fig:polyphase}
 \end{figure}
 
-A polyphase filter, as shown in Fig.~\ref{fig:polyphase}, is an implementation that avoids products by zero thus saving computational time. In our case, the filtering is performed over 4 different branches, each one working at frequency $\frac{1}{T}$. This allows the filters to work $\frac{T}{T_C} = 4$ times slower than the previous implementation would require. Before the output of the channel, $d(kT_C)$, noise is added to each branch and a parallel to series converter switches over the outputs of the different branches sequentially, selecting a new branch each time period $T_C$. If we assume that in the previous implementation $h_j \ne 0$ for $j = 0, \dots, N - 1$ and that $h_j = 0$ for $j \ge N$, then each filter $h^{(i)}$ of the polyphase implementation can be built by taking as its coefficients the ones that have index $j = 4k + i, k \ge 0$ in the na\"{\i}ve implementation. As an example, if $N = 6$, this setup will yield to $h^{(0)} = [h_0, h_4]$, $h^{(1)} = [h_1, h_5]$, $h^{(2)} = [h_2]$ and $h^{(3)} = [h_3]$.
+A polyphase filter, as shown in Fig.~\ref{fig:polyphase}, is an implementation that avoids products by zero thus saving computational time. In our case, the filtering is performed over 4 different branches, each one working at frequency $\frac{1}{T}$. This allows the filters to work $\frac{T}{T_C} = 4$ times slower than the previous implementation would require. Before the output of the channel, $d(kT_C)$, white noise $w^{(i)}$ with variance $\sigma^2_w = \frac{M_x}{4\Gamma}$ is added to each branch and a parallel to series converter switches over the outputs of the different branches sequentially, selecting a new branch each time period $T_C$. If we assume that in the previous implementation $h_j \ne 0$ for $j = 0, \dots, N - 1$ and that $h_j = 0$ for $j \ge N$,
+then each filter $h^{(i)}$ of the polyphase implementation can be built by taking as its coefficients the ones of the na\"{\i}ve implementation that have index $j = 4k + i, k \ge 0, i \in [0,3]$.
+As an example, if $N = 6$, this setup will yield to $h^{(0)} = [h_0, h_4]$, $h^{(1)} = [h_1, h_5]$, $h^{(2)} = [h_2]$ and $h^{(3)} = [h_3]$.
 
-In the following we will use the notation $N_i$ to identify the number of non-zero coefficients on branch i. Of course, because of how the polyphase implementation is built, $N = \sum_{k = 0}^{k = 3} N_i$.
+In the following we will use the notation $N_i$ to identify the number of non-zero coefficients on branch i. Of course, because of how the polyphase implementation is built, $N = \sum_{i = 0}^{3} N_i$.
 
-At the receiver side, the LS method is used in order to estimate the impulse response of the channel. Assuming the number of coefficients of the channel is $N$, a partially repeated ML pseudo-noise sequence $x(kT)$ of periodicity $L$ and length $L + N_{max} - 1$ is sent through the channel, with $N_{max} = \max \{N_i\}$ and $N_i$ defined as above. This yields an output signal $d(nT_C)$ that is used by the receiver to estimate the coefficients $\mathbf{h}$ by $\mathbf{\hat{h}}$.
-
-The actual estimation is performed separately on the 4 branches, each denoted by its index $i = 0,\ldots,3$, where for each branch we consider $d(kT+iT_C)$ as output, $\mathbf{h}_i = [h(iT_C), h(T+iT_C), \ldots, h((N_i-1)T + iT_C)]$ as impulse response, and $x(kT)$ is the input for all branches. Note that in the following we will always refer to the different polyphase branches with the index $i$, the dependance on time of the impulse response of the channel will be implied, and the notation
+The actual channel used throughout this exercise is the time-varying channel of the previous exercise and the number of coefficients is $N = N_h = 3$. Moreover the channel is time-varying, so the coefficients change at each step. Therefore $h_i(kT_C) = 0, i \ge N_h, \forall k$, while $h_i(kT_C), i < N_h$ changes at each step $T = 4T_c$. The output of each branch is updated in the following way
+\begin{equation}
+  \begin{cases}
+  d^{(i)}(kT) = h_i(kT + iT_c) & \mbox{for } i = 0, 1, 2 \\
+  d^{(i)}(kT) = 0              & \mbox{for } i = 3 \\
+  \end{cases}
+\end{equation}
+and the output in the domain $T_C$ is given by the parallel to series conversion of the 4 branches. \\
+Note that in the following we will always refer to the different polyphase branches with the index $i \in [0,3]$, the dependance on time of the impulse response of the channel will be implied, and the notation
 \begin{equation}\label{eq:def_ir_branch}
 h_i(k) = h(kT+iT_C), \quad k=0,\ldots,N_i-1
 \end{equation}
 will mean the $k$-th sample of the impulse response of the $i$-th branch, i.e. the impulse response of the channel at lag $(4k+i)T_C$.
+
+At the receiver side, the LS method is used in order to estimate the impulse response of the channel. Assuming the number of coefficients of the channel is $N$, a partially repeated ML pseudo-noise sequence $x(kT)$ of periodicity $L$ and length $L + N_{max} - 1$ is sent through the channel, with $N_{max} = \max \{N_i\}$ and $N_i$ defined as above.
+This yields an output signal $d(kT_C)$ that is used by the receiver to estimate the coefficients $\mathbf{h}$ by $\mathbf{\hat{h}}$.
+
+The actual estimation is performed separately on the 4 branches, each denoted by its index $i = 0,\ldots,3$, where for each branch we consider $d(kT+iT_C)$ as output, $\mathbf{h}_i = [h(iT_C), h(T+iT_C), \ldots, h((N_i-1)T + iT_C)]$ as impulse response, and $x(kT)$ is the input for all branches.
 
 The solution of the LS problem, for the estimation of the coefficients of the $i$-th polyphase branch, is given by
 \begin{equation}
@@ -350,7 +364,9 @@ The signal $x$ has $L+N_{max}-1$ samples, and we are now considering $L+1$ sampl
 \begin{equation}\label{eq:transientlen_dhat}
 N_{tr} - 4(N_{max}-2) = \max \{ 0, N-4 \} - 4 \left\lceil \frac{N}{4} \right\rceil + 8
 \end{equation}
-samples of $\hat{d}$. Note that this also works with $N \leq 4$. Indeed, $x$ in this case has length $L$ and we need to keep all output samples, that is to say the transient is actually 0. This algorithm takes the whole signal $x$ with a 0 at the front, $\hat{\mathbf{h}}$ is a column vector, and the first column of $\hat{\mathbf{d}}$ is all zeros. While this first column is useless, the second one has to be entirely kept. According to the expression above, the number of samples that need to be discarded is indeed 4.
+samples of $\hat{d}$. Note that this also works with $N \leq 4$. Indeed, $x$ in this case has length $L$ and we need to keep all output samples, that is to say the transient is actually 0.
+% TODO which algorithm? Not clear
+This algorithm takes the whole signal $x$ with a 0 at the front, $\hat{\mathbf{h}}$ is a column vector, and the first column of $\hat{\mathbf{d}}$ is all zeros. While this first column is useless, the second one has to be entirely kept. According to the expression above, the number of samples that need to be discarded is indeed 4.
 
 As a final remark, we point out some details on our implementation. Firstly, we implemented the LS solution as in \cite[p.~246]{bc}, i.e. using a $L \times N$ observation matrix
 \begin{equation}
@@ -370,11 +386,11 @@ Therefore we can solve the LS problem for the $i$-th branch as
 	\hat{\mathbf{h}}_i = \mathbf{\Phi}_i^{-1} \boldsymbol{\vartheta}_i, \quad\mathrm{ with } \quad \mathbf{\Phi}_i=\boldsymbol{\mathcal{I}}_i^H \boldsymbol{\mathcal{I}}_i \quad \mathrm{ and }\quad \boldsymbol{\vartheta}_i = \boldsymbol{\mathcal{I}}_i^H \mathbf{o}_i.
 \end{equation}
 
-Secondly, for a fixed value of $L$ we chose to generate a number of samples of $x$ that is sufficient to perform the estimation of $\mathbf{h}$ for all desired values of $N$. Specifically, if $x$ is a $(L+\ceil{\bar{N}/4} - 1)$ samples long ML sequence, then we can estimate the impulse response of the channel assuming it has $N$ coefficients, with any positive $N \leq \bar{N}$. This way we need to generate, for each $L$, one ML sequence per simulation, and in each simulation we estimate the channel for all $N \leq \bar{N}$.
+Secondly, for a fixed value of $L$ we chose to generate a number of samples of $x$ that is sufficient to perform the estimation of $\mathbf{h}$ for all desired values of $N$. Specifically, if $x$ is a $(L+\ceil{\bar{N}/4} - 1)$ samples long ML sequence, then we can estimate the impulse response of the channel assuming it has $N$ coefficients, with any positive $N \leq \bar{N}$. This way we need to generate, for each $L$, one ML sequence, and in each simulation we estimate the channel for all $N \leq \bar{N}$.
 
 
 \subsection*{Determine $L$ and $N$}
-Let $\bar{N}$ be 10. For each $L \in [3, 7, 15, 31, 63, 127]$ we transmit 100 ML sequences over disjoint intervals of the time-varying channel, evaluate the output $d(kT_C)$, and as previously mentioned we compute a LS estimate of the channel impulse response $\mathbf{h}_i \; \forall i$ for each $N \leq \bar{N}$. In order to evaluate the quality of the estimate we compute the error function defined as the sum of the squared errors at the output:
+Let $\bar{N}$ be 10. For each $L \in [3, 7, 15, 31, 63, 127]$ we transmit 100 ML sequences over disjoint intervals of the time-varying channel, evaluate the output $d(kT_C)$, and as previously mentioned we compute a LS estimate of the channel impulse response $\mathbf{h}_i \; i \in [0,3]$ for each $N \leq \bar{N}$. In order to evaluate the quality of the estimate we compute the error function defined as the sum of the squared errors at the output:
 \begin{equation}
 	\mathcal{E} = \sum_{k \in \mathcal{K}} |d(k)-\hat{d}(k)|^2
 \end{equation}
@@ -387,7 +403,7 @@ where $\mathcal{K}$ denotes the set of indices over the $T_C$ time domain for wh
 TODO:\\
 Define theoretical value of $\mathcal{E}$, plot it together with the experimental values and comment.\\
 % in my (Michele) opinion this isn't required. Note that the receiver doesn't know this value since it depends on the noise of the channel. Therefore it's ok that in our implementation the $\mathcal{E}$ tends to the theoretical value, but it isn't smth that can be exploited by the receiver or by us in order to make analysis
-Note that the simulation of the transmission is performed over disjoint time intervals of the time-varying channel, in order to mimic a real situation in which in order to perform more than once the estimation it is necessary to repeat the transmission multiple times. In particular the distance between two simulated transmissions is set to $50*(L+\bar(N))*T/T_C$ in order to try to consider uncorrelated impulse response, even if the actual coherence time of the channel isn't known at this point by the transmitter-receiver setup. This distance is a tradeoff between a longer waiting time between transmissions, which would yield uncorrelated impulses with an higher probability, and computational and memory constraints of the system. %TODO try on Andrea or Davide computer (8GB ram) to increase the number of coefficients generated in channel_generator(approx up to a*10^7 should work) and increase this distance, which is already enough, but we don't know it!
+Note that the simulation of the transmission is performed over disjoint time intervals of the time-varying channel, in order to mimic a real situation in which in order to perform more than once the estimation it is necessary to repeat the transmission multiple times. In particular the distance between two simulated transmissions is set to $50*(L+\bar(N))*T/T_C$ in order to try to consider uncorrelated impulse response, even if the actual coherence time of the channel isn't known at this point by the transmitter-receiver setup. This distance is a trade-off between a longer waiting time between transmissions, which would yield uncorrelated impulses with an higher probability, and computational and memory constraints of the system.
 
 
 \subsection*{Estimate of $E[||\mathbf{\hat{h}}-\mathbf{h}||^2]$ assuming $\mathbf{h}$ is known}
