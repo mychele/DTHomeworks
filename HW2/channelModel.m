@@ -6,6 +6,8 @@ rng default
 
 %% Data
 
+% the data_init script initializes all the input parameters that don't change 
+% across the simulation
 data_init;
 
 % Plot residual energy of IIR filter (determine transient)
@@ -21,15 +23,17 @@ ylim([0, 12])
 title('Frequency response of the Doppler filter')
 
 %% Criterion for Nh
-%TODO: Michele comment better!
-% Normalize the complete exp but consider just the queue
+% We consider the error that is introduced by dropping the tail of the of
+% the sampled exp function that describes the aleatory part of the PDP. The
+% entire function is normalized to sum to 1-C^2.
 
-h = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
-h = h.*(1-C^2)/sum(h);
+M_complete = 1/tau_rms*exp(-(0:899)*Tc/tau_rms);
+M_complete = M_complete.*(1-C^2)/sum(M_complete);
 
-for N_h = 1:20; % To be determined
-    deltah = h(N_h+1:end);
-    lambda_n(N_h) = 1/(snr_lin * sum(abs(deltah)));
+for N_h = 1:10
+    % consider only the tail
+    deltaM = M_complete(N_h+1:end);
+    lambda_n(N_h) = 1/(snr_lin * sum(abs(deltaM)));
 end
 
 figure
@@ -63,6 +67,9 @@ legend('PDP', 'Location', 'SouthWest')
 
 %% Generation of impulse responses
 
+% The code to generate the impulse responses is externalized in
+% channel_generator script, which will be invoked both in the first and
+% second exercise
 channel_generator;
 
 %% Show the behavior of |h_1(nTc)| for n = 0:1999, dropping the transient
@@ -152,10 +159,17 @@ legend('h1', 'Rayleigh pdf');
 % title(sprintf('Autoc from t=%d', begin))
 
 
-%% Simulation
-% TODO: Michele comment
+%% Simulation in order to compute the histogram of |h1(151Tc)|/sqrt(E(|h1(151Tc)|^2))
+% This simulation repeats for numexp times, indipendently, the generation
+% of the impulse response for ray 1. The task is the same as in the more
+% general channel_generator. However, in order to speed up the simulation
+% and since only one ray is involved, we don't invoke channel_generator
+% script as before but generate only the required impulse response.
+% Moreover, since we are interested in the 151th sample after the transient
+% we can generate shorter impulse responses at each iteration.
 numexp = 1000;
-h_samples_needed = 200000 + ceil(Tp/Tc*length(h_dopp)); % Some will be dropped because of transient, since
+h_samples_needed = 200000 + ceil(Tp/Tc*length(h_dopp)); 
+% Some will be dropped because of transient, since
 % enough time, memory and computational power are available 
 w_samples_needed = ceil(h_samples_needed / Tp);
 transient = ceil(Tp/Tc*length(h_dopp));
@@ -174,7 +188,7 @@ for k = 1:numexp
     % Energy scaling
     h_1(k) = h_notrans(152);  % it should be multiplied by sqrt(pdp(2)) but since
     % for the histogram it is required to divide for the same factor then
-    % we drop this computation to save computational time
+    % we drop this computation
 end
 
 figure, 
