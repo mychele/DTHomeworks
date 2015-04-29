@@ -446,17 +446,18 @@ Finally, we can express the estimation error of the $i$-th branch as
 	E[||\mathbf{\Delta h}_i||^2] = \sigma_w^2 \; \tr [(\mathbf{\Phi}_i^*)^{-1}] = \sigma_w^2 \; \tr [\mathbf{\Phi}_i^{-1}] = \sigma_w^2 \frac{N_i(L+2-N_i)}{(L+1)(L+1-N_i)}
 \end{equation}
 where $\mathbf{\Phi}_i$ is Hermitian. Going back to the overall estimation error we have
-\begin{equation}\label{deltahtheo}
-	E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = \sum_{i=0}^{3} E[||\mathbf{\Delta h}_i||^2] = \frac{\sigma_w^2}{L+1} \sum_{i=0}^{3} \frac{N_i (L+2-N_i)}{L+1-N_i}.
+\begin{equation}\label{eq:deltahtheo}
+	E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = \sum_{i=0}^{3} E[||\mathbf{\Delta h}_i||^2] = \frac{\sigma_w^2}{L+1} \sum_{i=0}^{3} \frac{N_i (L+2-N_i)}{L+1-N_i},
 \end{equation}
+that yields $E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = 0.025 = -16 \dB$ for $L=3, N=3$, whereas the empirical value is $E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = 0.026 = -15.8 \dB$.
 
-Equation~\ref{deltahteo} yields $E[||\mathbf{\hat{h}}-\mathbf{h}||^2] = 0.025 = -16 \dB$ for $L=3, N=3$.
+We also compared the empirical estimation error measured in the previous section with its theoretical value, varying $L$ and $N$. With $L$ fixed, the estimation error becomes worse as $N$ increases, but of course this holds for $N \geq N_h$ only, otherwise this result does not apply. In fact, when estimating $\mathbf{h}$ with $N<N_h$ the actual error becomes larger since we have less degrees of freedom with respect to the ones of the system. On the other hand, when $N > N_h$ it is as though we were estimating a channel with $N_h = N$ in which the last $N_h - N$ coefficients are zero. Therefore, of course the estimation error gets worse -- because we are performing more estimations and all of them are subject to error -- but it makes no difference whether or not the additional $N_h - N$ coefficients are indeed zero. For this reason, the empirical estimation error follows the theoretical value for $N \geq N_h$, as shown in Fig.~\ref{fig:p02_comparetheoreticaldeltah}.
 
-We also compared the empirical estimation error measured in the previous section with its theoretical value varying $L$ and $N$. With $L$ fixed, the estimation error becomes worse as $N$ increases, but of course this holds for $N \geq N_h$ only, otherwise this result does not apply. In fact, when estimating $\mathbf{h}$ with $N<N_h$ the actual error becomes larger since we have less degrees of freedom with respect to the ones of the system. On the other hand, when $N > N_h$ it is as though we were estimating a channel with $N_h = N$ in which the last $N_h - N$ coefficients are zero. Therefore, of course the estimation error gets worse -- because we are performing more estimations and all of them are subject to error -- but it makes no difference whether or not the additional $N_h - N$ coefficients are indeed zero. For this reason, the empirical estimation error follows the theoretical value for $N \geq N_h$, as shown in Fig.~\ref{fig:p02_comparetheoreticaldeltah}.
+However, this reasoning, being based on LS estimation, does not account for the time-variant nature of the channel. Specifically, the empirical estimation error compares the estimated impulse response not with the true impulse response, but with its mean in the time interval at hand. Therefore, unless $L$ is much smaller than the coherence time of the channel, the estimation error is underestimated, and for larger $L$ we expect the error to get worse.
 
 \begin{figure}[ht]
 	\centering
-	\includegraphics[width=0.75\textwidth]{p02_comparetheoreticaldeltah}
+	\includegraphics[width=0.68\textwidth]{p02_comparetheoreticaldeltah}
 	\caption{Experimental estimation error $E[||\mathbf{\Delta h}||^2]$ with different values of $L$ and $N$, compared with its theoretical value.}
     \label{fig:p02_comparetheoreticaldeltah}
 \end{figure}
