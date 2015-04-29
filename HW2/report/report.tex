@@ -170,7 +170,7 @@ This filter is an IIR narrowband filter which is the convolution of a filter tha
 
 The interpolator filter $h_{int}$ performs interpolation using the spline algorithm, then each impulse response $h'_i(kT_C)$ is multiplied by $\sigma_i = \sqrt{E[|\tilde{h}_i(nT_C)|^2]}$ in order to apply the desired power delay profile. Note that $E[|\tilde{h}_i(nT_C)|^2], \; i=0,\dots,N_h -1$ is the PDP obtained by sampling the continuous $M(\tau)$ PDP and normalizing it to $1-C^2$, thus it describes the power of the aleatory component of each ray. Finally, for the ray $i = 0$ the LOS component $C$ is added.
 
-This procedure is repeated for each ray $i = 0, 1, 2$ and the generated impulse response $h_i(nT_C)$ is stored without the transient in the $i$-th row of the matrix \texttt{h\_mat}. As a matter of fact, the simulation requires on average 6 ms for the generation of transient samples and 0.35 s for the generation of $2*10^6$ useful samples, therefore even with a conservative choice for the transient its computation requires about $1.7\%$ of the whole simulation time.
+This procedure is repeated for each ray $i = 0, 1, 2$ and the generated impulse response $h_i(nT_C)$ is stored without the transient in the $i$-th row of the matrix \texttt{h\_mat}. As a matter of fact, the simulation requires on average 6 ms for the generation of transient samples and 1.22 s for the generation of $8*10^6$ useful samples, therefore even with a conservative choice for the transient its computation requires about $0.5\%$ of the whole simulation time.
 
 The behavior of $|h_1(nT_C)|, n = 0, 1, \dots, 1999$ can be observed in Fig.~\ref{fig:h1}.
 
@@ -198,7 +198,7 @@ The coherence time is the range over which the autocorrelation of the impulse re
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width = 0.8\textwidth]{p02_h1hist}
+  \includegraphics[width = 0.85\textwidth]{p02_h1hist}
   \caption{Comparison between the histogram and the time domain data it was derived from}
   \label{fig:h1histvstime}
 \end{figure}
