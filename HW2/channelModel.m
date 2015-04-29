@@ -111,15 +111,15 @@ grid on
 
 % Here we show that the experimental PDF gets better with more samples
 figure
-subplot 211
-histogram(abs(h_mat(2, 1: 10000).')/sqrt(M_iTc(2)), 20,'Normalization','pdf', 'DisplayStyle', 'stairs')
-title('10000 samples of |h_1|')
-hold on
-a = 0:0.01:3;
-plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
-hold off
-legend('h1', 'Rayleigh pdf');
-subplot 212
+% subplot 211
+% histogram(abs(h_mat(2, 1: 10000).')/sqrt(M_iTc(2)), 20,'Normalization','pdf', 'DisplayStyle', 'stairs')
+% title('10000 samples of |h_1|')
+% hold on
+% a = 0:0.01:3;
+% plot(a, 2.*a.*exp(-a.^2), 'LineWidth', 1.5);  % Theoretical PDF (page 308, BC)
+% hold off
+% legend('h1', 'Rayleigh pdf');
+% subplot 212
 histogram(abs(h_mat(2, 1: 100000).')/sqrt(M_iTc(2)), 20,'Normalization','pdf', 'DisplayStyle', 'stairs')
 title('100000 samples of |h_1|')
 hold on

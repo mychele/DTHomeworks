@@ -174,7 +174,7 @@ This procedure is repeated for each ray $i = 0, 1, 2$ and the generated impulse 
 
 
 \subsection*{Show the behavior of $|h_1(nT_c)|$}
-The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig.~\ref{fig:h1}. 
+The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig.~\ref{fig:h1}.
 
 \begin{figure}[h!]
   \centering
@@ -187,7 +187,8 @@ The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig.~\re
 Since $\frac{|h_1|}{\sqrt{E[|h_1|^2]}}$ is the scaled absolute value of a complex gaussian random variable, it is distributed according to a Rayleigh distribution with PDF
 $$p_{|\bar{g}_i|}(a) = 2a e^{-a^2} 1(a)$$
 
-The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$, computed over a window of 1000 samples of a single realization of the channel's impulse response, is shown in Fig.~\ref{fig:h1hist}. We can observe that the empirical pdf does not approximate the Rayleigh distribution. Indeed, as Fig.~\ref{fig:h1histvstime} shows, whenever $h_1$ shows a local maximum or minimum, the values for consecutive time instants are similar, therefore they build up in the histogram to create peaks. In order to explain this behavior let's consider the coherence time of the channel. This is a parameter defined as the inverse of the Doppler spread $f_d$, therefore $T_{coh} = 1/f_d = \frac{T}{5*10^{-3}}$ but since the channel is defined in the time domain $T_c = T/4$ the coherence time with respect to the channel sampling time actually is $T_{coh} = 1/f_d = \frac{4T_c}{5*10^{-3}} \approx 833T_c$. The coherence time is the range over which the autocorrelation of the impulse response of ray $h_1$ is approximately non zero. Therefore, two samples of $h_1$ at a lag less than $T_{coh}$ are correlated and not statistically independent, even though drawn from the same distribution. Since the interval of 1000 consecutive samples over which the histogram is evaluated contains just one coherence interval and thus correlated samples, it is not representative of the complete distribution of $h_1$ values. On the other hand, if we increase the window of observed samples to (TODO) value, it can ben seen that the histogram approaches the expected Rayleigh distribution, since the number of independent samples observed grows. The histogram is an estimator of the probability density function, which is the derivative of the CDF. According to Glivenko-Cantelli theorem (TODO needs citation), the empirical CDF computed as $\hat{F}_n(x) = \frac{1}{x}\sum_{i = 0}^n \texttt{I}_x(i)$, with $\texttt{I}_x(i)$ the indicator function, converges to the real CDF as the number of independent observations of the process grows.
+The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$, computed over a window of 1000 samples of a single realization of the channel's impulse response, is shown in Fig.~\ref{fig:h1hist}. We can observe that the empirical pdf does not approximate the Rayleigh distribution. Indeed, as Fig.~\ref{fig:h1histvstime} shows, whenever $h_1$ shows a local maximum or minimum, the values for consecutive time instants are similar, therefore they build up in the histogram to create peaks. In order to explain this behavior let's consider the coherence time of the channel. This is a parameter defined as the inverse of the Doppler spread $f_d$, therefore $T_{coh} = 1/f_d = \frac{T}{5*10^{-3}}$ but since the channel is defined in the time domain $T_c = T/4$ the coherence time with respect to the channel sampling time actually is $T_{coh} = 1/f_d = \frac{4T_c}{5*10^{-3}} \approx 833T_c$.
+The coherence time is the range over which the autocorrelation of the impulse response of ray $h_1$ is approximately non zero. Therefore, two samples of $h_1$ at a lag less than $T_{coh}$ are correlated and not statistically independent, even though drawn from the same distribution. Since the interval of 1000 consecutive samples over which the histogram is evaluated contains just one coherence interval and thus correlated samples, it is not representative of the complete distribution of $h_1$ values. On the other hand, if we increase the window of observed samples to (TODO) value, it can ben seen that the histogram approaches the expected Rayleigh distribution, since the number of independent samples observed grows. The histogram is an estimator of the probability density function, which is the derivative of the CDF. According to Glivenko-Cantelli theorem (TODO needs citation), the empirical CDF computed as $\hat{F}_n(x) = \frac{1}{x}\sum_{i = 0}^n \texttt{I}_x(i)$, with $\texttt{I}_x(i)$ the indicator function, converges to the real CDF as the number of independent observations of the process grows.
 % TODO Also include pics of hist getting better with more samples or it didn't happen
 
 \begin{figure}[h!]
@@ -205,7 +206,7 @@ The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$, computed over a window of 1000
 \end{figure}
 
 \subsection*{Plot the histogram of $\frac{|h_1(151T_c)|}{\sqrt{E[|h_1(151T_c)|^2]}}$ for 1000 realizations}
-In this section we adopt a different approach to study the distribution of the values of $h_1$ and study the values that the same sample $\frac{|h_1(151T_c)|}{\sqrt{E[|h_1(151T_c)|^2]}}$ assumes over 1000 different realizations of the channel. The histogram that this simualtion generates can be seen in Fig.~\ref{fig:h1hist1000realizations}. As it can be seen, it approximates the Rayleigh distribution $p_{|\bar{g}_i|}(a) = 2a e^{-a^2} 1(a)$ in a better way than Fig. \ref{fig:h1hist}, since in this case the samples that are considered when computing the histogram are drawn from indipendent realizations of the process. Note that $E[|h_1(151T_c)|^2]$ is actually egual to the value of the PDP for ray $i=1$.
+In this section we adopt a different approach to study the distribution of the values of $h_1$ and study the values that the same sample $\frac{|h_1(151T_c)|}{\sqrt{E[|h_1(151T_c)|^2]}}$ assumes over 1000 different realizations of the channel. The histogram that this simualtion generates can be seen in Fig.~\ref{fig:h1hist1000realizations}. As it can be seen, it approximates the Rayleigh distribution $p_{|\bar{g}_i|}(a) = 2a e^{-a^2} 1(a)$ in a better way than Fig. \ref{fig:h1hist}, since in this case the samples that are considered when computing the histogram are drawn from independent realizations of the process. Note that $E[|h_1(151T_c)|^2]$ is actually equal to the value of the PDP for ray $i=1$.
 
 \begin{figure}[h!]
   \centering
@@ -214,27 +215,34 @@ In this section we adopt a different approach to study the distribution of the v
   \label{fig:h1hist1000realizations}
 \end{figure}
 
+\clearpage
+
 \section*{Problem 2}
 
 \subsection*{Setup of the receiver}
-% TODO
-Draw the polyphase implementation of the channel. This will help clarify what $N_i$ and $N$ are.
+% TODO Draw the polyphase implementation of the channel. This will help clarify what $N_i$ and $N$ are.
+
+The channel can be simulated using the model depicted in Fig.~\ref{fig:channel_model}. If $x(kT)$ is the sequence the sender wants to transmit over the channel, $x(kT_c)$ is the sequence obtained by interposing $L - 1 = \frac{T}{T_c} - 1 = 3$ zeros between consecutive samples of $x(kT)$. The $h_i$ coefficients are those of the impulse response of the channel derived at Problem 1, and $y(kT_c)$ is the output of the channel at the receiver side. The diagram was drawn for the sake of example by using $N = 5$ coefficients for the channel impulse response. This implementation would actually be quite inefficient, as for each non-zero sample of $x(kT_c)$ there are 3 samples equal to zero, for which the multiplication by the $h_i$ coefficients should also be performed.
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{channel_model}
-	\caption{.}
+	\caption{The channel model in its implementation as a simple filter}
     \label{fig:channel_model}
 \end{figure}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.75\textwidth]{polyphase}
-	\caption{.}
+	\caption{The polyphase implementation of the channel simulator}
     \label{fig:polyphase}
 \end{figure}
 
-At the receiver side, the LS method is used in order to estimate the impulse response of the channel. Assuming the number of coefficients of the channel is $N$, a partially repeated ML pseudo-noise sequence $x(kT)$ of periodicity $L$ and length $L + N_{max} - 1$ is sent through the channel, with $N_{max} = \max \{N_i\}$ and $N_i$ defined as above. In its polyphase implementation, the channel is a parallel of 4 filters with common input and sampling period $T$. In order to change the sampling period from $T$ to $T_C$, these branches are followed by a parallel/series switch that selects the outputs of the filters, passing to the next branch every $T_C$ seconds. This yields an output signal $d(nT_C)$ that is used by the receiver to estimate the coefficients $\mathbf{h}$ by $\mathbf{\hat{h}}$.
+A polyphase filter, as shown in Fig.~\ref{fig:polyphase}, is an implementation that avoids products by zero thus saving computational time. In our case, the filtering is performed over 4 different branches, each one working at frequency $\frac{1}{T}$. This allows the filters to work $\frac{T}{T_c} = 4$ times slower than the previous implementation would require. Before the output of the channel, $d(kT_c)$, noise is added to each branch and a parallel to series converter switches over the outputs of the different branches sequentially, selecting a new branch each time period $T_c$. If we assume that in the previous implementation $h_j \ne 0$ for $j = 0, \dots, N - 1$ and that $h_j = 0$ for $j \ge N$, then each filter $h^{(i)}$ of the polyphase implementation can be built by taking as its coefficients the ones that have index $j = 4k + i, k \ge 0$ in the na\"{\i}ve implementation. As an example, if $N = 5$, this setup will yield to $h^{(0)} = [h_0, h_4]$, $h^{(1)} = [h_1, h_5]$, $h^{(2)} = [h_2]$ and $h^{(3)} = [h_3]$.
+
+In the following we will use the notation $N_i$ to identify the number of non-zero coefficients on branch i. Of course, because of how the polyphase implementation is built, $N = \sum_{k = 0}^{k = 3} N_i$.
+
+At the receiver side, the LS method is used in order to estimate the impulse response of the channel. Assuming the number of coefficients of the channel is $N$, a partially repeated ML pseudo-noise sequence $x(kT)$ of periodicity $L$ and length $L + N_{max} - 1$ is sent through the channel, with $N_{max} = \max \{N_i\}$ and $N_i$ defined as above. This yields an output signal $d(nT_C)$ that is used by the receiver to estimate the coefficients $\mathbf{h}$ by $\mathbf{\hat{h}}$.
 
 The actual estimation is performed separately on the 4 branches, each denoted by its index $i = 0,\ldots,3$, where for each branch we consider $d(kT+iT_C)$ as output, $\mathbf{h}_i = [h(iT_C), h(T+iT_C), \ldots, h((N_i-1)T + iT_C)]$ as impulse response, and $x(kT)$ is the input for all branches. Note that in the following we will always refer to the different polyphase branches with the index $i$, the dependance on time of the impulse response of the channel will be implied, and the notation
 \begin{equation}\label{eq:def_ir_branch}
@@ -325,7 +333,7 @@ with $i=0,\ldots,3,\; j=0,\ldots,L$. The full $4 \times (L+1)$ matrix at time $k
 \end{equation}
 and contains the last $4(L+1)$ values of the output $\hat{d}$ up to the time instant $kT+3T_C$. Recalling the definition in \eqref{eq:def_ir_branch}, that applies to $\hat{\mathbf{h}}$ as well, we can concatenate vertically all columns, from the left to the right, to obtain the vector
 \begin{equation}
-	\hat{\mathbf{d}}' (k) = \left[\hat{d}[(k-L)T],\; \hat{d}[(k-L)T + T_C], \ldots,\; \hat{d}[kT + 3T_C] \right]^T.
+	\hat{\mathbf{d}}' (k) = \left[\hat{d}((k-L)T),\; \hat{d}((k-L)T + T_C), \ldots,\; \hat{d}(kT + 3T_C) \right]^T.
 \end{equation}
 
 What follows is a consideration on how many samples of this vector we should skip as transient. The transient of the whole system is $N-1$ samples long, if we consider the $T_C$ sampling period. However, after $N-1-(T/T_C - 1) = N-4$ samples we have already discarded all past samples of the signal $x$: we are still considering 3 initial conditions on $x$, but they do not contain samples of the signal, since it is defined with a sampling period equal to $4T_C$, thus they do not affect the output and we do not consider them as transient. Note that if $N \leq 4$ we do not need to discard any sample, therefore we define the number of samples of the transient in the $T_C$ domain as $N_{tr} = \max \{0, N-4\}$.
@@ -347,7 +355,7 @@ x[(N_i-1)+(L-1)] & \cdots & x(L-1) \\
 \end{equation}
 and a desired sample vector
 \begin{equation}
-\mathbf{o}_i^T = \left[ d_i(N_i-1)\;,\; \ldots\; , \;d_i[(N_i-1)+(L-1)] \right].
+\mathbf{o}_i^T = \left[ d_i(N_i-1)\;,\; \ldots\; , \;d_i((N_i-1)+(L-1)) \right].
 \end{equation}
 Therefore we can solve the LS problem for the $i$-th branch as
 \begin{equation}
@@ -403,7 +411,7 @@ where $\mathbf{\Phi}_i$ is Hermitian. Going back to the overall estimation error
 
 Now we are ready to compare the empirical estimation error measured in the previous section, with its theoretical value we just derived. With $L$ fixed, the estimation error becomes worse as $N$ increases, but of course this holds for $N \geq N_h$ only, otherwise this result does not apply. In fact, when estimating $\mathbf{h}$ with $N<N_h$ the actual error becomes larger since we have less degrees of freedom with respect to the ones of the system. On the other hand, when $N > N_h$ it is as though we were estimating a channel with $N_h = N$ in which the last $N_h - N$ coefficients are zero. Therefore, of course the estimation error gets worse -- because we are performing more estimations and all of them are subject to error -- but it makes no difference whether or not the additional $N_h - N$ coefficients are indeed zero. For this reason, the empirical estimation error follows the theoretical value for $N \geq N_h$, as shown in Fig.~\ref{fig:p02_comparetheoreticaldeltah}.
 
-\begin{figure}[ht]
+\begin{figure}[ht] % TODO Change this to display N = 10 max
 	\centering
 	\includegraphics[width=0.75\textwidth]{p02_comparetheoreticaldeltah}
 	\caption{Experimental estimation error $E[||\mathbf{\Delta h}||^2]$ with different values of $L$ and $N$, compared with its theoretical value.}
