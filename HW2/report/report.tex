@@ -88,7 +88,7 @@ basicstyle=\footnotesize\ttfamily
 
 \subsection*{Choice of $N_h$}
 
-In order to determine a suitable $N_h$ (i.e., the number of rays of the impulse response we will keep), we consider the noise that we would introduce by performing the truncation of the power delay profile \textit{PDP} (that corresponds to a truncation of the random impulse response). The aleatory part of the discrete power delay profile of the channel is given as the sampled version of
+In order to determine a suitable $N_h$ (i.e., the number of rays of the impulse response we will keep), we consider the noise that we would introduce by performing the truncation of the power delay profile \textit{PDP} (that corresponds to a truncation of the number of rays of the channel impulse response). The aleatory part of the discrete power delay profile of the channel is given as the sampled version of
 \begin{equation}
 \M(\tau) = \frac{1}{\bar{\tau}_{rms}} e^{-\tau / \bar{\tau}_{rms}}
 \end{equation}
@@ -100,7 +100,7 @@ with $i$ non-negative integer, $\tau_{rms} = 0.3T$ the average rms delay spread 
 \begin{equation}
 \sum_{i=0}^{\infty} \M(iT_C) = 1 - C^2
 \end{equation}
-where $C = \sqrt{K / (K+1)}$ is the deterministic line of sight (\textit{LOS}) component of the first ray (for $i=0$) and $K$ is the provided Rice factor. In order to compute the infinite sum above, only the initial 900 samples are actually used, as MATLAB approximates all $\M(iT_C)$ values for $i > 895$ to zero.
+where $C = \sqrt{K / (K+1)}$ is the deterministic line of sight (\textit{LOS}) component of the first ray (for $i=0$) and $K$ is the provided Rice factor. In order to compute the infinite sum above, only the initial 895 samples are actually used, as MATLAB approximates all $\M(iT_C)$ values for $i > 895$ to zero.
 
 Knowing that the true impulse response of the channel has random properties described by the power delay profile $\M(iT_C)$ and by the quantity $C$, then we define the quality of the approximation due to truncation as
 \begin{equation}
@@ -174,8 +174,7 @@ This procedure is repeated for each ray $i = 0, 1, 2$ and the generated impulse 
 
 
 \subsection*{Show the behavior of $|h_1(nT_c)|$}
-The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig.~\ref{fig:h1}.
-% TODO smth on coherence time?
+The behavior of $|h_1(nT_c)|, n = 0, 1, \dots, 1999$ can be observed in Fig.~\ref{fig:h1}. 
 
 \begin{figure}[h!]
   \centering
@@ -206,8 +205,7 @@ The histogram of $\frac{h_1}{\sqrt{E[|h_1|^2]}}$, computed over a window of 1000
 \end{figure}
 
 \subsection*{Plot the histogram of $\frac{|h_1(151T_c)|}{\sqrt{E[|h_1(151T_c)|^2]}}$ for 1000 realizations}
-The histogram can be seen in Fig.~\ref{fig:h1hist1000realizations}.
-Compare it with the theoretical result
+In this section we adopt a different approach to study the distribution of the values of $h_1$ and study the values that the same sample $\frac{|h_1(151T_c)|}{\sqrt{E[|h_1(151T_c)|^2]}}$ assumes over 1000 different realizations of the channel. The histogram that this simualtion generates can be seen in Fig.~\ref{fig:h1hist1000realizations}. As it can be seen, it approximates the Rayleigh distribution $p_{|\bar{g}_i|}(a) = 2a e^{-a^2} 1(a)$ in a better way than Fig. \ref{fig:h1hist}, since in this case the samples that are considered when computing the histogram are drawn from indipendent realizations of the process. Note that $E[|h_1(151T_c)|^2]$ is actually egual to the value of the PDP for ray $i=1$.
 
 \begin{figure}[h!]
   \centering
@@ -360,8 +358,7 @@ Secondly, for a fixed value of $L$ we chose to generate a number of samples of $
 
 
 \subsection*{Determine $L$ and $N$}
-
-For each considered pair $(L,N)$, we run 100 (TODO) simulations in which we take subsequent disjoint time intervals of the time-varying channel, evaluate its output $d(kT_C)$, compute an LS estimate of $\mathbf{h}_i \; \forall i$, and compute the error function defined as the sum of the squared errors at the output:
+Let $\bar{N}$ be 10. For each $L \in [3, 7, 15, 31, 63, 127]$ we transmit 100 ML sequences over disjoint intervals of the time-varying channel, evaluate the output $d(kT_C)$, and as previously mentioned we compute a LS estimate of the channel impulse response $\mathbf{h}_i \; \forall i$ for each $N \leq \bar{N}$. In order to evaluate the quality of the estimate we compute the error function defined as the sum of the squared errors at the output:
 \begin{equation}
 	\mathcal{E} = \sum_{k \in \mathcal{K}} |d(k)-\hat{d}(k)|^2
 \end{equation}
@@ -374,7 +371,7 @@ where $\mathcal{K}$ denotes the set of indices over the $T_C$ time domain for wh
 TODO:\\
 Define theoretical value of $\mathcal{E}$, plot it together with the experimental values and comment.\\
 % in my (Michele) opinion this isn't required. Note that the receiver doesn't know this value since it depends on the noise of the channel. Therefore it's ok that in our implementation the $\mathcal{E}$ tends to the theoretical value, but it isn't smth that can be exploited by the receiver or by us in order to make analysis
-Comment on the fact that we're using subsequent disjoint intervals of the channel.
+Note that the simulation of the transmission is performed over disjoint time intervals of the time-varying channel, in order to mimic a real situation in which in order to perform more than once the estimation it is necessary to repeat the transmission multiple times. In particular the distance between two simulated transmissions is set to $50*(L+\bar(N))*T/T_C$ in order to try to consider uncorrelated impulse response, even if the actual coherence time of the channel isn't known at this point by the transmitter-receiver setup. This distance is a tradeoff between a longer waiting time between transmissions, which would yield uncorrelated impulses with an higher probability, and computational and memory constraints of the system. %TODO try on Andrea or Davide computer (8GB ram) to increase the number of coefficients generated in channel_generator(approx up to a*10^7 should work) and increase this distance, which is already enough, but we don't know it!
 
 
 \subsection*{Estimate of $E[||\mathbf{\hat{h}}-\mathbf{h}||^2]$ assuming $\mathbf{h}$ is known}
