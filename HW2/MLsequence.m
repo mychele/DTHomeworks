@@ -1,10 +1,13 @@
 function [ p ] = MLsequence( L )
-%MLSEQUENCE
+% Generate a Maximum Length Pseudo Noise sequence, using shift and xor
+% operators. L is the desired length of the resulting PN sequence. The
+% script can handle L = 3, 7, 15, 31, 63 and 127.
 
+% Extract r from the given L
 r = log2(L+1);
 p = zeros(L,1);
 p(1:r) = ones(1,r).'; % Set arbitrary initial condition
-for l = r+1:(L)
+for l = r+1:(L) % Skip the initial condition for the cycle
     switch L
         case 3
             p(l) = xor(p(l-1), p(l-2));

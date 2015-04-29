@@ -5,18 +5,18 @@
 Tc = 1;     % This is the smallest time interval we want to simulate
 T = 4*Tc;   % Time sampling interval of the input of the channel
 Tq = Tc;    % Fundamental sampling time. This is the same as Tc
-fd = 5*10^-3/T; % doppler spread
+fd = 5*10^-3/T; % Doppler spread
 Tp = 1/10 * (1/fd) * Tq; % Sampling time used for filtering the white noise, 
-% in order to apply Anastasopoulos and Chugg (1997) filter it must be Tp =
-% 0.1
+% in order to apply Anastasopoulos and Chugg (1997) filter it must be 
+% Tp = 0.1
 
-Kdb = 3; % 3 dB
-K = 10^(Kdb/10);
-C = sqrt(K/(K+1)); % this holds if PDP sums to 1
+Kdb = 3; % 3 dB, given
+K = 10^(Kdb/10); % Linear K
+C = sqrt(K/(K+1)); % This holds if PDP sums to 1
 
 tau_rms = 0.3*T; 
 
-snr = 10; % db
+snr = 10; % dB
 snr_lin = 10^(snr/10);
 
 % Filter for doppler spectrum. The filter will have the
