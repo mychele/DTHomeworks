@@ -1,0 +1,112 @@
+\documentclass[10pt]{article}
+
+%% Various useful packages and commands from different sources
+
+\usepackage[applemac]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{cite, url,color} % Citation numbers being automatically sorted and properly "compressed/ranged".
+%\usepackage{pgfplots}
+\usepackage{graphics,amsfonts}
+\usepackage[pdftex]{graphicx}
+\usepackage[cmex10]{amsmath}
+% Also, note that the amsmath package sets \interdisplaylinepenalty to 10000
+% thus preventing page breaks from occurring within multiline equations. Use:
+ \interdisplaylinepenalty=2500
+% after loading amsmath to restore such page breaks as IEEEtran.cls normally does.
+
+% Compact lists
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{fancyvrb}
+
+\usepackage{listings} % for Matlab code
+\definecolor{commenti}{rgb}{0.13,0.55,0.13}
+\definecolor{stringhe}{rgb}{0.63,0.125,0.94}
+\lstloadlanguages{Matlab}
+\lstset{% general command to set parameter(s)
+framexleftmargin=0mm,
+frame=single,
+keywordstyle = \color{blue},% blue keywords
+identifierstyle =, % nothing happens
+commentstyle = \color{commenti}, % comments
+stringstyle = \ttfamily \color{stringhe}, % typewriter type for strings
+showstringspaces = false, % no special string spaces
+emph = {for, if, then, else, end},
+emphstyle = \color{blue},
+firstnumber = 1,
+numbers =right, %  show number_line
+numberstyle = \tiny, % style of number_line
+stepnumber = 5, % one number_line after stepnumber
+numbersep = 5pt,
+language = {Matlab},
+extendedchars = true,
+breaklines = true,
+breakautoindent = true,
+breakindent = 30pt,
+basicstyle=\footnotesize\ttfamily
+}
+
+\usepackage{array}
+% http://www.ctan.org/tex-archive/macros/latex/required/tools/
+\usepackage{mdwmath}
+\usepackage{mdwtab}
+%mdwtab.sty	-- A complete ground-up rewrite of LaTeX's `tabular' and  `array' environments.  Has lots of advantages over
+%		   the standard version, and over the version in `array.sty'.
+% *** SUBFIGURE PACKAGES ***
+\usepackage[tight,footnotesize]{subfigure}
+\usepackage[top=2.2cm, bottom=2.2cm, right=1.7cm,left=1.7cm]{geometry}
+\usepackage{indentfirst}
+
+
+%\setlength\parindent{0pt}
+\linespread{1}
+
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\M} {\mathtt{M}}
+\newcommand{\dB} {\mathrm{dB}}
+\newcommand{\tr} {\mathrm{tr}}
+
+
+
+\graphicspath{ {figures/} }
+
+% equations are numbered section by section
+%\numberwithin{equation}{section}
+
+
+\begin{document}
+\title{Digital Transmission - Homework 3}
+\author{Andrea Dittadi, Davide Magrin, Michele Polese}
+
+\maketitle
+
+\section*{Problem 1}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% PROBLEM 2 %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+\section*{Problem 2}
+
+
+\begin{thebibliography}{10}
+
+\bibitem{bc}
+Benvenuto, Cherubini, Algorithms for Communications Systems and their Applications, Wiley, 2004
+
+\bibitem{anachugg}
+Anastasopolous, Chugg, An efficient method for simulation of frequency selective isotropic Rayleigh fading, IEEE 47th Vehicular Technology Conference, vol 3, pages 2084 - 2088, 1997
+
+\bibitem{tucker}
+Tucker, A Generalization of the Glivenko-Cantelli Theorem. Ann. Math. Statist. 30 (1959), no. 3, 828--830.
+
+\end{thebibliography}
+
+\end{document}
