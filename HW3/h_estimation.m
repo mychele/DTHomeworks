@@ -15,7 +15,7 @@ end
 
 % Create four different d_i vectors, by sampling with step 4 the complete
 % vector d. Each of them is the output of the branch that has "lag" iTc.
-d_poly = zeros(length(d)/4, 4); % each column is a d_i
+d_poly = zeros(ceil(length(d)/4), 4); % each column is a d_i
 for idx  = 1:4
     d_poly(:, idx) = d(idx:4:end);
 end
