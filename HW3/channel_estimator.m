@@ -3,6 +3,9 @@ clear all
 close all
 clc
 
+Tc = 1;
+T = 4*Tc;
+
 %% Training sequence generation
 L = 15;
 N = 10;
@@ -26,4 +29,11 @@ end
 trainingseq = [mlseqdouble, mlseqdouble(1:2*N)];
 trainingsymbols = bitmap(trainingseq);
 
-%% 
+%% Generate the channel output
+
+snr = 20; %dB
+snr_lin = 10^(snr/10);
+r = channel_output(trainingsymbols, T, Tc, snr_lin);
+
+%% Estimate qhat
+
