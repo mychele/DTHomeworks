@@ -2,6 +2,7 @@
 clear all
 close all
 clc
+rng default % for reproducibility
 
 Tc = 1;
 T = 4*Tc;
