@@ -2,9 +2,10 @@ function [ r ] = channel_output( x, T, Tc, snr)
 % CHANNEL_OUTPUT Generates channel output (that is the desired signal) via a
 % polyphase implementation, with an hard coded non varying channel.
 % Returns the channel output r given the input parameters
-% x is a row vector
+% x is a column vector for consistency
 % snr must be linear
 
+x = x.'; % make x a row vector for simplicity
 Q0 = T/Tc; % interpolation factor
 q = [0,0,0,0,0,0,0,0,0.19*exp(-1i*2.21), 0.09*exp(1i*1.64), 0.7*exp(-1i*2.57), ...
     0.45, 0.6*exp(-1i*2.26), 0.35*exp(1i*3.15), 0.24*exp(1i*1.34), 0.37*exp(1i*2.6), ...
