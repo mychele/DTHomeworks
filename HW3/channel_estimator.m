@@ -1,8 +1,8 @@
 % This script solves the first problem.
-clear all
+clear
 close all
 clc
-%rng default % for reproducibility
+rng default % for reproducibility
 
 Tc = 1;
 T = 4*Tc;
@@ -37,7 +37,7 @@ snr_lin = 10^(snr/10);
 [r, sigma_w] = channel_output(trainingsymbols, T, Tc, snr_lin);
 
 %% Estimate qhat
-maxN = 40;
+maxN = 44;
 error_func = zeros(maxN, 1);
 for N = 1:maxN % N is the supposed length of the impulse response of the channel
     % Compute the supposed length of each branch
@@ -48,8 +48,8 @@ for N = 1:maxN % N is the supposed length of the impulse response of the channel
     [h_hat, d_hat] = h_estimation( trainingsymbols(end-(L+max(N_i)-1) + 1 : end), ...
         r(end - 4*(L+max(N_i)-1) + 1: end), L, N_i);
     d_no_trans = r(end-length(d_hat)+1 : end);
-    error_func(N) = sum(abs(d_hat - d_no_trans).^2)/length(d_hat);
+    error_func(N) = sum(abs(d_hat - d_no_trans).^2)/length(d_hat); % TODO check if we should divide for L?
 end
 
 figure
-plot(error_func), hold on, plot(sigma_w*ones(1, maxN))
+plot(10*log10(error_func)), hold on, plot(10*log10(sigma_w*ones(1, maxN)))
