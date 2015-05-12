@@ -6,7 +6,7 @@ function [output] = bitmap(input)
         return;
     end
     
-    output = zeros(1,L);
+    output = zeros(L,1);
     
     % Map each couple of values to the corresponding symbol
     for idx = 1:2:L-1

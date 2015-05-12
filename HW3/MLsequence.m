@@ -6,7 +6,7 @@ function [ p ] = MLsequence( L )
 % Extract r from the given L
 r = log2(L+1);
 p = zeros(L,1);
-p(1:r) = ones(1,r).'; % Set arbitrary initial condition
+p(1:r) = ones(r,1); % Set arbitrary initial condition
 for l = r+1:(L) % Skip the initial condition for the cycle
     switch L
         case 3

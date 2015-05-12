@@ -13,7 +13,7 @@ mlseq = MLsequence(L);
 
 % Replace every 0 with two 0s and every 1 with two 1s to put it into the
 % bitmap
-mlseqdouble = zeros(1, 2*L);
+mlseqdouble = zeros(2*L,1);
 for i = 1:L
     switch mlseq(i)
         case 0
@@ -26,7 +26,7 @@ for i = 1:L
 end
 
 % Repeat the sequence and bitmap it to get the symbols
-trainingseq = [mlseqdouble, mlseqdouble(1:2*N)];
+trainingseq = [mlseqdouble; mlseqdouble(1:2*N)];
 trainingsymbols = bitmap(trainingseq);
 
 %% Generate the channel output
