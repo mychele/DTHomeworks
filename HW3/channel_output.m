@@ -1,4 +1,4 @@
-function [ r ] = channel_output( x, T, Tc, snr)
+function [ r, sigma_w ] = channel_output( x, T, Tc, snr)
 % CHANNEL_OUTPUT Generates channel output (that is the desired signal) via a
 % polyphase implementation, with an hard coded non varying channel.
 % Returns the channel output r given the input parameters
