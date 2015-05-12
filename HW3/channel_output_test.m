@@ -1,4 +1,6 @@
-function [  ] = channel_output_test( x, T, Tc)
+function [ err ] = channel_output_test( x, T, Tc)
+% Returns a measure of the error. See it yourself, I don't have time to
+% explain.
 
 Q0 = T/Tc; % interpolation factor
 q = [0,0,0,0,0,0,0,0,0.19*exp(-1i*2.21), 0.09*exp(1i*1.64), 0.7*exp(-1i*2.57), ...
@@ -8,11 +10,19 @@ q = [0,0,0,0,0,0,0,0,0.19*exp(-1i*2.21), 0.09*exp(1i*1.64), 0.7*exp(-1i*2.57), .
     0.29*exp(1i*3.17), 0.4*exp(-1i*1.63), 0.07*exp(-1i*3.16)];
 
 out = channel_output(x, T, Tc, 100000);
+   
 out_control = conv(interp_nofilter(x, Q0), q);
+
+difference = length(out) - length(out_control);
+if difference > 0
+    out_control = [out_control; zeros(difference, 1)];
+elseif difference < 0
+    out = [out; zeros(-difference, 1)];
+end
 
 stem(abs(out))
 hold on, stem(abs(out_control), 'x')
 
-%errsquared = sum(abs(out-out_control).^2);
+err = sum(abs(out-out_control).^2) / sum(abs(out)).^2;
 
 end

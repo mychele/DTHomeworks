@@ -23,4 +23,4 @@ end
 trainingseq = [mlseqdouble, mlseqdouble(1:2*N)];
 trainingsymbols = bitmap(trainingseq);
 
-channel_output_test(trainingsymbols, T, Tc);
+channel_output_test(trainingsymbols, T, Tc)
