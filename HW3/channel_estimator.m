@@ -36,6 +36,7 @@ snr = 20; %dB
 snr_lin = 10^(snr/10);
 [r, sigma_w, q] = channel_output(trainingsymbols, T, Tc, snr_lin);
 
+
 %% Choose N @T/4
 
 maxN = 44;
@@ -55,14 +56,16 @@ end
 
 figure
 plot(10*log10(error_func)), hold on, plot(10*log10(sigma_w*ones(1, maxN)))
-title('Error functional')
+title('Error functional estimating h @T/4')
 xlabel('N_{T/4}'), ylabel('\epsilon [dB]')
 grid on
 
 % Fix N
 N_T4 = 28;
+N = ceil(N_T4 / 4);
 
-%% Estimate qhat @T/4 for N = 28
+
+%% Estimate q_hat @T/4 for the chosen N_T4
 
 % Compute the supposed length of each branch
 n_short = mod(4-N_T4, 4); % Num branches with a shorter filter than others
@@ -79,7 +82,9 @@ legend('q', 'qhat'), grid on, xlim([-0.2, length(q) + 0.2]), ylim([-0.05, max(ab
 title('q, qhat for N = 28, estimated @T/4')
 xlabel('iT/4')
 
+
 %% Estimate t0 as in pag 617 bc
+
 m_min = 0;
 m_max = 43;
 i = 1;
@@ -100,12 +105,34 @@ xlim([-0.2, m_max + 0.2])
 m_opt = m_opt - 1; % because of MATLAB indexing
 init_offs = mod(m_opt, 4);
 
-%% Estimate qhat @T
 
-N = ceil(N_T4 / 4);
+
+%% Choose N @T
+
+maxN = 11;
+error_func = zeros(maxN, 1);
+for N = 1:maxN % N is the supposed length of the impulse response of the channel
+    x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
+    d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + init_offs: 4 :end - (length(q)-4) + init_offs);
+    [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);    
+    d_no_trans = d_for_ls(N : N+L-1);
+    error_func(N) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
+end
+
+figure
+plot(10*log10(error_func)), hold on, plot(10*log10(sigma_w*ones(1, maxN)))
+title('Error functional estimating h @T')
+xlabel('N_{T}'), ylabel('\epsilon [dB]')
+grid on
+
+% Fix N
+N = 7;
+
+
+%% Estimate q_hat @T for the chosen N
 
 x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + mod(m_opt, 4): 4 :end - (length(q)-4) + mod(m_opt, 4));
+d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + init_offs: 4 :end - (length(q)-4) + init_offs);
 [q_hat, ~] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
 
 % Temp plot
@@ -122,7 +149,7 @@ title('q, qhat for N = 28, estimated @T')
 xlabel('iT/4')
 
 
-%% Interpolate qhat to get h_i
+%% Interpolate q_hat to get h_i
 
 % If estimation happened @T/4
 % hi = q_hat_vec(init_offs+1:4:end);
@@ -138,6 +165,7 @@ figure, plot(0:length(q)-1, abs(q)), hold on, stem(init_offs:4:4*(length(hi)-1)+
 legend('q', 'qhat = hi'), grid on, xlim([-0.2, length(q) + 0.2]), ylim([-0.05, max(abs(q_hat_vec) + 0.05)])
 title('q, qhat and hi')
 xlabel('iT/4')
+
 
 %% Possible way to define N1 and N2
 [h0, i0] = max(hi); % in this way i0 correspond to t0 + 0*T

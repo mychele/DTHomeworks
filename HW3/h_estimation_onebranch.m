@@ -31,7 +31,6 @@ h_hat(1, 1:N) = Phi \ theta;
 %% Compute d_hat
 
 d_hat = conv(x, h_hat);
-d_hat_discard_num = N; % TODO check this
-d_hat = d_hat(end-d_hat_discard_num+1 : end);
+d_hat = d_hat(N : N+L-1);
 
 end
