@@ -9,7 +9,7 @@ T = 4*Tc;
 
 %% Training sequence generation
 L = 15;
-N = 10;
+Nseq = 10;
 mlseq = MLsequence(L);
 
 % Replace every 0 with two 0s and every 1 with two 1s to put it into the
@@ -27,7 +27,7 @@ for i = 1:L
 end
 
 % Repeat the sequence and bitmap it to get the symbols
-trainingseq = [mlseqdouble; mlseqdouble(1:2*N)];
+trainingseq = [mlseqdouble; mlseqdouble(1:2*Nseq)];
 trainingsymbols = bitmap(trainingseq);
 
 %% Generate the channel output
@@ -36,35 +36,39 @@ snr = 20; %dB
 snr_lin = 10^(snr/10);
 [r, sigma_w, q] = channel_output(trainingsymbols, T, Tc, snr_lin);
 
-%% Estimate qhat @T/4
+%% Choose N @T/4
+
 maxN = 44;
 error_func = zeros(maxN, 1);
-for N = 1:maxN % N is the supposed length of the impulse response of the channel
+for N_T4 = 1:maxN % N is the supposed length of the impulse response of the channel
     % Compute the supposed length of each branch
-    n_short = mod(4-N, 4); % Num branches with a shorter filter than others
+    n_short = mod(4-N_T4, 4); % Num branches with a shorter filter than others
     % N_i is the number of coefficients of the filter of the i-th branch.
-    N_i(1:4-n_short) = ceil(N/4);
-    N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
+    N_i(1:4-n_short) = ceil(N_T4/4);
+    N_i(4-n_short + 1 : 4) = ceil(N_T4/4) - 1;
     x_for_ls = trainingsymbols(end-(L+max(N_i)-1) + 1 : end);
     d_for_ls = r(end - 4*(L+max(N_i)-1) + 1 - (length(q)-4): end - (length(q)-4));
     [~, r_hat] = h_estimation(x_for_ls, d_for_ls, L, N_i);
     d_no_trans = r(end-length(r_hat)+1- (length(q)-4) : end - (length(q)-4));
-    error_func(N) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat); % TODO check if we should divide for L?
+    error_func(N_T4) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat); % TODO check if we should divide for L?
 end
 
 figure
 plot(10*log10(error_func)), hold on, plot(10*log10(sigma_w*ones(1, maxN)))
 title('Error functional')
-xlabel('N'), ylabel('\epsilon [dB]')
+xlabel('N_{T/4}'), ylabel('\epsilon [dB]')
 grid on
 
+% Fix N
+N_T4 = 28;
+
 %% Estimate qhat @T/4 for N = 28
-N = 28;
+
 % Compute the supposed length of each branch
-n_short = mod(4-N, 4); % Num branches with a shorter filter than others
+n_short = mod(4-N_T4, 4); % Num branches with a shorter filter than others
 % N_i is the number of coefficients of the filter of the i-th branch.
-N_i(1:4-n_short) = ceil(N/4);
-N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
+N_i(1:4-n_short) = ceil(N_T4/4);
+N_i(4-n_short + 1 : 4) = ceil(N_T4/4) - 1;
 x_for_ls = trainingsymbols(end-(L+max(N_i)-1) + 1 : end);
 d_for_ls = r(end - 4*(L+max(N_i)-1) + 1 - (length(q)-4): end - (length(q)-4));
 [q_hat, ~] = h_estimation(x_for_ls, d_for_ls, L, N_i);
@@ -93,40 +97,32 @@ title('crosscorrelation between input & output')
 xlim([-0.2, m_max + 0.2])
 
 [~, m_opt] = max(crossvec);
-m_opt = m_opt - 1; % beacuse of MATLAB indexing
-
+m_opt = m_opt - 1; % because of MATLAB indexing
+init_offs = mod(m_opt, 4);
 
 %% Estimate qhat @T
 
-N = 7;
-
-% x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-% d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4): end - (length(q)-4));
-% figure, stem(10:4:4*length(x_for_ls)-1+10, real(x_for_ls))
-% hold on
-% plot(0:length(d_for_ls)-1, real(d_for_ls))
-% title('x and d aligned according to t_0, in domain T/4'), legend('x', 'd')
+N = ceil(N_T4 / 4);
 
 x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
 d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + mod(m_opt, 4): 4 :end - (length(q)-4) + mod(m_opt, 4));
-figure, stem(2:length(x_for_ls)-1+2, real(x_for_ls))
+[q_hat, ~] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
+
+% Temp plot
+figure, stem(init_offs:length(x_for_ls)-1+init_offs, real(x_for_ls))
 hold on
 plot(0:length(d_for_ls)-1, real(d_for_ls / q(11)))
 title('d (normalized) and x, aligned according to t_0, @T')
 legend('x', 'd'), grid on
 
-[q_hat, ~] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
-
 q_hat_vec = q_hat.';
-figure, plot(0:length(q)-1, abs(q)), hold on, stem(2:4:4*length(q_hat_vec)-1+2, abs(q_hat_vec))
+figure, plot(0:length(q)-1, abs(q)), hold on, stem(init_offs:4:4*length(q_hat_vec)-1+init_offs, abs(q_hat_vec))
 legend('q', 'qhat'), grid on, xlim([-0.2, length(q) + 0.2]), ylim([-0.05, max(abs(q_hat_vec) + 0.05)])
 title('q, qhat for N = 28, estimated @T')
 xlabel('iT/4')
 
 
 %% Interpolate qhat to get h_i
-
-init_offs = mod(m_opt, 4);
 
 % If estimation happened @T/4
 % hi = q_hat_vec(init_offs+1:4:end);
