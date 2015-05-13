@@ -9,7 +9,8 @@ T = 4*Tc;
 
 %% Training sequence generation
 L = 15;
-N = 10;
+maxN = 44;
+maxNi = ceil(maxN/4);
 mlseq = MLsequence(L);
 
 % Replace every 0 with two 0s and every 1 with two 1s to put it into the
@@ -27,7 +28,7 @@ for i = 1:L
 end
 
 % Repeat the sequence and bitmap it to get the symbols
-trainingseq = [mlseqdouble; mlseqdouble(1:2*N)];
+trainingseq = [mlseqdouble; mlseqdouble(1:2*maxNi)];
 trainingsymbols = bitmap(trainingseq);
 
 %% Generate the channel output
@@ -37,7 +38,6 @@ snr_lin = 10^(snr/10);
 [r, sigma_w, q] = channel_output(trainingsymbols, T, Tc, snr_lin);
 
 %% Estimate qhat
-maxN = 44;
 error_func = zeros(maxN, 1);
 for N = 1:maxN % N is the supposed length of the impulse response of the channel
     % Compute the supposed length of each branch
