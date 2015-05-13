@@ -53,6 +53,9 @@ end
 
 figure
 plot(10*log10(error_func)), hold on, plot(10*log10(sigma_w*ones(1, maxN)))
+title('Error functional')
+xlabel('N')
+ylabel('\epsilon [dB]')
 
 %% Plot q and qhat fot N = 28
 N = 28;
@@ -68,7 +71,9 @@ error_func(N) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat); % TODO check if w
 
 q_hat_vec = reshape(q_hat, numel(q_hat), 1);
 figure, plot(0:length(q)-1, abs(q)), hold on, plot(0:length(q_hat_vec)-1, abs(q_hat_vec))
-legend('q', 'qhat'), grid on, xlim([-0.2, length(q) + 0.2])
+legend('q', 'qhat'), grid on, xlim([-0.2, length(q) + 0.2]), ylim([-0.05, max(abs(q_hat_vec) + 0.05)])
+title('q, qhat for N = 28')
+xlabel('iT/4')
 
 %% Estimate t0 as in pag 617 bc
 m_min = 0;
@@ -82,6 +87,10 @@ for m = m_min:m_max
 end
 
 figure, plot(m_min:m_max, crossvec), grid on
+ylabel('crosscorrelation, output sampled from m')
+xlabel('m')
+title('crosscorrelation between input & output')
+xlim([-0.2, m_max + 0.2])
 
 [~, m_opt] = max(crossvec);
 m_opt = m_opt - 1; % beacuse of MATLAB indexing
@@ -92,4 +101,6 @@ hi = q_hat_vec(init_offs+1:4:end);
 
 figure, plot(0:length(q)-1, abs(q)), hold on, plot(0:length(q_hat_vec)-1, abs(q_hat_vec)), hold on,
 stem(init_offs:4:length(q), abs(hi))
-legend('q', 'qhat', 'hi'), grid on, xlim([-0.2, length(q) + 0.2])
+legend('q', 'qhat', 'hi'), grid on, xlim([-0.2, length(q) + 0.2]), ylim([-0.05, max(abs(q_hat_vec) + 0.05)])
+title('q, qhat and hi')
+xlabel('iT/4')
