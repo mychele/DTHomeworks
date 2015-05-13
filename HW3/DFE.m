@@ -14,7 +14,7 @@ sigma_a = 2;
 N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
 M1 = N1+N2+1;   % FF filter: equal to the span of h
 M2 = 0; %M1-1;      % FB filter: one less than the FF filter
-D = (N-1)/2;   % D is chosen large first and then decreased
+D = (N-1)/2; %(M1-1);   % D is chosen large first and then decreased
 K = length(x);
 a_k = zeros(K,1);
 
@@ -43,15 +43,22 @@ for row = 0:(M1-1)
     end
 end
 
-c_opt = inv(R) * p;
+c_opt = R \ p;
 
 b = zeros(M2,1);
 for i = 1:M2
     b(i) = - (fliplr(c_opt.')*h((i+D+N1+nb0+1-M1+1):(i+D+N1+nb0+1)));
 end
 
+%% TODO plot hhat, c, psi=conv(h,c), b and get a sense of what is happening
+
 %% Threshold detector
-x_FF = zeros(length(x),1);
+
+% known data
+preamble = MLsequence(15);
+
+y = zeros(length(x),1);
+detected = zeros(length(x), 1);
 for k = 0:length(x)-1
     if (k < M1 - 1)
         xconv = [flipud(x(1:k+1)); zeros(M1 - k - 1, 1)];
@@ -59,32 +66,24 @@ for k = 0:length(x)-1
         xconv = flipud(x(k-M1+1 + 1:k + 1));
     end
     
-    x_FF(k+1) = c_opt.'*xconv;
-end
-
-detected = zeros(length(x), 1);
-
-for i = 1:length(x_FF)
-    curr = x_FF(i);
-    if (real(curr) > 0)
-        if (imag(curr) > 0)
-            curr = 1+1i;
-        else curr = 1-1i;
-        end
+    if (k <= M2)
+        a_old = [flipud(detected(1:k)); zeros(M2 - k, 1)];
     else
-        if (imag(curr) > 0)
-            curr = -1+1i;
-        else curr = -1-1i;
-        end
+        a_old = flipud(detected(k-M2+1:k));
     end
-    detected(i) = curr;
+    
+    y(k+1) = c_opt.'*xconv + b.'*a_old;
+    detected(k+1) = qpsk_td(y(k+1));
 end
+
+
 
 figure
 for i = D + 1:length(x)
-    plot(rT(i-D), 'or'), hold on, plot(x_FF(i), 'ob'), hold on,
-    plot(trainingsymbols(i-D), 'ok');
+    plot(rT(i-D), 'or'), hold on, plot(detected(i), 'ob'), hold on,
+    plot(y(i), 'og'), plot(trainingsymbols(i-D), 'ok');
     xlim([-2, 2]), ylim([-2, 2]), grid on;
+    legend('received', 'detected', 'filtered', 'sent')
     pause
     hold off
 end
