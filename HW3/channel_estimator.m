@@ -45,9 +45,10 @@ for N = 1:maxN % N is the supposed length of the impulse response of the channel
     % N_i is the number of coefficients of the filter of the i-th branch.
     N_i(1:4-n_short) = ceil(N/4);
     N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
-    [~, r_hat] = h_estimation( trainingsymbols(end-(L+max(N_i)-1) + 1 : end), ...
-        r(end - 4*(L+max(N_i)-1) + 1: end), L, N_i);
-    d_no_trans = r(end-length(r_hat)+1 : end);
+    x_for_ls = trainingsymbols(end-(L+max(N_i)-1) + 1 : end);
+    d_for_ls = r(end - 4*(L+max(N_i)-1) + 1 - (length(q)-4): end - (length(q)-4));
+    [~, r_hat] = h_estimation(x_for_ls, d_for_ls, L, N_i);
+    d_no_trans = r(end-length(r_hat)+1- (length(q)-4) : end - (length(q)-4));
     error_func(N) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat); % TODO check if we should divide for L?
 end
 
@@ -64,8 +65,9 @@ n_short = mod(4-N, 4); % Num branches with a shorter filter than others
 % N_i is the number of coefficients of the filter of the i-th branch.
 N_i(1:4-n_short) = ceil(N/4);
 N_i(4-n_short + 1 : 4) = ceil(N/4) - 1;
-[q_hat, r_hat] = h_estimation( trainingsymbols(end-(L+max(N_i)-1) + 1 : end), ...
-    r(end - 4*(L+max(N_i)-1) + 1: end), L, N_i);
+x_for_ls = trainingsymbols(end-(L+max(N_i)-1) + 1 : end);
+d_for_ls = r(end - 4*(L+max(N_i)-1) + 1 - (length(q)-4): end - (length(q)-4));
+[q_hat, r_hat] = h_estimation(x_for_ls, d_for_ls, L, N_i);
 d_no_trans = r(end-length(r_hat)+1 : end);
 error_func(N) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat); % TODO check if we should divide for L?
 

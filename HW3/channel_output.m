@@ -21,7 +21,7 @@ q_mat = [q(1:Q0:end); q(2:Q0:end); q(3:Q0:end); q(4:Q0:end)];
 
 r = zeros(Q0 * (length(x)), 1);
 
-for k = 0 : length(x) - 1% + length(q)/Q0 - 1
+for k = 0 : length(x) - 1 + length(q)/Q0 - 1
     % Generate white noise for each branch
     w = wgn(Q0, 1, 10*log10(sigma_w), 'complex');
     
