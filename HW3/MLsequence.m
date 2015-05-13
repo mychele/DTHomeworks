@@ -21,6 +21,8 @@ for l = r+1:(L) % Skip the initial condition for the cycle
             p(l) = xor(p(l-5), p(l-6));
         case 127
             p(l) = xor(p(l-6), p(l-7));
+        case 2^20 -1
+            p(l) = xor(p(l-17), p(l-20));
     end
 end
 end
