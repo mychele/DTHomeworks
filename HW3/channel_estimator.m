@@ -96,6 +96,7 @@ xlim([-0.2, m_max + 0.2])
 m_opt = m_opt - 1; % beacuse of MATLAB indexing
 
 %% Interpolate qhat to get h_i
+
 init_offs = mod(m_opt, 4);
 hi = q_hat_vec(init_offs+1:4:end);
 
@@ -104,3 +105,14 @@ stem(init_offs:4:length(q), abs(hi))
 legend('q', 'qhat', 'hi'), grid on, xlim([-0.2, length(q) + 0.2]), ylim([-0.05, max(abs(q_hat_vec) + 0.05)])
 title('q, qhat and hi')
 xlabel('iT/4')
+
+%% Possible way to define N1 and N2
+[h0, i0] = max(hi); % in this way i0 correspond to t0 + 0*T
+N1 = i0 - 1; % number of precursors
+N2 = length(hi) - i0; % number of postcursors
+
+%%%%% TODO: remember!!! Divide your received signal and everything for h0
+%%%%% in order to get the same constellation of the tx at receiver
+
+figure, stem(-N1:N2, abs(hi)), grid on, xlabel('i'), ylabel('hi'), title('hi vs i \in [-N1, N2]')
+xlim([- N1 - 0.2, N2 + 0.2])
