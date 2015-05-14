@@ -5,7 +5,6 @@ function [ r, sigma_w, q ] = channel_output( x, T, Tc, snr)
 % x is a column vector for consistency
 % snr must be linear
 
-x = x.'; % make x a row vector for simplicity
 Q0 = T/Tc; % interpolation factor
 q = [0,0,0,0,0,0,0,0,0.19*exp(-1i*2.21), 0.09*exp(1i*1.64), 0.7*exp(-1i*2.57), ...
     0.45, 0.6*exp(-1i*2.26), 0.35*exp(1i*3.15), 0.24*exp(1i*1.34), 0.37*exp(1i*2.6), ...
@@ -25,7 +24,7 @@ results = zeros(Q0, length(x)+length(q)/Q0-1);
 for k = 1:Q0  % Iterate over the four branches
     w = wgn(1, length(x)+length(q)/Q0-1, 10*log10(sigma_w), 'complex');
     
-    results(k,:) = conv(q_mat(k,:), x.') + w.';
+    results(k,:) = conv(q_mat(k,:), x) + w.';
     r(k:Q0:end) = results(k,:);
 end
 

@@ -5,11 +5,31 @@
 %   N1: number of precursors
 %   N2: number of postcursors
 
-receiver_util;
+clear
+close all
+clc
+rng default
 
-snr_col = 1;
+Tc = 1;
+T = 4 * Tc;
+snr = 10; % 6, 8, 10, 12, 14 % dB
+L_data = 127;
 
-rT = r_T4(init_offs+1:4:end, snr_col); % data sampled in T
+%% Create, send and receive data with the given channel
+[packet, r_T4, ~] = txrc(L_data, snr, T, Tc);
+
+% estimate the channel using the first 100 samples (4*length(ts))
+N = 7;
+[ m_opt, h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1:100), N, T);
+
+% sample to get r @ T
+init_offs = mod(m_opt, 4); % in T/4
+t0 = floor(m_opt/4); % from now consider T = 1
+T = 1;
+
+%% Detection begins
+
+rT = r_T4(init_offs+1:4:end); % data sampled in T
 x = rT/h(N1+1).'; % data normalized by h0
 hi = h/h(N1+1).'; % impulse response normalized by h0
 
@@ -17,7 +37,7 @@ hi = h/h(N1+1).'; % impulse response normalized by h0
 sigma_a = 2;
 N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
 M1 = N1+N2+1;   % FF filter: equal to the span of h
-M2 = M1-1;      % FB filter: one less than the FF filter
+M2 = 0;      % FB filter: one less than the FF filter
 D = (N-1)/2; %(M1-1);   % D is chosen large first and then decreased
 K = length(x);
 a_k = zeros(K,1);
@@ -55,11 +75,12 @@ for i = 1:M2
 end
 
 %% TODO plot hhat, c, psi=conv(h,c), b and get a sense of what is happening
+len_plot = 14;
 figure
 subplot(4,1,1)
-stem(abs(h))
-title('|h_{hat}|')
-xlim([1 14])
+stem(-N1:N2, abs(hi(nb0+1:nb0+1+N1+N2)))
+title('|h_{hat} normalized|')
+xlim([-5 8])
 ylim([0 1])
 subplot(4,1,2)
 stem(abs(c_opt))
@@ -67,7 +88,7 @@ title('|c|')
 xlim([1 14])
 ylim([0 1])
 subplot(4,1,3)
-stem(abs(conv(h,c_opt)))
+stem(abs(conv(hi,c_opt)))
 title('|psi|')
 xlim([1 14])
 ylim([0 1])
@@ -101,23 +122,48 @@ for k = 0:length(x)-1
     detected(k+1) = qpsk_td(y(k+1));
 end
 
+decisions = detected(t0+D+1:end-1);
+
+
 figure
 subplot(4,1,1)
-stem(packet)
+stem(real(packet))
 xlim([0,length(packet)])
-title('Training Symbols')
+title('Sent Symbols (real part)')
 subplot(4,1,2)
-stem(x(t0+1:end))
+stem(real(x(t0+1:end)))
 xlim([0,length(packet)])
-title('Received Symbols')
+title('Received Symbols (real part)')
 subplot(4,1,3)
-stem(y(t0+D+1:end))
+stem(real(y(t0+D+1:end)))
 xlim([0,length(packet)])
-title('Filtered Symbols')
+title('Filtered Symbols (real part)')
 subplot(4,1,4)
-stem(detected(t0+D+1:end))
+stem(real(detected(t0+D+1:end))), hold on
+stem(real(packet))
+xlim([0,length(decisions)])
+legend('Detected', 'Real')
+title('Detected Symbols (real part)')
+
+figure
+subplot(4,1,1)
+stem(imag(packet))
 xlim([0,length(packet)])
-title('Detected Symbols')
+title('Sent Symbols (imag part)')
+subplot(4,1,2)
+stem(imag(x(t0+1:end)))
+xlim([0,length(packet)])
+title('Received Symbols (imag part)')
+subplot(4,1,3)
+stem(imag(y(t0+D+1:end)))
+xlim([0,length(packet)])
+title('Filtered Symbols (imag part)')
+subplot(4,1,4)
+stem(imag(detected(t0+D+1:end))), hold on,
+stem(imag(packet))
+xlim([0,length(decisions)])
+legend('Detected', 'Real')
+title('Detected Symbols (imag part)')
 
 % figure
 % for i = D + t0 + 1:length(trainingsymbols)
@@ -132,5 +178,16 @@ title('Detected Symbols')
 % TODO check that the R matrix should be Hermitian and Toeplitz for a
 % LE, while it should be only Hermitian for a DFE
 % Threshold to take the decision
-decisions = detected(t0+D+1:end);
 %end
+
+sent_bit = ibmap(packet);
+rec_bit = ibmap(decisions);
+
+figure, 
+stem(sent_bit), hold on, stem(rec_bit)
+legend('sent bit', 'received bit')
+
+
+
+pbit = BER(packet, decisions);
+
