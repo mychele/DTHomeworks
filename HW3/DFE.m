@@ -7,11 +7,17 @@
 
 receiver_util;
 
+snr_col = 1;
+
+rT = r_T4(init_offs+1:4:end, snr_col); % data sampled in T
+x = rT/h(N1+1).'; % data normalized by h0
+hi = h/h(N1+1).'; % impulse response normalized by h0
+
 % Initialize useful quantities
 sigma_a = 2;
 N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
 M1 = N1+N2+1;   % FF filter: equal to the span of h
-M2 = 0; %M1-1;      % FB filter: one less than the FF filter
+M2 = M1-1;      % FB filter: one less than the FF filter
 D = (N-1)/2; %(M1-1);   % D is chosen large first and then decreased
 K = length(x);
 a_k = zeros(K,1);
@@ -49,6 +55,27 @@ for i = 1:M2
 end
 
 %% TODO plot hhat, c, psi=conv(h,c), b and get a sense of what is happening
+figure
+subplot(4,1,1)
+stem(abs(h))
+title('|h_{hat}|')
+xlim([1 14])
+ylim([0 1])
+subplot(4,1,2)
+stem(abs(c_opt))
+title('|c|')
+xlim([1 14])
+ylim([0 1])
+subplot(4,1,3)
+stem(abs(conv(h,c_opt)))
+title('|psi|')
+xlim([1 14])
+ylim([0 1])
+subplot(4,1,4)
+stem(abs(b))
+title('|b|')
+xlim([1 14])
+ylim([0 1])
 
 %% Threshold detector
 
@@ -74,23 +101,23 @@ for k = 0:length(x)-1
     detected(k+1) = qpsk_td(y(k+1));
 end
 
-% figure
-% subplot(4,1,1)
-% stem(packet)
-% xlim([0,length(packet)])
-% title('Training Symbols')
-% subplot(4,1,2)
-% stem(x(t0+1:end))
-% xlim([0,length(packet)])
-% title('Received Symbols')
-% subplot(4,1,3)
-% stem(y(t0+D+1:end))
-% xlim([0,length(packet)])
-% title('Filtered Symbols')
-% subplot(4,1,4)
-% stem(detected(t0+D+1:end))
-% xlim([0,length(packet)])
-% title('Detected Symbols')
+figure
+subplot(4,1,1)
+stem(packet)
+xlim([0,length(packet)])
+title('Training Symbols')
+subplot(4,1,2)
+stem(x(t0+1:end))
+xlim([0,length(packet)])
+title('Received Symbols')
+subplot(4,1,3)
+stem(y(t0+D+1:end))
+xlim([0,length(packet)])
+title('Filtered Symbols')
+subplot(4,1,4)
+stem(detected(t0+D+1:end))
+xlim([0,length(packet)])
+title('Detected Symbols')
 
 % figure
 % for i = D + t0 + 1:length(trainingsymbols)

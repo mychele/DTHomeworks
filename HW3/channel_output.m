@@ -19,23 +19,14 @@ sigma_w = sigma_a*E_q/(4*snr);
 % create the impulse response for the Q0 = 4 branches
 q_mat = [q(1:Q0:end); q(2:Q0:end); q(3:Q0:end); q(4:Q0:end)];
 
-r = zeros(Q0 * (length(x)), 1);
+r = zeros(Q0 * (length(x)+length(q)/Q0-1), 1);
 
-for k = 0 : length(x) - 1 + length(q)/Q0 - 1
-    % Generate white noise for each branch
-    w = wgn(Q0, 1, 10*log10(sigma_w), 'complex');
+results = zeros(Q0, length(x)+length(q)/Q0-1);
+for k = 1:Q0  % Iterate over the four branches
+    w = wgn(1, length(x)+length(q)/Q0-1, 10*log10(sigma_w), 'complex');
     
-    if (k < length(q)/Q0)
-        xconv = [fliplr(x(1:k+1)), zeros(1, length(q)/Q0 - k - 1)];
-    elseif (k >= length(q)/Q0 && k <= length(x) - 1)
-        xconv = fliplr(x(k-length(q)/Q0 + 2:k+1));
-    else
-        xconv = [zeros(1, k - length(x) + 1), fliplr(x(end - length(q)/Q0 + k - length(x) + 2:end))];
-    end
-
-    for i = 0:Q0-1 % Branch index
-        r(k*T + i*Tc + 1) = q_mat(i + 1, :) * xconv.' + w(i+1);
-    end
+    results(k,:) = conv(q_mat(k,:), x.') + w.';
+    r(k:Q0:end) = results(k,:);
 end
 
 end
