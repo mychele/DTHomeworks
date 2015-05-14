@@ -5,9 +5,7 @@
 %   N1: number of precursors
 %   N2: number of postcursors
 
-rT = r(init_offs+1:4:end);
-x = rT/hi(N1+1);
-h = hi;
+receiver_util;
 
 % Initialize useful quantities
 sigma_a = 2;
@@ -21,22 +19,22 @@ a_k = zeros(K,1);
 % Zero padding of the i.r.
 nb0 = 20;
 nf0 = 20;
-h = [zeros(nb0,1); h; zeros(nf0,1)];
+hi = [zeros(nb0,1); hi; zeros(nf0,1)];
 
 % Get the Weiner-Hopf solution
 p = zeros(M1, 1);
 for i = 0:(M1 - 1)
-    p(i+1) = sigma_a * conj(h(N1+nb0+1+D-i));
+    p(i+1) = sigma_a * conj(hi(N1+nb0+1+D-i));
 end
 
 R = zeros(M1);
 for row = 0:(M1-1)
     for col = 0:(M1-1)
-        first_sum = (h((nb0+1):(N1+N2+nb0+1))).' * ...
-            conj(h((nb0+1-(row-col)):(N1+N2+nb0+1-(row-col))));
-        second_sum = (h((N1+nb0+1+1+D-col):(N1+nb0+1+M2+D-col))).' * ...
-            conj((h((N1+nb0+1+1+D-row):(N1+nb0+1+M2+D-row))));
-        r_w = (row == col) * sigma_w; % This is a delta only if there is no g_M.
+        first_sum = (hi((nb0+1):(N1+N2+nb0+1))).' * ...
+            conj(hi((nb0+1-(row-col)):(N1+N2+nb0+1-(row-col))));
+        second_sum = (hi((N1+nb0+1+1+D-col):(N1+nb0+1+M2+D-col))).' * ...
+            conj((hi((N1+nb0+1+1+D-row):(N1+nb0+1+M2+D-row))));
+        r_w = (row == col) * est_sigmaw; % This is a delta only if there is no g_M.
         
         R(row+1, col+1) = sigma_a * (first_sum - second_sum) + r_w;
         
@@ -47,7 +45,7 @@ c_opt = R \ p;
 
 b = zeros(M2,1);
 for i = 1:M2
-    b(i) = - (fliplr(c_opt.')*h((i+D+N1+nb0+1-M1+1):(i+D+N1+nb0+1)));
+    b(i) = - (fliplr(c_opt.')*hi((i+D+N1+nb0+1-M1+1):(i+D+N1+nb0+1)));
 end
 
 %% TODO plot hhat, c, psi=conv(h,c), b and get a sense of what is happening
@@ -76,20 +74,36 @@ for k = 0:length(x)-1
     detected(k+1) = qpsk_td(y(k+1));
 end
 
+% figure
+% subplot(4,1,1)
+% stem(packet)
+% xlim([0,length(packet)])
+% title('Training Symbols')
+% subplot(4,1,2)
+% stem(x(t0+1:end))
+% xlim([0,length(packet)])
+% title('Received Symbols')
+% subplot(4,1,3)
+% stem(y(t0+D+1:end))
+% xlim([0,length(packet)])
+% title('Filtered Symbols')
+% subplot(4,1,4)
+% stem(detected(t0+D+1:end))
+% xlim([0,length(packet)])
+% title('Detected Symbols')
 
-
-figure
-for i = D + 1:length(x)
-    plot(rT(i-D), 'or'), hold on, plot(detected(i), 'ob'), hold on,
-    plot(y(i), 'og'), plot(trainingsymbols(i-D), 'ok');
-    xlim([-2, 2]), ylim([-2, 2]), grid on;
-    legend('received', 'detected', 'filtered', 'sent')
-    pause
-    hold off
-end
+% figure
+% for i = D + t0 + 1:length(trainingsymbols)
+%     plot(trainingsymbols(i-D-t0), 'ok'), hold on, plot(x(i-D), 'or'), 
+%     hold on, plot(y(i), 'og'),%  plot(detected(i), 'ob')
+%     xlim([-2, 2]), ylim([-2, 2]), grid on;
+%     legend('sent', 'received', 'filtered', 'detected')
+%     pause
+%     hold off
+% end
 
 % TODO check that the R matrix should be Hermitian and Toeplitz for a
 % LE, while it should be only Hermitian for a DFE
 % Threshold to take the decision
-decisions = (1+1i) * ones(K,1); % TODO set this as the actual output
+decisions = detected(t0+D+1:end);
 %end

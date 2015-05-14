@@ -37,4 +37,6 @@ est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 N1 = h_center;
 N2 = length(h_i) - N1 - 1;
 
+h_i = h_i.'; % for convenience
+
 end
