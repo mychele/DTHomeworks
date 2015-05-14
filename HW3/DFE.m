@@ -6,7 +6,7 @@
 %   N2: number of postcursors
 
 rT = r(init_offs+1:4:end);
-x = rT;
+x = rT/hi(N1+1);
 h = hi;
 
 % Initialize useful quantities
