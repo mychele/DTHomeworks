@@ -8,8 +8,8 @@ close all
 
 Tc = 1;
 T = 4 * Tc;
-L_data = 2^20 - 1;
-snr = 50; %dB
+L_data = 2^18 - 1;
+snr = 6; %dB
 
 % create, send and receive data with the given channel
 fprintf('\nCalling txrc()\n')
@@ -43,6 +43,7 @@ M = 4;
 symb = [1+1i, 1-1i, -1+1i, -1-1i]; % possible transmitted symbols (QPSK)
 Ns = M ^ (N1+N2);
 TMAX = L_data + 50;
+MEMORY = 20 * N;
 
 %throwitaway:
 %newStateBase=@(currstate) (mod(currstate-1, M^(N1+N2-1)) * 4);
@@ -54,20 +55,21 @@ TMAX = L_data + 50;
 % figure, stem(0:N1+N2, real(hi)), hold on, stem(0:N1+N2, imag(hi)), title('hi')
 
 % Init stuff
-surv_seq = zeros(Ns, TMAX);
-surv_seq(:, 1) = 1:Ns;
-surv_seq_len = 1;
+survSeq = zeros(Ns, min(TMAX, 2*MEMORY));
+survSeq(:, 1) = 1:Ns;
+survSeq_writingcol = 1;
+survSeq_shift = 0;
+detectedStates = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 %cost = ones(Ns, 1) * Inf;
 
 tic;
 
 for k = 1 : length(r)   % Main loop
-    surv_seq_len = surv_seq_len + 1;
+    survSeq_writingcol = survSeq_writingcol + 1;
     costnew = - ones(Ns, 1);
     pred = zeros(Ns, 1);
     newstate = 0;
-    k
     
     for state = 1 : Ns  % Cycle through all states, at time k(?)
         for j = 1:M     % M possibilities for the new symbol
@@ -77,7 +79,7 @@ for k = 1 : length(r)   % Main loop
             if newstate > Ns, newstate = 1; end
             
             % TODO optimize
-            supposednewseq = [symb(mod(surv_seq(state, 1:surv_seq_len-1)-1,M)+1), symb(j)];
+            supposednewseq = [symb(mod(survSeq(state, 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
             
             % TODO optimize
             difflength = N - length(supposednewseq);
@@ -103,32 +105,41 @@ for k = 1 : length(r)   % Main loop
     
     % The following operations strongly affect the computation time, if
     % the number of states is not too large. Otherwise the bottleneck is
-    % the number of iterations of the inner loops above. This stuff is slow
-    % with long sequences since it handles huge matrices. Split them!
-    % TODO optimize the way matrices are handled. Avoid creating so many!
+    % the number of iterations of the inner loops above.
+    % TODO optimize the way matrices are handled. Avoid creating so many.
     
-    temp = zeros(size(surv_seq));
+    if survSeq_writingcol == size(survSeq, 2)
+        % We would write in the last column... shift first!
+        
+        % Take the first row of old decided states and store it before erasing it.
+        detectedStates(1+survSeq_shift : survSeq_shift+MEMORY) = survSeq(1, 1:MEMORY);
+        
+        % Shift of half the size, that is our memory.
+        survSeq(:, 1:MEMORY) = survSeq(:, MEMORY+1:end);
+        survSeq_shift = survSeq_shift + MEMORY;
+        survSeq_writingcol = MEMORY; % that is 2MEMORY - MEMORY
+    end
+        
+    
+    temp = zeros(size(survSeq));
     for newstate = 1:Ns
-        temp(newstate, 1:surv_seq_len) = [surv_seq(pred(newstate), 1:surv_seq_len-1), newstate];
+        temp(newstate, 1:survSeq_writingcol) = ...
+            [survSeq(pred(newstate), 1:survSeq_writingcol-1), newstate];
     end
-    surv_seq = temp;
+    survSeq = temp;
     
-    allcosts(:, k) = cost;
+    %allcosts(:, k) = cost;
     cost = costnew;
-    temp = zeros(size(surv_seq));
-    for l = 1 : Ns
-        index = surv_seq(l, surv_seq_len);
-        if index > 0
-            temp(surv_seq(l, surv_seq_len), :) = surv_seq(l, :);
-        end
-    end
-    surv_seq = temp;
-    
 end
 
 toc
+elapsed_time = toc;
 
-% Take the first row and get the symbols
-detected = symb(mod(surv_seq(1, 1:surv_seq_len-1)-1, M) + 1);
+% Finish storing, then get the symbols
+detectedStates(1+survSeq_shift : survSeq_shift+survSeq_writingcol-1) = ...
+    survSeq(1, 1:survSeq_writingcol-1);
+detected = symb(mod(detectedStates-1, M) + 1);
 
-fprintf('Pbit is approximately %.g\n', sum(packet-detected.' ~= 0) / length(packet))
+num_errors = sum(packet-detected.' ~= 0);
+fprintf('P_err is approximately %.g (%d errors)\n', num_errors / length(packet), num_errors)
+% TODO: understand why the last symbol is always in error.
