@@ -24,13 +24,13 @@ T = 1;
 
 %% Detection begins
 rT = r_T4(init_offs+1:4:end); % data sampled in T
-x = rT/h(N1+1).'; % data normalized by h0
+x = rT(t0+1:t0+1+length(packet)-1)/h(N1+1).'; % data normalized by h0, starting from t0
 hi = h/h(N1+1).'; % impulse response normalized by h0
 
 N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
-M1 = N1+N2+1;   % FF filter: equal to the span of h
-M2 = 0;      % FB filter: one less than the FF filter
-D = (N-1)/2; %(M1-1);   % D is chosen large first and then decreased
-[decisions, pbit] = DFE_filter(packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, 0);
+M1 = N;   % FF filter: equal to the span of h
+D = (M1-1);   % D is chosen large first and then decreased % (N-1)/2 + 2 or 3 for LE
+M2 = N2 + M1 - 1 - D;      % FB filter: one less than the FF filter
+[decisions, pbit, Jmin] = DFE_filter(packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, 0);
 
 

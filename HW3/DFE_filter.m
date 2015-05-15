@@ -1,4 +1,4 @@
-function [ decisions, pbit ] = DFE_filter( packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb )
+function [ decisions, pbit, Jmin ] = DFE_filter( packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb )
 % Function that performs DFE filtering. It needs
 % packet is the sequence of sent symbols
 % x is the received samples vector in T, normalized by h0
@@ -16,8 +16,9 @@ function [ decisions, pbit ] = DFE_filter( packet, x, hi, N1, N2, est_sigmaw, t0
 sigma_a = 2;
 
 % Zero padding of the i.r.
-nb0 = 20;
-nf0 = 20;
+nb0 = 40;
+nf0 = 40;
+h_zero_ind = nb0+ N1 + 1;
 hi = [zeros(nb0,1); hi; zeros(nf0,1)];
 
 % Get the Weiner-Hopf solution
@@ -42,10 +43,14 @@ end
 
 c_opt = R \ p;
 
+Jmin = sigma_a*(1-c_opt.'* flipud(hi(N1+nb0+1+D-M1+1:N1+nb0+1+D)));
+
 b = zeros(M2,1);
 for i = 1:M2
     b(i) = - (fliplr(c_opt.')*hi((i+D+N1+nb0+1-M1+1):(i+D+N1+nb0+1)));
 end
+
+psi = conv(hi(nb0+1:nb0+1+N1+N2),c_opt);
 
 if (verb == true)
     % Plot hhat, c, psi=conv(h,c), b and get a sense of what is happening
@@ -55,16 +60,20 @@ if (verb == true)
     subplot(4,1,2)
     stem(abs(c_opt)), title('|c|'), xlim([1 14]), ylim([0 1])
     subplot(4,1,3)
-    stem(abs(conv(hi,c_opt))), title('|psi|'), xlim([1 14]), ylim([0 1])
+    stem(-N1:-N1+length(psi)-1, abs(psi)), title('|psi|'), xlim([-N1 -N1+length(psi)]), ylim([0 1])
     subplot(4,1,4)
     stem(abs(b)), title('|b|'), xlim([1 14]), ylim([0 1])
 end
 
-y = zeros(length(x),1); % output of ff filter
-detected = zeros(length(x),1); % output of td
-for k = 0:length(x)-1
+y = zeros(length(x) + D , 1); % output of ff filter
+detected = zeros(length(x) + D, 1); % output of td
+for k = 0:length(x) - 1 + D
     if (k < M1 - 1)
         xconv = [flipud(x(1:k+1)); zeros(M1 - k - 1, 1)];
+    elseif k > length(x)-1 && k < length(x) - 1 + M1
+        xconv = [zeros(k-length(x)+1, 1); flipud(x(end - M1 + 1 + k - length(x) + 1:end))];
+    elseif k >= length(x) - 1 + M1 % just in case D is greater than M1
+        xconv = zeros(M1, 1);
     else
         xconv = flipud(x(k-M1+1 + 1:k + 1));
     end
@@ -77,32 +86,33 @@ for k = 0:length(x)-1
     
     y(k+1) = c_opt.'*xconv;
     detected(k+1) = qpsk_td(y(k+1) + b.'*a_old);
+    
 end
 
-decisions = detected(t0+D+1:end-1);
+decisions = detected(D+1:end);
 
 if (verb == 1)
     figure
     subplot(4,1,1)
-    stem(real(packet)), xlim([0,length(packet)]), title('Sent Symbols (real part)')
+    stem(0:length(packet)-1, real(packet)), xlim([0,length(packet)]), title('Sent Symbols (real part)')
     subplot(4,1,2)
-    stem(real(x(t0+1:end))), xlim([0,length(packet)]), title('Received Symbols (real part)')
+    stem(0:length(packet)-1, real(x(1:length(packet)))), xlim([0,length(packet)]), title('Received Symbols (real part)')
     subplot(4,1,3)
-    stem(real(y(t0+D+1:end))), xlim([0,length(packet)]), title('FF Filtered Symbols (real part)')
+    stem(0:length(packet)-1, real(y(D+1:end))), xlim([0,length(packet)]), title('FF Filtered Symbols (real part)')
     subplot(4,1,4)
-    stem(real(detected(t0+D+1:end))), hold on, stem(real(packet))
+    stem(0:length(packet)-1, real(decisions)), hold on, stem(0:length(packet)-1, real(packet))
     xlim([0,length(decisions)]), legend('Detected', 'Real'), title('Detected Symbols (real part)')
     
     figure
     subplot(4,1,1)
-    stem(imag(packet)), xlim([0,length(packet)]), title('Sent Symbols (imag part)')
+    stem(0:length(packet)-1, imag(packet)), xlim([0,length(packet)]), title('Sent Symbols (imag part)')
     subplot(4,1,2)
-    stem(imag(x(t0+1:end))), xlim([0,length(packet)]), title('Received Symbols (imag part)')
+    stem(0:length(packet)-1, imag(x(1:length(packet)))), xlim([0,length(packet)]), title('Received Symbols (imag part)')
     subplot(4,1,3)
-    stem(imag(y(t0+D+1:end))), xlim([0,length(packet)]), title('FF Filtered Symbols (imag part)')
+    stem(0:length(packet)-1, imag(y(D+1:end))), xlim([0,length(packet)]), title('FF Filtered Symbols (imag part)')
     subplot(4,1,4)
-    stem(imag(detected(t0+D+1:end))), hold on, stem(imag(packet))
-    xlim([0,length(decisions)]), legend('Detected', 'Real'), title('Detected Symbols (imag part)')
+    stem(0:length(packet)-1, imag(decisions)), hold on, stem(0:length(packet)-1, imag(packet))
+    xlim([0,length(decisions)]), legend('Detected', 'imag'), title('Detected Symbols (imag part)')
     
     sent_bit = ibmap(packet);
     rec_bit = ibmap(decisions);
