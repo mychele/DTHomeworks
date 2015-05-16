@@ -18,9 +18,10 @@ fprintf('Generating input symbols and channel output... ')
 fprintf('done!\n')
 
 % Estimate the channel using the first 100 samples (4*length(ts))
-N = 7;
+N = 5;
+assumed_dly = 2;
 fprintf('Estimating timing phase and IR... ')
-[ m_opt, h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1:100), N, T);
+[ m_opt, h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1+T*assumed_dly:100+T*assumed_dly), N, T);
 fprintf('done!\n')
 
 % Sample to get r @ T
@@ -41,6 +42,6 @@ if (L_data > 128) % to avoid very looooooong time to generate useless plots
     verb=0;
 end
 %[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x(t0+1 : t0+length(packet)), hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb);
-[decisions, pbit, num_bit_error] = viterbi(packet, x, hi, N1, N2, 0, N2);
+[decisions, pbit, num_bit_error] = viterbi(packet(1:end-assumed_dly), x(1+assumed_dly:end), hi, N1, N2, 0, N2);
 
 
