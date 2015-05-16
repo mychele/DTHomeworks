@@ -16,8 +16,8 @@ function [ decisions, pbit, Jmin ] = DFE_filter( packet, x, hi, N1, N2, est_sigm
 sigma_a = 2;
 
 % Zero padding of the i.r.
-nb0 = 40;
-nf0 = 40;
+nb0 = 60;
+nf0 = 60;
 h_zero_ind = nb0+ N1 + 1;
 hi = [zeros(nb0,1); hi; zeros(nf0,1)];
 
