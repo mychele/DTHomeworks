@@ -57,7 +57,7 @@ for snr_i = 1:length(snr_vec)
     end
 end
 
-%save('jmin_LE', 'JminLE')
+save('jmin_LE', 'JminLE')
 
 for i = 1:length(snr_vec)
     figure, mesh(1:D_max, 1:M1_max, reshape(abs(JminLE(i, :, :)), size(JminLE(i, :, :), 2), size(JminLE(i, :, :), 3)))
@@ -110,7 +110,7 @@ for snr_i = 1:length(snr_vec)
     end
 end
 
-%save('jmin_DFE', 'JminDFE')
+save('jmin_DFE', 'JminDFE')
 
 for i = 1:length(snr_vec)
     figure, mesh(1:D_max, 1:M1_max, reshape(abs(JminDFE(i, :, :)), size(JminDFE(i, :, :), 2), size(JminDFE(i, :, :), 3)))
