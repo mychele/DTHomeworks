@@ -1,4 +1,4 @@
-function [ decisions, pbit, Jmin ] = DFE_filter( packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb )
+function [ decisions, pbit, num_bit_error, Jmin ] = DFE_filter( packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb )
 % Function that performs DFE filtering. It needs
 % packet is the sequence of sent symbols
 % x is the received samples vector in T, normalized by h0
@@ -121,6 +121,6 @@ if (verb == 1)
     legend('sent bit', 'received bit')
 end
 
-pbit = BER(packet, decisions);
+[pbit, num_bit_error] = BER(packet, decisions);
 end
 
