@@ -1,4 +1,4 @@
-function [ pbit ] = BER( sent, detected )
+function [ pbit, num_bit_error ] = BER( sent, detected )
 % Computes the BER, it accepts symbols
 %
 
@@ -9,7 +9,9 @@ end
 sent_bit = ibmap(sent);
 det_bit = ibmap(detected);
 
-pbit = sum(abs(sent_bit - det_bit))/length(sent_bit);
+num_bit_error = sum(abs(sent_bit - det_bit));
+
+pbit = num_bit_error/length(sent_bit);
 
 end
 
