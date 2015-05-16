@@ -57,6 +57,7 @@ survSeq_shift = 0;
 detectedStates = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 %cost = ones(Ns, 1) * Inf;
+%statemap = (1:Ns).';
 
 tic;
 
@@ -87,6 +88,7 @@ for k = 1 : length(r)   % Main loop
             % TODO optimize
             % Supposed new sequence, obtained from the old state adding a new symbol
             supposednewseq = [symb(mod(survSeq(state, 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
+            %supposednewseq = [symb(mod(survSeq(statemap(state), 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
             
             % TODO optimize
             % Compute desired signal u assuming the input sequence is the one above
@@ -140,6 +142,34 @@ for k = 1 : length(r)   % Main loop
             [survSeq(pred(newstate), 1:survSeq_writingcol-1), newstate];
     end
     survSeq = temp;
+    
+    
+%     % For each new state, see where its predecessor is (which row according to
+%     % statemap), then add newstate at the end of that survival sequence, and iterate
+%     % for all new states. Finally, update the statemap according to the new states at k.
+%     % Instead of sorting the rows according to the new states at k, we
+%     % store a map so as to keep track of the row in which a certain state
+%     % at time k is.
+%     
+%     % These are the states at k-1 that were discarded by the algorithm, so
+%     % we can overwrite them
+%     deadsequences = setdiff(1:Ns, unique(pred)); % data in A that is not in B
+%     deadseq_idx = 1;
+%     alreadyused = false(Ns, 1); % refers to the true index of the matrix
+%     for newstate = 1:Ns
+%         if ~alreadyused(statemap(pred(newstate)))
+%             survSeq(statemap(pred(newstate)), survSeq_writingcol) = newstate;
+%             alreadyused(statemap(pred(newstate))) = true;
+%         else
+%             survSeq(statemap(deadsequences(deadseq_idx)), 1:survSeq_writingcol) = ...
+%                 [survSeq(statemap(pred(newstate)), 1:survSeq_writingcol-1), newstate];
+%             alreadyused(statemap(deadsequences(deadseq_idx))) = true; % shouldn't need this, I think
+%             deadseq_idx = deadseq_idx + 1;
+%         end
+%     end
+%     statemap = survSeq(:, survSeq_writingcol);
+    
+    
     
     %allcosts(:, k) = cost;
     
