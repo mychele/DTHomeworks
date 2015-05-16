@@ -1,4 +1,4 @@
-function [ detected, pbit, num_bit_errors, Jmin ] = viterbi( packet, r, hi, N1, N2 , t0 )
+function [ detected, pbit, num_bit_errors ] = viterbi( packet, r, hi, N1, N2 , t0 )
 %VITERBI
 
 % TODO: use t0 to ignore precursors by maintaining delay of the channel.
@@ -92,9 +92,6 @@ for k = 1 : length(r)
                 costnew(newstate) = newstate_cost;
                 pred(newstate) = state;
             end
-            
-            % fprintf('k=%d\t%d->%d\tu=%f+j%f\tr=%f+j%f\n', k, state, newstate, real(u), imag(u), real(r(k)), imag(r(k)))
-            
         end
     end
     
@@ -169,6 +166,15 @@ elapsed_time = toc;
 detectedStates(1+survSeq_shift : survSeq_shift+survSeq_writingcol-1) = ...
     survSeq(1, 1:survSeq_writingcol-1);
 detected = symb(mod(detectedStates-1, M) + 1);
+
+% TODO why this?
+if N1 > 0
+    packet = packet(N1:end);
+    detected = detected(1:end-N1+1);
+else
+    packet = packet(1:end-1);
+    detected = detected(2:end);
+end
 
 
 
