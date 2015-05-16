@@ -1,26 +1,27 @@
-function [ detected, pbit, num_bit_errors ] = viterbi( packet, r, hi, N1, N2 , t0 )
+function [ detected, pbit, num_bit_errors ] = viterbi( packet, r, hi, N1, N2, L1, L2 )
 %VITERBI
-
-% TODO: use t0 to ignore precursors by maintaining delay of the channel.
-% Right now the number of precursors considered is actually N1 that is t0.
-
-% TODO: understand why the last symbol is always in error.
-
 
 % State: most recent is at the left, as in the book, and it has lowest weight
 % (thus, in the base-M representation, it is of course the rightmost one).
 
 fprintf('Viterbi started.\n')
+if (L1 > N1) || (L2 > N2)
+    disp('The considered precursors and postcursors cannot be more that the actual ones!')
+    return
+end
 
 
 % --- Setup
 
 M = 4;
 symb = [1+1i, 1-1i, -1+1i, -1-1i]; % possible transmitted symbols (QPSK)
-Ns = M ^ (N1+N2);       % Number of states
-TMAX = length(r) + 100; % Max value of time k
 N = N1 + N2 + 1;
+L = L1 + L2 + 1;
 MEMORY = 20 * N;        %
+Ns = M ^ (L1+L2);       % Number of states
+r  =  r(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of r
+hi = hi(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of hi
+TMAX = length(r) + 100; % Max value of time k
 
 
 
@@ -34,11 +35,7 @@ survSeq_shift = 0;
 detectedStates = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 %cost = ones(Ns, 1) * Inf;
-
 %statemap = (1:Ns).';
-
-%cool but useless:
-%newStateBase=@(currstate) (mod(currstate-1, M^(N1+N2-1)) * 4);
 
 
 % --- Main loop
@@ -61,24 +58,24 @@ for k = 1 : length(r)
     
     for state = 1 : Ns  % Cycle through all states, at time k-1 (?)
         
-        for j = 1:M     % M possibilities for the new symbol
+        for j = 1 : M   % M possibilities for the new symbol
             
             % Index of the new state: it's mod(state-1, M^(N1+N2-1)) * M + j
             newstate = newstate + 1;
             if newstate > Ns, newstate = 1; end
             
-            % TODO optimize
+            % TODO optimize?
             % Supposed new sequence, obtained from the old state adding a new symbol
             supposednewseq = [symb(mod(survSeq(state, 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
             %supposednewseq = [symb(mod(survSeq(statemap(state), 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
             
-            % TODO optimize
+            % TODO optimize?
             % Compute desired signal u assuming the input sequence is the one above
-            difflength = N - length(supposednewseq);
+            difflength = L - length(supposednewseq);
             if difflength > 0
                 supposednewseq = [zeros(1, difflength), supposednewseq];
             else
-                supposednewseq = supposednewseq(end-N+1:end);
+                supposednewseq = supposednewseq(end-L+1:end);
             end
             u = supposednewseq * flipud(hi);
             
@@ -88,7 +85,6 @@ for k = 1 : length(r)
             newstate_cost = cost(state) + abs(r(k) - u)^2;
             if costnew(newstate) == -1 ...     % not assigned yet, or...
                     || costnew(newstate) > newstate_cost    % ...found path with lower cost
-                % Update everything
                 costnew(newstate) = newstate_cost;
                 pred(newstate) = state;
             end
@@ -178,9 +174,9 @@ fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
 fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
 % figure, hold on
-% stem(real(r))
-% stem(real(packet), 'x')
-% stem(real(detected), 'd')
+% stem(-L1:length(r)-1-L1, real(r))
+% stem(0:length(packet)-1, real(packet), 'x')
+% stem(0:length(detected)-1, real(detected), 'd')
 % legend('r', 'sent', 'detected')
 
 end
