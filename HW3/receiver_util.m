@@ -8,24 +8,29 @@ clc
 Tc = 1;
 T = 4 * Tc;
 snr = 6; % 6, 8, 10, 12, 14 % dB
-L_data = 2^20-1;
+L_data = 2^18-1;
 
-%% Create, send and receive data with the given channel
+%% Create, send and receive data, estimate channel and prepare for detection
+
+% Create, send and receive data with the given channel
+fprintf('Generating input symbols and channel output... ')
 [packet, r_T4, ~] = txrc(L_data, snr, T, Tc);
+fprintf('done!\n')
 
-% estimate the channel using the first 100 samples (4*length(ts))
+% Estimate the channel using the first 100 samples (4*length(ts))
 N = 7;
+fprintf('Estimating timing phase and IR... ')
 [ m_opt, h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1:100), N, T);
+fprintf('done!\n')
 
-% sample to get r @ T
-init_offs = mod(m_opt, 4); % in T/4
-t0 = floor(m_opt/4); % from now consider T = 1
-T = 1;
+% Sample to get r @ T
+init_offs = mod(m_opt, T);  % offset in T/4
+t0 = N1;                    % t0 is @ T; TODO this is N1, we should refactor
+rT = r_T4(init_offs+1:T:end); % data sampled in T
+x = rT(t0+1 : t0+length(packet))/h(N1+1).'; % data normalized by h0, starting from t0
+hi = h / h(N1+1).';     % impulse response normalized by h0
 
 %% Detection begins
-rT = r_T4(init_offs+1:4:end); % data sampled in T
-x = rT(t0+1:t0+1+length(packet)-1)/h(N1+1).'; % data normalized by h0, starting from t0
-hi = h/h(N1+1).'; % impulse response normalized by h0
 
 N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
 M1 = 20;   % FF filter: equal to the span of h
@@ -36,5 +41,6 @@ if (L_data > 128) % to avoid very looooooong time to generate useless plots
     verb=0;
 end
 [decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb);
+[decisions, pbit, num_bit_error] = viterbi(packet, x, hi, N1, N2, t0);
 
 
