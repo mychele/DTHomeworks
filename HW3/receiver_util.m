@@ -3,11 +3,11 @@
 clear
 close all
 clc
-rng default
+% rng default
 
 Tc = 1;
 T = 4 * Tc;
-snr = 14; % 6, 8, 10, 12, 14 % dB
+snr = 6; % 6, 8, 10, 12, 14 % dB
 L_data = 2^20-1;
 
 %% Create, send and receive data with the given channel
@@ -28,9 +28,13 @@ x = rT(t0+1:t0+1+length(packet)-1)/h(N1+1).'; % data normalized by h0, starting 
 hi = h/h(N1+1).'; % impulse response normalized by h0
 
 N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
-M1 = N;   % FF filter: equal to the span of h
-D = (M1-1);   % D is chosen large first and then decreased % (N-1)/2 + 2 or 3 for LE
-M2 = N2 + M1 - 1 - D;      % FB filter: one less than the FF filter
-[decisions, pbit, Jmin] = DFE_filter(packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, 0);
+M1 = 20;   % FF filter: equal to the span of h
+D = 14; %M1-1;   % D is chosen large first and then decreased % (N-1)/2 + 2 or 3 for LE
+M2 = 0; %N2 + M1 - 1 - D;      % FB filter: one less than the FF filter
+verb = 1;
+if (L_data > 128) % to avoid very looooooong time to generate useless plots
+    verb=0;
+end
+[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb);
 
 
