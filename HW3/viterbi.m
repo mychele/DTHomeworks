@@ -166,16 +166,7 @@ elapsed_time = toc;
 detectedStates(1+survSeq_shift : survSeq_shift+survSeq_writingcol-1) = ...
     survSeq(1, 1:survSeq_writingcol-1);
 detected = symb(mod(detectedStates-1, M) + 1);
-
-% TODO why this?
-if N1 > 0
-    packet = packet(N1:end);
-    detected = detected(1:end-N1+1);
-else
-    packet = packet(1:end-1);
-    detected = detected(2:end);
-end
-
+detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
 
 
 % --- Output results
@@ -183,13 +174,13 @@ end
 num_errors = sum(packet-detected.' ~= 0);
 [pbit, num_bit_errors] = BER(packet, detected);
 
-fprintf('P_err is approximately %.g (%d errors)\n', num_errors / length(packet), num_errors)
+fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
+fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
 % figure, hold on
 % stem(real(r))
 % stem(real(packet), 'x')
 % stem(real(detected), 'd')
 % legend('r', 'sent', 'detected')
-% figure, stem(0:N1+N2, real(hi)), hold on, stem(0:N1+N2, imag(hi)), title('hi')
 
 end

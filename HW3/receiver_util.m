@@ -27,8 +27,8 @@ fprintf('done!\n')
 init_offs = mod(m_opt, T);  % offset in T/4
 t0 = N1;                    % t0 is @ T; TODO this is N1, we should refactor
 rT = r_T4(init_offs+1:T:end); % data sampled in T
-x = rT(t0+1 : t0+length(packet))/h(N1+1).'; % data normalized by h0, starting from t0
-hi = h / h(N1+1).';     % impulse response normalized by h0
+x = rT / h(N1+1).';         % data normalized by h0
+hi = h / h(N1+1).';         % impulse response normalized by h0
 
 %% Detection begins
 
@@ -40,7 +40,7 @@ verb = 1;
 if (L_data > 128) % to avoid very looooooong time to generate useless plots
     verb=0;
 end
-[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x, hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb);
+%[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x(t0+1 : t0+length(packet)), hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb);
 [decisions, pbit, num_bit_error] = viterbi(packet, x, hi, N1, N2, t0);
 
 
