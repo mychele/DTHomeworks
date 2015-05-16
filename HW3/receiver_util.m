@@ -41,7 +41,7 @@ verb = 1;
 if (L_data > 128) % to avoid very looooooong time to generate useless plots
     verb=0;
 end
-%[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x(t0+1 : t0+length(packet)), hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb);
-[decisions, pbit, num_bit_error] = viterbi(packet(1:end-assumed_dly), x(1+assumed_dly:end), hi, N1, N2, 0, N2);
+[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2, est_sigmaw, t0, D, M1, M2, verb);
+%[decisions, pbit, num_bit_error] = viterbi(packet(1:end-assumed_dly), x(1+assumed_dly:end), hi, N1, N2, 0, N2);
 
 
