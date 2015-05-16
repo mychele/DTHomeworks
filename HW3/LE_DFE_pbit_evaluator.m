@@ -12,7 +12,7 @@ snr_vec = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]; % dB
 
 L_data = 2^20-1; % be patient
 
-sim_each = 32;
+sim_each = 64;
 pbitLE = zeros(length(snr_vec), sim_each);
 num_bit_errorLE = zeros(length(snr_vec), sim_each);
 
