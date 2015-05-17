@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+#
+# Output in current folder
+#
+#$ -cwd
+#
+# Send me an email when job ends or it is aborted
+#
+#$ -m ea
+#
+# Specify parallel queue
+# no
+# and set the number of parallel jobs
+# no
+
+matlab -nodesktop -nosplash -nojvm -r "viterbi_pbit_evaluator"

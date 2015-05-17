@@ -6,18 +6,18 @@ rng default
 
 Tc = 1;
 T = 4 * Tc;
-snr_vec = 6 : 2 : 12; % dB
-L_data = 2^7 - 1;
+snr_vec = 6 : 2 : 14; % dB
+L_data = 2^15 - 1;
 
 sim_each = 8;
 pbit = zeros(length(snr_vec), sim_each);
 n_biterr = zeros(length(snr_vec), sim_each);
 
-parpool(2);
+%parpool(2);
 
 for snr_i = 1:length(snr_vec)
     snr_curr = snr_vec(snr_i);
-    parfor sim = 1:sim_each     % perform sim_each simulations
+    for sim = 1:sim_each     % perform sim_each simulations
         
         % --- Create, send and receive data, estimate channel and prepare for detection
         
@@ -50,7 +50,9 @@ for snr_i = 1:length(snr_vec)
     fprintf('%.1f%% completed\n', snr_i*100/length(snr_vec))
 end
 
-delete(gcp);
+%delete(gcp);
+
+save('BER_viterbi', 'pbit', 'n_biterr');
 
 %% Statistics
 
