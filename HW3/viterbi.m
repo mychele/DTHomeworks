@@ -65,18 +65,14 @@ for k = 1 : length(r)
             if newstate > Ns, newstate = 1; end
             
             % TODO optimize?
-            % Supposed new sequence, obtained from the old state adding a new symbol
-            supposednewseq = [symb(mod(survSeq(state, 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
-            %supposednewseq = [symb(mod(survSeq(statemap(state), 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
+            % Supposed new sequence, obtained from the old state adding a new symbol.
+            % It has always length 1 at least, so it is at most L-1 elements
+            % longer than the used IR (i.e. hi). So we zero-pad at the beginning.
+            supposednewseq = [zeros(1,L-1), symb(mod(survSeq(state, 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
+            %supposednewseq = [zeros(1,L-1), symb(mod(survSeq(statemap(state), 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
             
-            % TODO optimize?
             % Compute desired signal u assuming the input sequence is the one above
-            difflength = L - length(supposednewseq);
-            if difflength > 0
-                supposednewseq = [zeros(1, difflength), supposednewseq];
-            else
-                supposednewseq = supposednewseq(end-L+1:end);
-            end
+            supposednewseq = supposednewseq(end-L+1:end);
             u = supposednewseq * flipud(hi);
             
             % Compute the cost of the new state assuming this input sequence,
@@ -105,7 +101,7 @@ for k = 1 : length(r)
         survSeq_writingcol = MEMORY; % Actually it is (SIZE-MEMORY)
     end
     
-        
+    
     % The following operations strongly affect the computation time, if
     % the number of states is not too large. Otherwise the bottleneck is
     % the number of iterations of the inner loops above.
@@ -125,7 +121,7 @@ for k = 1 : length(r)
 %     % Instead of sorting the rows according to the new states at k, we
 %     % store a map so as to keep track of the row in which a certain state
 %     % at time k is.
-%     
+%
 %     % These are the states at k-1 that were discarded by the algorithm, so
 %     % we can overwrite them
 %     deadsequences = setdiff(1:Ns, unique(pred)); % data in A that is not in B
