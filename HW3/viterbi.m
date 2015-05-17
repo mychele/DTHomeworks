@@ -4,7 +4,7 @@ function [ detected, pbit, num_bit_errors ] = viterbi( packet, r, hi, N1, N2, L1
 % State: most recent is at the left, as in the book, and it has lowest weight
 % (thus, in the base-M representation, it is of course the rightmost one).
 
-fprintf('Viterbi started.\n')
+%fprintf('Viterbi started.\n')
 if (L1 > N1) || (L2 > N2)
     disp('The considered precursors and postcursors cannot be more that the actual ones!')
     return
@@ -28,7 +28,7 @@ SURVSEQ_OFFS = L-1;
 
 % --- Init stuff
 
-tic;
+tStart = tic;   % Use a variable to avoid conflict with parallel calls to tic/toc
 survSeq = zeros(Ns, min(TMAX, 2*MEMORY));
 survSeq(:, 1+SURVSEQ_OFFS) = symb(mod(0:Ns-1, M) + 1);
 survSeq_writingcol = 1+SURVSEQ_OFFS;
@@ -154,7 +154,7 @@ for k = 1 : length(r)
 end
 
 %printprogress('', msg_delete);
-toc
+toc(tStart)
 
 
 
