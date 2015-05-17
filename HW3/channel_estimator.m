@@ -132,6 +132,29 @@ xlabel('N1_{T}'), ylabel('\epsilon [dB]')
 grid on, ylim([-25 -15])
 
 
+%% Choose N and N1 simultaneously (@T), given t0
+
+maxN1 = t0; % we already know it can't be larger than this
+maxN = 11;
+error_func = zeros(maxN, maxN1);
+for N1 = 0:maxN1
+    for N = t0+1:maxN
+    x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
+    d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + init_offs + 4*t0: 4 :end - (length(q)-4) + 4*t0 + init_offs);
+    [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N-N1);    
+    d_no_trans = d_for_ls(N-N1 : N-N1+L-1);
+    error_func(N-N1, N1+1) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
+    end
+end
+
+figure
+plot(t0+1:t0+maxN, 10*log10(error_func)), hold on, plot([t0+1 t0+maxN], 10*log10(sigma_w*[1 1]))
+title('Error functional estimating h @T, given t_0 and varying N_1')
+xlabel('N_{T}'), ylabel('\epsilon [dB]')
+legend('N_1 = 0', 'N_1 = 1', 'N_1 = 2', '\sigma_w')
+grid on, xlim([4 11])
+
+
 
 %% Estimate q_hat @T for the chosen N
 
