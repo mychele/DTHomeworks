@@ -18,15 +18,15 @@ fprintf('Generating input symbols and channel output... ')
 fprintf('done!\n')
 
 % Estimate the channel using the first 100 samples (4*length(ts))
-N = 5;
 assumed_dly = 2;
+assumed_m_opt = 10;
 fprintf('Estimating timing phase and IR... ')
-[ m_opt, h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1+T*assumed_dly:100+T*assumed_dly), N, T);
+[ h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1:100+T*assumed_dly), 0, 4, assumed_m_opt, T);
 fprintf('done!\n')
 
 % Sample to get r @ T
-init_offs = mod(m_opt, T);  % offset in T/4
-t0 = N1;                    % t0 is @ T; TODO this is N1, we should refactor
+init_offs = mod(assumed_m_opt, T);  % offset in T/4
+t0 = assumed_dly;                    % t0 is @ T; TODO this is N1, we should refactor
 rT = r_T4(init_offs+1:T:end); % data sampled in T
 x = rT / h(N1+1).';         % data normalized by h0
 hi = h / h(N1+1).';         % impulse response normalized by h0
