@@ -33,6 +33,9 @@ for l = r+1:(L) % Skip the initial condition for the cycle
             p(l) = xor(xor(xor(p(l-14), p(l-17)), p(l-18)), p(l-19));
         case 2^20 -1
             p(l) = xor(p(l-17), p(l-20));
+        otherwise
+            p = [];
+            disp('MLsequence: length not supported');
     end
 end
 end
