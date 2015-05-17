@@ -7,9 +7,10 @@ rng default
 Tc = 1;
 T = 4 * Tc;
 snr_vec = 6 : 2 : 14; % dB
-L_data = 2^15 - 1;
+L_data = 2.^ [15, 15, 18, 20, 20] - 1;
+if length(L_data) ~= length(snr_vec), disp('Check L_data'), return, end
 
-sim_each = 8;
+sim_each = 10;
 pbit = zeros(length(snr_vec), sim_each);
 n_biterr = zeros(length(snr_vec), sim_each);
 
