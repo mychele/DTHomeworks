@@ -18,10 +18,11 @@ symb = [1+1i, 1-1i, -1+1i, -1-1i]; % possible transmitted symbols (QPSK)
 N = N1 + N2 + 1;
 L = L1 + L2 + 1;
 MEMORY = 20 * N;        %
-Ns = M ^ (L1+L2);       % Number of states
+Ns = M ^ (L1+L2);               % Number of states
 r  =  r(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of r
 hi = hi(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of hi
-TMAX = length(r) + 100; % Max value of time k
+TMAX = length(r) + 100;         % Max value of time k
+SURVSEQ_OFFS = L-1;
 
 
 
@@ -29,10 +30,10 @@ TMAX = length(r) + 100; % Max value of time k
 
 tic;
 survSeq = zeros(Ns, min(TMAX, 2*MEMORY));
-survSeq(:, 1) = mod(0:Ns-1, M) + 1;
-survSeq_writingcol = 1;
+survSeq(:, 1+SURVSEQ_OFFS) = symb(mod(0:Ns-1, M) + 1);
+survSeq_writingcol = 1+SURVSEQ_OFFS;
 survSeq_shift = 0;
-detectedStates = zeros(1, length(packet));
+detectedSymb = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 %cost = ones(Ns, 1) * Inf;
 %statemap = (1:Ns).';
@@ -70,11 +71,10 @@ for k = 1 : length(r)
             newstate = newstate + 1;
             if newstate > Ns, newstate = 1; end
             
-            % TODO optimize?
             % Supposed new sequence, obtained from the old state adding a new symbol.
             % It has always length 1 at least, so it is at most L-1 elements
             % longer than the used IR (i.e. hi). So we zero-pad at the beginning.
-            supposednewseq = [zeros(1,L-1), symb(survSeq(state, 1:survSeq_writingcol-1)), symb(j)];
+            supposednewseq = [survSeq(state, 1:survSeq_writingcol-1), symb(j)];
             %supposednewseq = [zeros(1,L-1), symb(mod(survSeq(statemap(state), 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
             
             % Compute desired signal u assuming the input sequence is the one above
@@ -99,7 +99,7 @@ for k = 1 : length(r)
     if survSeq_writingcol == size(survSeq, 2)
         
         % Take the first row of old decided states and store it before erasing it.
-        detectedStates(1+survSeq_shift : survSeq_shift+MEMORY) = survSeq(1, 1:MEMORY);
+        detectedSymb(1+survSeq_shift : survSeq_shift+MEMORY) = survSeq(1, 1:MEMORY);
         
         % Shift of half the size, that is our memory.
         survSeq(:, 1:MEMORY) = survSeq(:, MEMORY+1:end);
@@ -116,7 +116,7 @@ for k = 1 : length(r)
     temp = zeros(size(survSeq));
     for newstate = 1:Ns
         temp(newstate, 1:survSeq_writingcol) = ...
-            [survSeq(pred(newstate), 1:survSeq_writingcol-1), mod(newstate-1, M)+1];
+            [survSeq(pred(newstate), 1:survSeq_writingcol-1), symb(mod(newstate-1, M)+1)];
     end
     survSeq = temp;
     
@@ -154,17 +154,17 @@ for k = 1 : length(r)
     cost = costnew;
 end
 
-disp('\n')
-toc
-elapsed_time = toc;
+fprintf('\n'), toc
+%elapsed_time = toc;
 
 
 
 % --- Finish storing, then get the symbols
 
-detectedStates(1+survSeq_shift : survSeq_shift+survSeq_writingcol-1) = ...
+detectedSymb(1+survSeq_shift : survSeq_shift+survSeq_writingcol-1) = ...
     survSeq(1, 1:survSeq_writingcol-1);
-detected = symb(detectedStates);
+detectedSymb = detectedSymb(1+SURVSEQ_OFFS : end);
+detected = detectedSymb;
 detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
 
 
