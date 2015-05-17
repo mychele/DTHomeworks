@@ -36,11 +36,17 @@ detectedStates = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 %cost = ones(Ns, 1) * Inf;
 %statemap = (1:Ns).';
+msg_delete = '';
 
 
 % --- Main loop
 
 for k = 1 : length(r)
+    
+    % Print progress
+    if(mod(k, 16) == 0)
+        msg_delete = printprogress(num2str(k), msg_delete);
+    end
     
     % "Pointer" to the column we are gonna write in this iteration
     survSeq_writingcol = survSeq_writingcol + 1;
@@ -148,6 +154,7 @@ for k = 1 : length(r)
     cost = costnew;
 end
 
+disp('\n')
 toc
 elapsed_time = toc;
 
