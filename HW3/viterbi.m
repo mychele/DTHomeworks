@@ -29,7 +29,7 @@ TMAX = length(r) + 100; % Max value of time k
 
 tic;
 survSeq = zeros(Ns, min(TMAX, 2*MEMORY));
-survSeq(:, 1) = 1:Ns;
+survSeq(:, 1) = mod(0:Ns-1, M) + 1;
 survSeq_writingcol = 1;
 survSeq_shift = 0;
 detectedStates = zeros(1, length(packet));
@@ -68,7 +68,7 @@ for k = 1 : length(r)
             % Supposed new sequence, obtained from the old state adding a new symbol.
             % It has always length 1 at least, so it is at most L-1 elements
             % longer than the used IR (i.e. hi). So we zero-pad at the beginning.
-            supposednewseq = [zeros(1,L-1), symb(mod(survSeq(state, 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
+            supposednewseq = [zeros(1,L-1), symb(survSeq(state, 1:survSeq_writingcol-1)), symb(j)];
             %supposednewseq = [zeros(1,L-1), symb(mod(survSeq(statemap(state), 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
             
             % Compute desired signal u assuming the input sequence is the one above
@@ -110,7 +110,7 @@ for k = 1 : length(r)
     temp = zeros(size(survSeq));
     for newstate = 1:Ns
         temp(newstate, 1:survSeq_writingcol) = ...
-            [survSeq(pred(newstate), 1:survSeq_writingcol-1), newstate];
+            [survSeq(pred(newstate), 1:survSeq_writingcol-1), mod(newstate-1, M)+1];
     end
     survSeq = temp;
     
@@ -157,7 +157,7 @@ elapsed_time = toc;
 
 detectedStates(1+survSeq_shift : survSeq_shift+survSeq_writingcol-1) = ...
     survSeq(1, 1:survSeq_writingcol-1);
-detected = symb(mod(detectedStates-1, M) + 1);
+detected = symb(detectedStates);
 detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
 
 
