@@ -35,9 +35,8 @@ survSeq_writingcol = 1+SURVSEQ_OFFS;
 survSeq_shift = 0;
 detectedSymb = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
-%cost = ones(Ns, 1) * Inf;
 %statemap = (1:Ns).';
-msg_delete = '';
+%msg_delete = '';
 
 
 % --- Main loop
@@ -45,9 +44,9 @@ msg_delete = '';
 for k = 1 : length(r)
     
     % Print progress
-    if(mod(k, 16) == 0)
-        msg_delete = printprogress(num2str(k), msg_delete);
-    end
+%     if(mod(k, 16) == 0)
+%         msg_delete = printprogress(num2str(k), msg_delete);
+%     end
     
     % "Pointer" to the column we are gonna write in this iteration
     survSeq_writingcol = survSeq_writingcol + 1;
@@ -154,8 +153,8 @@ for k = 1 : length(r)
     cost = costnew;
 end
 
-fprintf('\n'), toc
-%elapsed_time = toc;
+%printprogress('', msg_delete);
+toc
 
 
 
@@ -168,13 +167,14 @@ detected = detectedSymb;
 detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
 
 
+
 % --- Output results
 
-num_errors = sum(packet-detected.' ~= 0);
 [pbit, num_bit_errors] = BER(packet, detected);
 
-fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
-fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
+% num_errors = sum(packet-detected.' ~= 0);
+% fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
+% fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
 % figure, hold on
 % stem(-L1:length(r)-1-L1, real(r))
