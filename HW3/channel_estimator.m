@@ -2,7 +2,7 @@
 clear
 close all
 clc
-rng default % for reproducibility
+%rng default % for reproducibility
 
 Tc = 1;
 T = 4*Tc;
@@ -60,10 +60,11 @@ d_for_ls = r(end - 4*(L+max(N_i)-1) + 1 - (length(q)-4): end - (length(q)-4));
 [q_hat, ~] = h_estimation(x_for_ls, d_for_ls, L, N_i);
 
 q_hat_vec = reshape(q_hat, numel(q_hat), 1);
-figure, plot(0:length(q)-1, abs(q)), hold on, plot(0:length(q_hat_vec)-1, abs(q_hat_vec))
-legend('q', 'qhat'), grid on, xlim([-0.2, length(q) + 0.2]), ylim([-0.05, max(abs(q_hat_vec) + 0.05)])
-title('q, qhat for N = 28, estimated @T/4')
-xlabel('iT/4')
+
+% figure, plot(0:length(q)-1, abs(q)), hold on, plot(0:length(q_hat_vec)-1, abs(q_hat_vec))
+% legend('q', 'qhat'), grid on, xlim([-0.2, length(q) + 0.2]), ylim([-0.05, max(abs(q_hat_vec) + 0.05)])
+% title('q, qhat for N = 28, estimated @T/4')
+% xlabel('iT/4')
 
 
 %% Estimate t0 as in pag 617 bc
@@ -97,8 +98,8 @@ maxN = 11;
 error_func = zeros(maxN, 1);
 for N = 1:maxN % N is the supposed length of the impulse response of the channel
     x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-    d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + init_offs: 4 :end - (length(q)-4) + init_offs);
-    [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);    
+    d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs: T :end - (length(q)-4) + init_offs);
+    [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
     d_no_trans = d_for_ls(N : N+L-1);
     error_func(N) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 end
@@ -113,50 +114,57 @@ grid on
 N = 7;
 
 
-%% Choose number of "anticausal" coefficients, given t0
+%% Choose number of "anticausal" coefficients, given t0 and N
 
-maxN1 = t0; % we already know it can't be larger than this
-error_func = zeros(maxN1, 1);
-for N1 = 0:maxN1
-    x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-    d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + init_offs + 4*t0: 4 :end - (length(q)-4) + 4*t0 + init_offs);
-    [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N-N1);    
-    d_no_trans = d_for_ls(N-N1 : N-N1+L-1);
-    error_func(N1+1) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
-end
+% maxN1 = t0; % we already know it can't be larger than this
+% error_func = zeros(maxN1, 1);
+% for N1 = 0:maxN1
+%     x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
+%     d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + init_offs + 4*t0: 4 :end - (length(q)-4) + 4*t0 + init_offs);
+%     [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N-N1);
+%     d_no_trans = d_for_ls(N-N1 : N-N1+L-1);
+%     error_func(N1+1) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
+% end
+%
+% figure
+% plot(0:maxN1, 10*log10(error_func)), hold on, plot([0 maxN1], 10*log10(sigma_w*[1 1]))
+% title('Error functional estimating h @T, given N and t_0')
+% xlabel('N1_{T}'), ylabel('\epsilon [dB]')
+% grid on, ylim([-25 -15])
 
-figure
-plot(0:maxN1, 10*log10(error_func)), hold on, plot([0 maxN1], 10*log10(sigma_w*[1 1]))
-title('Error functional estimating h @T, given N and t_0')
-xlabel('N1_{T}'), ylabel('\epsilon [dB]')
-grid on, ylim([-25 -15])
 
-
-%% Choose N and N1 simultaneously (@T), given t0
+%% Choose N1 and N2 (@T), given t0
 
 maxN1 = t0; % we already know it can't be larger than this
 maxN = 11;
 error_func = zeros(maxN, maxN1);
 for N1 = 0:maxN1
-    for N = t0+1:maxN
-    x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-    d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + init_offs + 4*t0: 4 :end - (length(q)-4) + 4*t0 + init_offs);
-    [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N-N1);    
-    d_no_trans = d_for_ls(N-N1 : N-N1+L-1);
-    error_func(N-N1, N1+1) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
+    for N2 = 0:maxN-N1-1
+        N = N1+N2+1;
+        x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
+        d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(t0-N1): T :end - (length(q)-4) + T*(t0-N1) + init_offs);
+        % Now d_for_ls is delayed by N1 samples wrt x_for_ls.
+        [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
+        % We discarded the first t0-N1 samples, so the "perceived delay" is N1 < t0.
+        % We estimated the channel with N coefficients disregarding the first t0-N1,
+        % and the IR we get is a version of the actual one shifted left by t0-N1.
+        d_no_trans = d_for_ls(N : N+L-1);
+        error_func(N-N1, N1+1) = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
     end
 end
 
 figure
-plot(t0+1:t0+maxN, 10*log10(error_func)), hold on, plot([t0+1 t0+maxN], 10*log10(sigma_w*[1 1]))
+plot(0:maxN-1, 10*log10(error_func)), hold on, plot([0 maxN-1], 10*log10(sigma_w*[1 1]))
 title('Error functional estimating h @T, given t_0 and varying N_1')
-xlabel('N_{T}'), ylabel('\epsilon [dB]')
+xlabel('N_{2,T}'), ylabel('\epsilon [dB]')
 legend('N_1 = 0', 'N_1 = 1', 'N_1 = 2', '\sigma_w')
-grid on, xlim([4 11])
+grid on, xlim([0 8])
 
-
+N = 7;
 
 %% Estimate q_hat @T for the chosen N
+
+% TODO perform estimation with N1<t0 in general
 
 x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
 d_for_ls = r(end - 4*(L+N-1) + 1 - (length(q)-4) + init_offs: 4 :end - (length(q)-4) + init_offs);
