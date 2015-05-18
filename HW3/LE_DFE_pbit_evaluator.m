@@ -33,7 +33,7 @@ for snr_i = 1:length(snr_vec)
         
         % Estimate the channel using the first 100 samples (4*length(ts))
         fprintf('Estimating timing phase and IR... ')
-        [ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4, assumed_m_opt);
+        [ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4);
         fprintf('done!\n')
         
         % Sample to get r @ T
@@ -74,7 +74,7 @@ for snr_i = 1:length(snr_vec)
         
         % Estimate the channel using the first 100 samples (4*length(ts))
         fprintf('Estimating timing phase and IR... ')
-        [ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4, assumed_m_opt);
+        [ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4);
         fprintf('done!\n')
         
         % Sample to get r @ T
