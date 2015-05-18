@@ -24,14 +24,16 @@ for snr_i = 1:length(snr_vec)
         
         % Create, send and receive data with the given channel
         %fprintf('Generating input symbols and channel output... ')
-        [packet, r_T4, ~] = txrc(L_data, snr_curr, T, Tc);
+        [packet, r_T4, ~] = txrc(L_data(snr_i), snr_curr, T, Tc);
         %fprintf('done!\n')
         
         % Estimate the channel using the first 100 samples (4*length(ts))
-        N = 5;
+        N1 = 0;
+        N2 = 4;
         assumed_dly = 2;
+        m_opt = 10; % these 4 quantities are assumed from ex 1
         %fprintf('Estimating timing phase and IR... ')
-        [ m_opt, h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1+T*assumed_dly:100+T*assumed_dly), N, T);
+        [ h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1:100+T*assumed_dly), N1, N2, m_opt, T);
         %fprintf('done!\n')
         
         % Sample to get r @ T
