@@ -55,7 +55,7 @@ for snr_i = 1:length(snr_vec)
     end
 end
 
-%save('pbit_LE', 'pbitLE', 'num_bit_errorLE');
+save('pbit_LE', 'pbitLE', 'num_bit_errorLE');
 
 
 %% DFE pbit evaluation
