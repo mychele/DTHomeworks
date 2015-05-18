@@ -1,0 +1,140 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2015 The MathWorks, Inc.
+                   R2015a (8.5.0.197613) 64-bit (glnxa64)
+                             February 12, 2015
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+
+	Academic License
+
+Starting parallel pool (parpool) using the 'local' profile ... connected to 8 workers.
+Elapsed time is 677.326363 seconds.
+P_err = 0.1 (16266 errors)
+P_bit = 0.06 (16885 errors)
+Elapsed time is 695.518143 seconds.
+P_err = 0.1 (17851 errors)
+P_bit = 0.07 (18763 errors)
+Elapsed time is 702.605348 seconds.
+P_err = 0.1 (18305 errors)
+P_bit = 0.07 (19108 errors)
+Elapsed time is 710.590203 seconds.
+P_err = 0.2 (22900 errors)
+P_bit = 0.09 (23852 errors)
+Elapsed time is 713.296105 seconds.
+P_err = 0.1 (13280 errors)
+P_bit = 0.05 (13733 errors)
+Elapsed time is 741.999560 seconds.
+P_err = 0.2 (25495 errors)
+P_bit = 0.1 (26718 errors)
+Elapsed time is 785.822446 seconds.
+P_err = 0.2 (20109 errors)
+P_bit = 0.08 (20982 errors)
+Elapsed time is 793.989883 seconds.
+P_err = 0.1 (17757 errors)
+P_bit = 0.07 (18390 errors)
+20.0% completed
+Elapsed time is 2640.369743 seconds.
+P_err = 0.06 (32160 errors)
+P_bit = 0.03 (32807 errors)
+Elapsed time is 2730.284634 seconds.
+P_err = 0.04 (20006 errors)
+P_bit = 0.02 (20291 errors)
+Elapsed time is 2764.809238 seconds.
+P_err = 0.06 (33602 errors)
+P_bit = 0.03 (34035 errors)
+Elapsed time is 2790.596431 seconds.
+P_err = 0.03 (14223 errors)
+P_bit = 0.01 (14416 errors)
+Elapsed time is 2920.424534 seconds.
+P_err = 0.04 (20962 errors)
+P_bit = 0.02 (21347 errors)
+Elapsed time is 2959.182504 seconds.
+P_err = 0.04 (21463 errors)
+P_bit = 0.02 (21733 errors)
+Elapsed time is 2994.486838 seconds.
+P_err = 0.03 (15558 errors)
+P_bit = 0.01 (15707 errors)
+Elapsed time is 3104.332825 seconds.
+P_err = 0.03 (16539 errors)
+P_bit = 0.02 (16748 errors)
+40.0% completed
+Elapsed time is 2553.510528 seconds.
+P_err = 0.008 (4409 errors)
+P_bit = 0.004 (4419 errors)
+Elapsed time is 2558.046226 seconds.
+P_err = 0.01 (7389 errors)
+P_bit = 0.007 (7431 errors)
+Elapsed time is 2708.457547 seconds.
+P_err = 0.009 (4798 errors)
+P_bit = 0.005 (4812 errors)
+Elapsed time is 2727.899059 seconds.
+P_err = 0.003 (1357 errors)
+P_bit = 0.001 (1361 errors)
+Elapsed time is 2818.287679 seconds.
+P_err = 0.008 (4208 errors)
+P_bit = 0.004 (4225 errors)
+Elapsed time is 2895.938139 seconds.
+P_err = 0.02 (8731 errors)
+P_bit = 0.008 (8776 errors)
+Elapsed time is 3042.033169 seconds.
+P_err = 0.008 (4152 errors)
+P_bit = 0.004 (4166 errors)
+Elapsed time is 3060.585739 seconds.
+P_err = 0.006 (3168 errors)
+P_bit = 0.003 (3179 errors)
+60.0% completed
+Elapsed time is 2518.052233 seconds.
+P_err = 0.0004 (216 errors)
+P_bit = 0.0002 (216 errors)
+Elapsed time is 2692.072871 seconds.
+P_err = 0.0002 (94 errors)
+P_bit = 9e-05 (94 errors)
+Elapsed time is 2755.210622 seconds.
+P_err = 0.002 (1150 errors)
+P_bit = 0.001 (1151 errors)
+Elapsed time is 2788.453446 seconds.
+P_err = 0.001 (742 errors)
+P_bit = 0.0007 (742 errors)
+Elapsed time is 2803.588092 seconds.
+P_err = 0.0003 (169 errors)
+P_bit = 0.0002 (169 errors)
+Elapsed time is 2862.388547 seconds.
+P_err = 0.0005 (271 errors)
+P_bit = 0.0003 (271 errors)
+Elapsed time is 3035.341680 seconds.
+P_err = 0.0007 (343 errors)
+P_bit = 0.0003 (343 errors)
+Elapsed time is 3113.276089 seconds.
+P_err = 0.0007 (374 errors)
+P_bit = 0.0004 (375 errors)
+80.0% completed
+Elapsed time is 2502.223124 seconds.
+P_err = 4e-05 (20 errors)
+P_bit = 2e-05 (20 errors)
+Elapsed time is 2707.626152 seconds.
+P_err = 2e-06 (1 errors)
+P_bit = 1e-06 (1 errors)
+Elapsed time is 2735.661351 seconds.
+P_err = 8e-06 (4 errors)
+P_bit = 4e-06 (4 errors)
+Elapsed time is 2762.049755 seconds.
+P_err = 6e-06 (3 errors)
+P_bit = 3e-06 (3 errors)
+Elapsed time is 2864.018595 seconds.
+P_err = 4e-06 (2 errors)
+P_bit = 2e-06 (2 errors)
+Elapsed time is 2923.826343 seconds.
+P_err = 2e-06 (1 errors)
+P_bit = 1e-06 (1 errors)
+Elapsed time is 3027.593768 seconds.
+P_err = 4e-06 (2 errors)
+P_bit = 2e-06 (2 errors)
+Elapsed time is 3124.894874 seconds.
+P_err = 2e-05 (12 errors)
+P_bit = 1e-05 (12 errors)
+100.0% completed
+Parallel pool using the 'local' profile is shutting down.
