@@ -19,7 +19,7 @@ sim_each = 64;
 pbitLE = zeros(length(snr_vec), sim_each);
 num_bit_errorLE = zeros(length(snr_vec), sim_each);
 
-parpool(4);
+parpool(8);
 
 for snr_i = 1:length(snr_vec)
     snr_ch = snr_vec(snr_i);
