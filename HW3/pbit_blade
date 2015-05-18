@@ -14,4 +14,4 @@
 # and set the number of parallel jobs
 #$ -l par_cpu=4
 
-matlab -nodesktop -nosplash -nojvm -r "LE_DFE_pbit_evaluator"
+matlab -nodesktop -nosplash -r "LE_DFE_pbit_evaluator"
