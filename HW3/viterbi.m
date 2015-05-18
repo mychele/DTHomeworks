@@ -14,31 +14,29 @@ end
 % --- Setup
 
 M = 4;
-symb = [1+1i, 1-1i, -1+1i, -1-1i]; % possible transmitted symbols (QPSK)
+symb = [1+1i, 1-1i, -1+1i, -1-1i]; % All possible transmitted symbols (QPSK)
 N = N1 + N2 + 1;
-L = L1 + L2 + 1;
-kd = 20 * N;        % Trellis size
-MAT_SIZE = 2*kd;    % Actual size of the matrix that stores the sequences (must be >kd)
-Ns = M ^ (L1+L2);               % Number of states
+Kd = 20 * N;      % Trellis size, that is the size of the state matrix as well
+Ns = M ^ (L1+L2); % Number of states
 r  =  r(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of r
 hi = hi(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of hi
-SURVSEQ_OFFS = L-1;
 
 
 
-% --- Init stuff
+% ------------------
+% --- Init stuff ---
+% ------------------
 
 tStart = tic;   % Use a variable to avoid conflict with parallel calls to tic/toc
-survSeq = zeros(Ns, MAT_SIZE);
-survSeq(:, 1+SURVSEQ_OFFS) = symb(mod(0:Ns-1, M) + 1);
-survSeq_writingcol = 1+SURVSEQ_OFFS;
+survSeq = zeros(Ns, Kd);
+survSeq(:, Kd) = symb(mod(0:Ns-1, M) + 1);
 % TODO: init the first elements to the end of ML sequence.
-% TODO: if we use u_mat we actually don't need SURVSEQ_OFFS I think.
-survSeq_shift = 0;
 detectedSymb = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 
+
 % -- Define u_mat matrix
+
 statelength = L1 + L2; % number of digits of the state, i.e. its length in base M=4
 statevec = zeros(1, statelength); % symbol index, from the oldest to the newest
 u_mat = zeros(Ns, M);
@@ -61,12 +59,13 @@ for state = 1:Ns
 end
 
 
-% --- Main loop
+
+
+% -----------------
+% --- Main loop ---
+% -----------------
 
 for k = 1 : length(r)
-    
-    % "Pointer" to the column we are gonna write in this iteration
-    survSeq_writingcol = survSeq_writingcol + 1;
     
     % Initialize the costs of the new states to -1
     costnew = - ones(Ns, 1);
@@ -80,7 +79,7 @@ for k = 1 : length(r)
     newstate = 0;
     
     
-    for state = 1 : Ns  % Cycle through all states, at time k-1 (?)
+    for state = 1 : Ns  % Cycle through all states, at time k-1
         
         for j = 1 : M   % M possibilities for the new symbol
             
@@ -88,94 +87,50 @@ for k = 1 : length(r)
             newstate = newstate + 1;
             if newstate > Ns, newstate = 1; end
             
-            % Supposed new sequence, obtained from the old state adding a new symbol.
-            %supposednewseq = [survSeq(state, 1:survSeq_writingcol-1), symb(j)];
-            
-            % Compute desired signal u assuming the input sequence is the one above
-            %supposednewseq = supposednewseq(end-L+1:end);
-            %u = supposednewseq * flipud(hi);
-            
-            % Desired signal u assuming the input sequence is the one above
+            % Desired signal u assuming the input sequence is the one given by the current
+            % state "state", followed by a new assumed symbol given by j.
             u = u_mat(state, j);
             
-            % Compute the cost of the new state assuming this input sequence,
-            % then update the cost of the new state, and overwrite the predecessor,
-            % if this transition has a lower cost than before.
+            % Compute the cost of the new state assuming this input sequence, then update
+            % the cost of the new state, and overwrite the predecessor, if this transition
+            % has a lower cost than before.
             newstate_cost = cost(state) + abs(r(k) - u)^2;
             if costnew(newstate) == -1 ...     % not assigned yet, or...
-                    || costnew(newstate) > newstate_cost    % ...found path with lower cost
+                    || costnew(newstate) > newstate_cost  % ...found path with lower cost
                 costnew(newstate) = newstate_cost;
                 pred(newstate) = state;
             end
         end
     end
     
-    % Handle memory. If we were gonna write to the last column, first we store
-    % the oldest chunk of the decided sequence (we decide it for good), then
-    % we shift the matrix to make room for new data.
-    if survSeq_writingcol == MAT_SIZE
-        
-        % Take the first row of old decided states and store it before erasing it.
-        detectedSymb(1+survSeq_shift : survSeq_shift+MAT_SIZE-kd) = survSeq(1, 1:MAT_SIZE-kd);
-        
-        % Shift of half the size, that is our memory.
-        survSeq(:, 1:kd) = survSeq(:, end-kd+1 : end);
-        survSeq_shift = survSeq_shift + MAT_SIZE - kd;
-        survSeq_writingcol = kd;
-    end
     
-    % Update the survivor sequence
+    % Update the survivor sequence by shifting the time horizon of the matrix by one, and
+    % rewrite the matrix with the new survival sequences sorted by current state.
+    % Meanwhile, decide the oldest sample (based on minimum cost) and get rid of it to
+    % keep only Kd columns in the matrix.
     temp = zeros(size(survSeq));
     for newstate = 1:Ns
-        temp(newstate, 1:survSeq_writingcol) = ...
-            [survSeq(pred(newstate), 1:survSeq_writingcol-1), symb(mod(newstate-1, M)+1)];
+        temp(newstate, 1:Kd-1) = ...    % In the new matrix except the last col
+            [survSeq(pred(newstate), 2:Kd-1), ... % we write the data we had except the oldest one,
+            symb(mod(newstate-1, M)+1)];        % and then the new symbol we just supposed to have received.
     end
+    [~, decided_index] = min(costnew);      % Find the oldest symbol that yields the min cost
+    detectedSymb(1+k) = survSeq(decided_index); % and store it (decide it for good).
+    % TODO check this min cost thing above.
     survSeq = temp;
-    
-    
-    %     % For each new state, see where its predecessor is (which row according to
-    %     % statemap), then add newstate at the end of that survival sequence, and iterate
-    %     % for all new states. Finally, update the statemap according to the new states at k.
-    %     % Instead of sorting the rows according to the new states at k, we
-    %     % store a map so as to keep track of the row in which a certain state
-    %     % at time k is.
-    %
-    %     % These are the states at k-1 that were discarded by the algorithm, so
-    %     % we can overwrite them
-    %     deadsequences = setdiff(1:Ns, unique(pred)); % data in A that is not in B
-    %     deadseq_idx = 1;
-    %     alreadyused = false(Ns, 1); % refers to the true index of the matrix
-    %     for newstate = 1:Ns
-    %         if ~alreadyused(statemap(pred(newstate)))
-    %             survSeq(statemap(pred(newstate)), survSeq_writingcol) = newstate;
-    %             alreadyused(statemap(pred(newstate))) = true;
-    %         else
-    %             survSeq(statemap(deadsequences(deadseq_idx)), 1:survSeq_writingcol) = ...
-    %                 [survSeq(statemap(pred(newstate)), 1:survSeq_writingcol-1), newstate];
-    %             alreadyused(statemap(deadsequences(deadseq_idx))) = true; % shouldn't need this, I think
-    %             deadseq_idx = deadseq_idx + 1;
-    %         end
-    %     end
-    %     statemap = survSeq(:, survSeq_writingcol);
-    
-    
-    
-    %allcosts(:, k) = cost;
     
     % Update the cost to be used as cost at time k-1 in the next iteration
     cost = costnew;
 end
 
-%printprogress('', msg_delete);
 toc(tStart)
 
 
 
 % --- Finish storing, then get the symbols
-
-detectedSymb(1+survSeq_shift : survSeq_shift+survSeq_writingcol-1) = ...
-    survSeq(1, 1:survSeq_writingcol-1);
-detectedSymb = detectedSymb(1+SURVSEQ_OFFS : end);
+detectedSymb(length(r)+2 : length(r)+Kd) = ...
+    survSeq(1, 1:Kd-1);
+detectedSymb = detectedSymb(Kd : end);
 detected = detectedSymb;
 detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
 
