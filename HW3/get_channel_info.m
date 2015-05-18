@@ -1,4 +1,4 @@
-function [ h_i, est_sigmaw, N1, N2] = get_channel_info( r, N1, N2, assumed_m_opt, T )
+function [ h_i, est_sigmaw, N1, N2] = get_channel_info( r, N1, N2, assumed_m_opt)
 %GET_CHANNEL_INFO
 
 L = 15;
@@ -25,12 +25,12 @@ trainingsymbols = ts_generation(L, Nseq);
 
 
 % --- Estimate impulse response h @T and compute estimated noise power
-
-t0 = floor(assumed_m_opt / T);
-init_offs = mod(assumed_m_opt, T);
+Q0 = 4;
+init_offs = mod(assumed_m_opt, Q0);
 N = N1+N2+1;
-x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-d_for_ls = r(end - T*(L+N-1) + 1 + init_offs - T*N1: T :end - T*N1);
+x_for_ls = trainingsymbols(end - (L+N-1) + 1 : end);
+% r is in T
+d_for_ls = r(end - (L+N-1) + 1 : end);
 [h_i, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
 d_no_trans = d_for_ls(N : N+L-1);
 est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);

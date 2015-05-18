@@ -5,30 +5,30 @@ close all
 clc
 % rng default
 
-Tc = 1;
-T = 4 * Tc;
-snr = 6; % 6, 8, 10, 12, 14 % dB
-L_data = 2^18-1;
+T = 1;
+snr = 14; % 6, 8, 10, 12, 14 % dB
+L_data = 2^20-1; %2^18-1;
+
+% From exercise 1
+assumed_dly = 2;
+assumed_m_opt = 10;
+init_offs = mod(assumed_m_opt, 4);  % offset in T/4
+t0 = assumed_dly;                    % t0 is @ T; TODO this is N1, we should refactor
 
 %% Create, send and receive data, estimate channel and prepare for detection
 
 % Create, send and receive data with the given channel
 fprintf('Generating input symbols and channel output... ')
-[packet, r_T4, ~] = txrc(L_data, snr, T, Tc);
+[packet, r, sigma_w] = txrc(L_data, snr, assumed_m_opt);
 fprintf('done!\n')
 
 % Estimate the channel using the first 100 samples (4*length(ts))
-assumed_dly = 2;
-assumed_m_opt = 10;
 fprintf('Estimating timing phase and IR... ')
-[ h, est_sigmaw, N1, N2 ] = get_channel_info(r_T4(1:100+T*assumed_dly), 0, 4, assumed_m_opt, T);
+[ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4, assumed_m_opt);
 fprintf('done!\n')
 
 % Sample to get r @ T
-init_offs = mod(assumed_m_opt, T);  % offset in T/4
-t0 = assumed_dly;                    % t0 is @ T; TODO this is N1, we should refactor
-rT = r_T4(init_offs+1:T:end); % data sampled in T
-x = rT / h(N1+1).';         % data normalized by h0
+x = r / h(N1+1).';         % data normalized by h0
 hi = h / h(N1+1).';         % impulse response normalized by h0
 
 %% Detection begins
