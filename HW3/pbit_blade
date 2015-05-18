@@ -12,6 +12,6 @@
 # Specify parallel queue
 #$ -q parallel
 # and set the number of parallel jobs
-#$ -l par_cpu=4
+#$ -l par_cpu=8
 
 matlab -nodesktop -nosplash -r "LE_DFE_pbit_evaluator"
