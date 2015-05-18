@@ -43,7 +43,7 @@ for snr_i = 1:length(snr_vec)
         % Detection begins
         N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
         M1 = 20;        % FF filter: equal to the span of h
-        D = 14;
+        D = 16;
         M2 = 0;      % FB filter not present in LE
         % Print progress update
         fprintf('LE, snr = %d, M1 = %d, D = %d... ', snr_ch, M1, D);
@@ -83,7 +83,7 @@ for snr_i = 1:length(snr_vec)
         
         % Detection begins
         N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
-        M1 = 20;        % FF filter: equal to the span of h
+        M1 = 25;        % FF filter: equal to the span of h
         D = M1-1;
         M2 = N2 + M1 - 1 - D;  % FB filter
         % Print progress update
