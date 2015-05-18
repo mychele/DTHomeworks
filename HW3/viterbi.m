@@ -32,21 +32,37 @@ tStart = tic;   % Use a variable to avoid conflict with parallel calls to tic/to
 survSeq = zeros(Ns, min(TMAX, 2*MEMORY));
 survSeq(:, 1+SURVSEQ_OFFS) = symb(mod(0:Ns-1, M) + 1);
 survSeq_writingcol = 1+SURVSEQ_OFFS;
+% TODO: init the first elements to the end of ML sequence.
+% TODO: if we use u_mat we actually don't need SURVSEQ_OFFS I think.
 survSeq_shift = 0;
 detectedSymb = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
-%statemap = (1:Ns).';
-%msg_delete = '';
+
+% -- Define u_mat matrix
+ndigits = L1 + L2; % n digits of the state
+statevec = zeros(1, ndigits); % symbol index, from the oldest to the newest
+i = ndigits;
+umat = zeros(Ns, M);
+for state = 1:Ns
+    for j = 1:M
+        lastsymbols = [symb(statevec + 1), symb(j)];   % symbols, from the oldest to the newest
+        umat(state, j) = lastsymbols * flipud(hi);
+    end
+    
+    % Update statevec
+    statevec(i) = statevec(i) + 1;
+    l = i;
+    while (statevec(l) >= M && l > 1)
+        statevec(l) = 0;
+        l = l-1;
+        statevec(l) = statevec(l) + 1;
+    end
+end
 
 
 % --- Main loop
 
 for k = 1 : length(r)
-    
-    % Print progress
-%     if(mod(k, 16) == 0)
-%         msg_delete = printprogress(num2str(k), msg_delete);
-%     end
     
     % "Pointer" to the column we are gonna write in this iteration
     survSeq_writingcol = survSeq_writingcol + 1;
@@ -62,6 +78,7 @@ for k = 1 : length(r)
     % closed form expression exists: (mod(state-1, M^(N1+N2-1)) * M + j).
     newstate = 0;
     
+    
     for state = 1 : Ns  % Cycle through all states, at time k-1 (?)
         
         for j = 1 : M   % M possibilities for the new symbol
@@ -71,14 +88,14 @@ for k = 1 : length(r)
             if newstate > Ns, newstate = 1; end
             
             % Supposed new sequence, obtained from the old state adding a new symbol.
-            % It has always length 1 at least, so it is at most L-1 elements
-            % longer than the used IR (i.e. hi). So we zero-pad at the beginning.
-            supposednewseq = [survSeq(state, 1:survSeq_writingcol-1), symb(j)];
-            %supposednewseq = [zeros(1,L-1), symb(mod(survSeq(statemap(state), 1:survSeq_writingcol-1)-1,M)+1), symb(j)];
+            %supposednewseq = [survSeq(state, 1:survSeq_writingcol-1), symb(j)];
             
             % Compute desired signal u assuming the input sequence is the one above
-            supposednewseq = supposednewseq(end-L+1:end);
-            u = supposednewseq * flipud(hi);
+            %supposednewseq = supposednewseq(end-L+1:end);
+            %u = supposednewseq * flipud(hi);
+            
+            % Desired signal u assuming the input sequence is the one above
+            u = umat(state, j);
             
             % Compute the cost of the new state assuming this input sequence,
             % then update the cost of the new state, and overwrite the predecessor,
@@ -120,30 +137,30 @@ for k = 1 : length(r)
     survSeq = temp;
     
     
-%     % For each new state, see where its predecessor is (which row according to
-%     % statemap), then add newstate at the end of that survival sequence, and iterate
-%     % for all new states. Finally, update the statemap according to the new states at k.
-%     % Instead of sorting the rows according to the new states at k, we
-%     % store a map so as to keep track of the row in which a certain state
-%     % at time k is.
-%
-%     % These are the states at k-1 that were discarded by the algorithm, so
-%     % we can overwrite them
-%     deadsequences = setdiff(1:Ns, unique(pred)); % data in A that is not in B
-%     deadseq_idx = 1;
-%     alreadyused = false(Ns, 1); % refers to the true index of the matrix
-%     for newstate = 1:Ns
-%         if ~alreadyused(statemap(pred(newstate)))
-%             survSeq(statemap(pred(newstate)), survSeq_writingcol) = newstate;
-%             alreadyused(statemap(pred(newstate))) = true;
-%         else
-%             survSeq(statemap(deadsequences(deadseq_idx)), 1:survSeq_writingcol) = ...
-%                 [survSeq(statemap(pred(newstate)), 1:survSeq_writingcol-1), newstate];
-%             alreadyused(statemap(deadsequences(deadseq_idx))) = true; % shouldn't need this, I think
-%             deadseq_idx = deadseq_idx + 1;
-%         end
-%     end
-%     statemap = survSeq(:, survSeq_writingcol);
+    %     % For each new state, see where its predecessor is (which row according to
+    %     % statemap), then add newstate at the end of that survival sequence, and iterate
+    %     % for all new states. Finally, update the statemap according to the new states at k.
+    %     % Instead of sorting the rows according to the new states at k, we
+    %     % store a map so as to keep track of the row in which a certain state
+    %     % at time k is.
+    %
+    %     % These are the states at k-1 that were discarded by the algorithm, so
+    %     % we can overwrite them
+    %     deadsequences = setdiff(1:Ns, unique(pred)); % data in A that is not in B
+    %     deadseq_idx = 1;
+    %     alreadyused = false(Ns, 1); % refers to the true index of the matrix
+    %     for newstate = 1:Ns
+    %         if ~alreadyused(statemap(pred(newstate)))
+    %             survSeq(statemap(pred(newstate)), survSeq_writingcol) = newstate;
+    %             alreadyused(statemap(pred(newstate))) = true;
+    %         else
+    %             survSeq(statemap(deadsequences(deadseq_idx)), 1:survSeq_writingcol) = ...
+    %                 [survSeq(statemap(pred(newstate)), 1:survSeq_writingcol-1), newstate];
+    %             alreadyused(statemap(deadsequences(deadseq_idx))) = true; % shouldn't need this, I think
+    %             deadseq_idx = deadseq_idx + 1;
+    %         end
+    %     end
+    %     statemap = survSeq(:, survSeq_writingcol);
     
     
     
@@ -172,9 +189,9 @@ detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
 
 [pbit, num_bit_errors] = BER(packet, detected);
 
-% num_errors = sum(packet-detected.' ~= 0);
-% fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
-% fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
+num_errors = sum(packet-detected.' ~= 0);
+fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
+fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
 % figure, hold on
 % stem(-L1:length(r)-1-L1, real(r))
