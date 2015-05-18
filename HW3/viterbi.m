@@ -17,11 +17,11 @@ M = 4;
 symb = [1+1i, 1-1i, -1+1i, -1-1i]; % possible transmitted symbols (QPSK)
 N = N1 + N2 + 1;
 L = L1 + L2 + 1;
-MEMORY = 20 * N;        %
+kd = 20 * N;        % Trellis size
+MAT_SIZE = 2*kd;    % Actual size of the matrix that stores the sequences (must be >kd)
 Ns = M ^ (L1+L2);               % Number of states
 r  =  r(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of r
 hi = hi(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of hi
-TMAX = length(r) + 100;         % Max value of time k
 SURVSEQ_OFFS = L-1;
 
 
@@ -29,7 +29,7 @@ SURVSEQ_OFFS = L-1;
 % --- Init stuff
 
 tStart = tic;   % Use a variable to avoid conflict with parallel calls to tic/toc
-survSeq = zeros(Ns, min(TMAX, 2*MEMORY));
+survSeq = zeros(Ns, MAT_SIZE);
 survSeq(:, 1+SURVSEQ_OFFS) = symb(mod(0:Ns-1, M) + 1);
 survSeq_writingcol = 1+SURVSEQ_OFFS;
 % TODO: init the first elements to the end of ML sequence.
@@ -39,23 +39,24 @@ detectedSymb = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 
 % -- Define u_mat matrix
-ndigits = L1 + L2; % n digits of the state
-statevec = zeros(1, ndigits); % symbol index, from the oldest to the newest
-i = ndigits;
+statelength = L1 + L2; % number of digits of the state, i.e. its length in base M=4
+statevec = zeros(1, statelength); % symbol index, from the oldest to the newest
 u_mat = zeros(Ns, M);
 for state = 1:Ns
+    
+    % Set value of the current element of u_mat
     for j = 1:M
-        lastsymbols = [symb(statevec + 1), symb(j)];   % symbols, from the oldest to the newest
+        lastsymbols = [symb(statevec + 1), symb(j)]; % symbols, from the oldest to the newest
         u_mat(state, j) = lastsymbols * flipud(hi);
     end
     
     % Update statevec
-    statevec(i) = statevec(i) + 1;
-    l = i;
-    while (statevec(l) >= M && l > 1)
-        statevec(l) = 0;
-        l = l-1;
-        statevec(l) = statevec(l) + 1;
+    statevec(statelength) = statevec(statelength) + 1;
+    i = statelength;
+    while (statevec(i) >= M && i > 1)
+        statevec(i) = 0;
+        i = i-1;
+        statevec(i) = statevec(i) + 1;
     end
 end
 
@@ -112,23 +113,18 @@ for k = 1 : length(r)
     % Handle memory. If we were gonna write to the last column, first we store
     % the oldest chunk of the decided sequence (we decide it for good), then
     % we shift the matrix to make room for new data.
-    if survSeq_writingcol == size(survSeq, 2)
+    if survSeq_writingcol == MAT_SIZE
         
         % Take the first row of old decided states and store it before erasing it.
-        detectedSymb(1+survSeq_shift : survSeq_shift+MEMORY) = survSeq(1, 1:MEMORY);
+        detectedSymb(1+survSeq_shift : survSeq_shift+MAT_SIZE-kd) = survSeq(1, 1:MAT_SIZE-kd);
         
         % Shift of half the size, that is our memory.
-        survSeq(:, 1:MEMORY) = survSeq(:, MEMORY+1:end);
-        survSeq_shift = survSeq_shift + MEMORY;
-        survSeq_writingcol = MEMORY; % Actually it is (SIZE-MEMORY)
+        survSeq(:, 1:kd) = survSeq(:, end-kd+1 : end);
+        survSeq_shift = survSeq_shift + MAT_SIZE - kd;
+        survSeq_writingcol = kd;
     end
     
-    
-    % The following operations strongly affect the computation time, if
-    % the number of states is not too large. Otherwise the bottleneck is
-    % the number of iterations of the inner loops above.
-    % TODO optimize the way matrices are handled. Avoid creating so many.
-    
+    % Update the survivor sequence
     temp = zeros(size(survSeq));
     for newstate = 1:Ns
         temp(newstate, 1:survSeq_writingcol) = ...
