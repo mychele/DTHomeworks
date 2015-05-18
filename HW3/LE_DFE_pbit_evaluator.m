@@ -11,11 +11,13 @@ assumed_dly = 2;
 assumed_m_opt = 10;
 init_offs = mod(assumed_m_opt, 4);  % offset in T/4
 t0 = assumed_dly;                   % t0 is @ T; TODO this is N1, we should refactor
+N1 = 0;
+N2 = 4;
 
 %% LE pbit evaluation
 L_data = 2^20-1; % be patient
 
-sim_each = 64;
+sim_each = 32;
 pbitLE = zeros(length(snr_vec), sim_each);
 num_bit_errorLE = zeros(length(snr_vec), sim_each);
 
@@ -33,7 +35,7 @@ for snr_i = 1:length(snr_vec)
         
         % Estimate the channel using the first 100 samples (4*length(ts))
         fprintf('Estimating timing phase and IR... ')
-        [ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4);
+        [ h, est_sigmaw ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4);
         fprintf('done!\n')
         
         % Sample to get r @ T
@@ -74,7 +76,7 @@ for snr_i = 1:length(snr_vec)
         
         % Estimate the channel using the first 100 samples (4*length(ts))
         fprintf('Estimating timing phase and IR... ')
-        [ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4);
+        [ h, est_sigmaw ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4);
         fprintf('done!\n')
         
         % Sample to get r @ T
