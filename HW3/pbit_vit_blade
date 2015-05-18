@@ -10,8 +10,8 @@
 #$ -m ea
 #
 # Specify parallel queue
-# no
+#$ -q parallel
 # and set the number of parallel jobs
-# no
+#$ -l par_cpu=8
 
-matlab -nodesktop -nosplash -nojvm -r "viterbi_pbit_evaluator"
+matlab -nodesktop -nosplash -r "viterbi_pbit_evaluator"
