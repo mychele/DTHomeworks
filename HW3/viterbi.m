@@ -42,11 +42,11 @@ cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 ndigits = L1 + L2; % n digits of the state
 statevec = zeros(1, ndigits); % symbol index, from the oldest to the newest
 i = ndigits;
-umat = zeros(Ns, M);
+u_mat = zeros(Ns, M);
 for state = 1:Ns
     for j = 1:M
         lastsymbols = [symb(statevec + 1), symb(j)];   % symbols, from the oldest to the newest
-        umat(state, j) = lastsymbols * flipud(hi);
+        u_mat(state, j) = lastsymbols * flipud(hi);
     end
     
     % Update statevec
@@ -95,7 +95,7 @@ for k = 1 : length(r)
             %u = supposednewseq * flipud(hi);
             
             % Desired signal u assuming the input sequence is the one above
-            u = umat(state, j);
+            u = u_mat(state, j);
             
             % Compute the cost of the new state assuming this input sequence,
             % then update the cost of the new state, and overwrite the predecessor,
