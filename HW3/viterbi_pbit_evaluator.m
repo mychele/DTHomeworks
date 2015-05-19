@@ -11,8 +11,8 @@ L_data = 2.^ [18 20 20 20 20] - 1;
 if length(L_data) ~= length(snr_vec), disp('Check L_data'), return, end
 
 sim_each = 8;
-pbit = zeros(length(snr_vec), sim_each);
-n_biterr = zeros(length(snr_vec), sim_each);
+pbit_viterbi = zeros(length(snr_vec), sim_each);
+n_biterr_viterbi = zeros(length(snr_vec), sim_each);
 
 % From exercise 1
 N1 = 0;
@@ -49,8 +49,8 @@ for snr_i = 1:length(snr_vec)
         % --- Detection
         
         [~, pbit_this, n_biterr_this] = viterbi(packet(1:end-assumed_dly+N1), x(1+assumed_dly-N1:end), hi, N1, N2, 0, N2);
-        pbit(snr_i, sim) = pbit_this;
-        n_biterr(snr_i, sim) = n_biterr_this;
+        pbit_viterbi(snr_i, sim) = pbit_this;
+        n_biterr_viterbi(snr_i, sim) = n_biterr_this;
     end
     
     fprintf('%.1f%% completed\n', snr_i*100/length(snr_vec))
@@ -58,12 +58,11 @@ end
 
 delete(gcp);
 
-save('BER_viterbi', 'pbit', 'n_biterr');
+save('pbit_viterbi', 'pbit_viterbi', 'n_biterr_viterbi');
 
 %% Statistics
 
-BER_viterbi = median(pbit, 2);
-
+BER_viterbi = median(pbit_viterbi, 2);
 BER_ideal = BER_awgn(snr_vec);
 
 figure, semilogy(snr_vec, BER_viterbi), hold on, semilogy(snr_vec, BER_ideal)

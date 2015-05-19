@@ -2,14 +2,14 @@
 
 load('pbit_DFE.mat');
 load('pbit_LE.mat');
-load('BER_viterbi.mat');
+load('pbit_viterbi.mat');
 
 %% Statistics
 snr_vec = 6:2:14;
 
 BER_LE = mean(pbitLE, 2);
 BER_DFE = mean(pbitDFE, 2);
-BER_viterbi = median(pbit, 2);
+BER_viterbi = median(pbit_viterbi, 2);
 
 BER_ideal = BER_awgn(snr_vec);
 
