@@ -148,7 +148,7 @@ fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
 % > Very useful plot for debugging <
 % figure, hold on
-% stem(-L1:length(r)-1-L1, real(r))
+% stem(-L1-traininglength:length(r)-1-L1-traininglength, real(r))
 % stem(0:length(packet)-1, real(packet), 'x')
 % stem(0:length(detected)-1, real(detected), 'd')
 % legend('r', 'sent', 'detected')
