@@ -29,7 +29,7 @@ hi = hi(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of hi
 
 tStart = tic;   % Use a variable to avoid conflict with parallel calls to tic/toc
 survSeq = zeros(Ns, Kd);
-survSeq(:, Kd) = symb(mod(0:Ns-1, M) + 1);
+%survSeq(:, Kd+1) = symb(mod(0:Ns-1, M) + 1);
 % TODO: init the first elements to the end of ML sequence.
 detectedSymb = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
@@ -110,8 +110,8 @@ for k = 1 : length(r)
     % keep only Kd columns in the matrix.
     temp = zeros(size(survSeq));
     for newstate = 1:Ns
-        temp(newstate, 1:Kd-1) = ...    % In the new matrix except the last col
-            [survSeq(pred(newstate), 2:Kd-1), ... % we write the data we had except the oldest one,
+        temp(newstate, 1:Kd) = ...    % In the new matrix except the last col
+            [survSeq(pred(newstate), 2:Kd), ... % we write the data we had except the oldest one,
             symb(mod(newstate-1, M)+1)];        % and then the new symbol we just supposed to have received.
     end
     [~, decided_index] = min(costnew);      % Find the oldest symbol that yields the min cost
@@ -129,7 +129,7 @@ toc(tStart)
 % --- Finish storing, then get the symbols
 detectedSymb(length(r)+2 : length(r)+Kd) = survSeq(decided_index, 1:Kd-1);
 % Decided using the min cost from the last iteration
-detectedSymb = detectedSymb(Kd : end);
+detectedSymb = detectedSymb(Kd+1 : end);
 detected = detectedSymb;
 detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
 detected = detected (1+traininglength : end);  % Discard detected training sequence both
