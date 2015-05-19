@@ -3,6 +3,13 @@ function [ p ] = MLsequence( L )
 % operators. L is the desired length of the resulting PN sequence. The
 % script can handle L = 3, 7, 15, 31, 63 and 127.
 
+% TODO: remove this or find a decent way of doing this?
+if (L == 2^22 - 4)    % NB this is NOT a ML sequence.
+    p = MLsequence(2^20-1);
+    p = repmat(p, 4, 1);
+    return
+end
+
 % Extract r from the given L
 r = log2(L+1);
 p = zeros(L,1);
