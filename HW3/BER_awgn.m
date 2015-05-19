@@ -14,10 +14,11 @@ q = [0,0,0,0,0,0,0,0,0.19*exp(-1i*2.21), 0.09*exp(1i*1.64), 0.7*exp(-1i*2.57), .
 h = q(3:4:end);
 
 E_h = sum(abs(h).^2);
-sigma_a = 2; % for a QPSK, it is also the distance between 2 symbols
-sigma_w = sigma_a*E_h./(snr_lin);
+dm = 2; % for a QPSK, it is also the distance between 2 symbols
+sigma_w_2 = 2*E_h./(snr_lin);
+sigma_i = sqrt(sigma_w_2/2);
 
-gamma = (sigma_a ./ sigma_w);
+gamma = (dm ./ (2*sigma_i)).^2;
 
 BER = qfunc(sqrt(gamma));
 
