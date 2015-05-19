@@ -39,5 +39,10 @@ N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
 M1 = 20;   % FF filter: equal to the span of h
 D = 14; %M1-1;   % D is chosen large first and then decreased % (N-1)/2 + 2 or 3 for LE
 M2 = 0; %N2 + M1 - 1 - D;      % FB filter: one less than the FF filter
-[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2, est_sigmaw, assumed_dly, D, M1, M2, (L_data<=128));
-%[decisions, pbit, num_bit_error] = viterbi(packet(1:end-assumed_dly+N1), x(1+assumed_dly-N1:end), hi, N1, N2, 0, N2);
+
+% DFE LE
+%[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2, est_sigmaw, assumed_dly, D, M1, M2, (L_data<=128));
+
+% Viterbi
+%[decisions, pbit, num_bit_error] = viterbi(packet(1:end-assumed_dly+N1), x(1+assumed_dly-N1:end), hi, N1, N2, 0, N2, 25);
+[decisions, pbit, num_bit_error] = viterbi(packet(1:end), [x(1+assumed_dly-N1:end); zeros(assumed_dly-N1, 1)], hi, N1, N2, 0, N2, 25);
