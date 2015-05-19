@@ -1,4 +1,4 @@
-function [ detected, pbit, num_bit_errors ] = viterbi( packet, r, hi, N1, N2, L1, L2 )
+function [ detected, pbit, num_bit_errors ] = viterbi( packet, r, hi, N1, N2, L1, L2, traininglength )
 %VITERBI
 
 % State: most recent is at the left, as in the book, and it has lowest weight
@@ -133,6 +133,8 @@ detectedSymb(length(r)+2 : length(r)+Kd) = ...
 detectedSymb = detectedSymb(Kd : end);
 detected = detectedSymb;
 detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
+detected = detected (1+traininglength : end);  % Discard detected training sequence both
+packet   = packet   (1+traininglength : end);  % in the received and in the detected data
 
 
 
@@ -144,6 +146,7 @@ num_errors = sum(packet-detected.' ~= 0);
 fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
 fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
+% > Very useful plot for debugging <
 % figure, hold on
 % stem(-L1:length(r)-1-L1, real(r))
 % stem(0:length(packet)-1, real(packet), 'x')
