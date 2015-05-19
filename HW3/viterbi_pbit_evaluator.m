@@ -48,7 +48,7 @@ for snr_i = 1:length(snr_vec)
         
         % --- Detection
         
-        [~, pbit_this, n_biterr_this] = viterbi(packet(1:end-assumed_dly+N1), x(1+assumed_dly-N1:end), hi, N1, N2, 0, N2);
+        [~, pbit_this, n_biterr_this] = viterbi(packet, [x(1+assumed_dly-N1:end); zeros(assumed_dly-N1, 1)], hi, N1, N2, 0, N2, 25);
         pbit_viterbi(snr_i, sim) = pbit_this;
         n_biterr_viterbi(snr_i, sim) = n_biterr_this;
     end
