@@ -115,8 +115,7 @@ for k = 1 : length(r)
             symb(mod(newstate-1, M)+1)];        % and then the new symbol we just supposed to have received.
     end
     [~, decided_index] = min(costnew);      % Find the oldest symbol that yields the min cost
-    detectedSymb(1+k) = survSeq(decided_index); % and store it (decide it for good).
-    % TODO check this min cost thing above.
+    detectedSymb(1+k) = survSeq(decided_index, 1); % and store it (decide it for good).
     survSeq = temp;
     
     % Update the cost to be used as cost at time k-1 in the next iteration
@@ -128,8 +127,8 @@ toc(tStart)
 
 
 % --- Finish storing, then get the symbols
-detectedSymb(length(r)+2 : length(r)+Kd) = ...
-    survSeq(1, 1:Kd-1);
+detectedSymb(length(r)+2 : length(r)+Kd) = survSeq(decided_index, 1:Kd-1);
+% Decided using the min cost from the last iteration
 detectedSymb = detectedSymb(Kd : end);
 detected = detectedSymb;
 detected = detected(2:length(packet)+1);    % Discard first symbol (time k=-1)
