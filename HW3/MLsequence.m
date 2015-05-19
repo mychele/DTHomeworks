@@ -4,9 +4,9 @@ function [ p ] = MLsequence( L )
 % script can handle L = 3, 7, 15, 31, 63 and 127.
 
 % TODO: remove this or find a decent way of doing this?
-if (L == 2^22 - 4)    % NB this is NOT a ML sequence.
+if (L == 3*(2^20 - 1))    % NB this is NOT a ML sequence.
     p = MLsequence(2^20-1);
-    p = repmat(p, 4, 1);
+    p = repmat(p, 3, 1);
     return
 end
 

@@ -1,6 +1,6 @@
 function [iecdfyavg, ecdfx] = viterbi_Kd_estim()
 
-L_data = 2^22 - 4;
+L_data = 3*(2^20 - 1);
 
 numsim = 16;
 MAX_Kd = 80;
