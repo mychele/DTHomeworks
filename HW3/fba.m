@@ -62,14 +62,7 @@ end
 c = zeros(M, Ns, K+1);
 fprintf('channel transition metric...')
 for k = 1:K
-    for state = 1:Ns
-        % Iterate over the branches
-        for j = 1:M
-            % Compute cost
-            u_k = u_mat(state, j);
-            c(j, state, k) = - abs(r(k) - u_k)^2;
-        end
-    end
+    c(:, :, k) = (-abs(r(k) - u_mat).^2).';
 end
 c(:,:,K+1) = 0;
 fprintf('done\n')
