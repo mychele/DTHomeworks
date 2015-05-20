@@ -1,11 +1,24 @@
 function [iecdfyavg, ecdfx] = viterbi_Kd_estim()
 
+% Runs numsim simulations of the transmission of 3 ML sequences with length 2^20 - 1, with
+% a Viterbi detector that has Kd = MAX_Kd. At each iteration (starting after the transient
+% Kd), it checks which is the minimum value of Kd that would yield no premature decision.
+% That is, all survivor sequences contain the same symbols from a certain column
+% backwards, and that column is given by the minimum Kd needed, which is a sort of
+% "memory" of the Viterbi algorithm.
+% If the resulting complementary CDF is y for a certain value of Kd, it means that for that
+% Kd, the number of iterations in which the decision on the oldest symbol is actually made
+% among different symbols is y times the total number of iterations (except for the
+% transient in which the survivor sequence is filled for the first time). In those cases,
+% the symbol that belongs to the most likely sequence is chosen, which might turn out to
+% be a suboptimal decision. The number of times we make this approximation on the Viterbi
+% algorithm is y times the length of the sequence.
+
 L_data = 3*(2^20 - 1);
 
 numsim = 16;
 MAX_Kd = 80;
-snr_channel = 5; % in dB, worst case scenario in our simulations
-
+snr_channel = 5;   % in dB, worst case scenario in our simulations
 ecdfy = zeros(numsim, MAX_Kd+1);
 
 % From exercise 1
@@ -14,9 +27,9 @@ N2 = 4;
 assumed_dly = 2;
 assumed_m_opt = 10;
 
-
+% Peform numsim simulation using 16 parallel threads
 parpool(16);
-parfor sim_i = 1:numsim     % perform sim_each simulations
+parfor sim_i = 1:numsim
     
     % --- Create, send and receive data, estimate channel and prepare for detection
     
@@ -34,17 +47,16 @@ parfor sim_i = 1:numsim     % perform sim_each simulations
     % --- Perform detection and get bin counts
     [ecdfy_this] = viterbi_Kd_estim_helper( ...
         packet, x(1+assumed_dly-N1:end), hi, N1, N2, 0, N2, MAX_Kd);
-    % 25 is the length of the training sequence.
     ecdfy(sim_i, :) = ecdfy_this;
 end
 
 
-delete(gcp);
+delete(gcp);  % Delete parallel pool
 
+
+% Get and store results
 iecdfyavg = 1 - mean(ecdfy);
 ecdfx = 0:MAX_Kd;
-
-% Save
 save('viterbi_Kd_estimation', 'iecdfyavg', 'ecdfx', 'numsim');
 
 % Plot
@@ -60,10 +72,8 @@ end
 
 
 function [ ecdfy ] = viterbi_Kd_estim_helper( packet, r, hi, N1, N2, L1, L2, MAX_Kd )
-% Returns ...
-
-% State: most recent is at the left, as in the book, and it has lowest weight
-% (thus, in the base-M representation, it is of course the rightmost one).
+% Returns the values of the empirical CDF of Kd_min, for Kd_min = 0, ..., MAX_Kd, given
+% the usual Viterbi parameters.
 
 if (L1 > N1) || (L2 > N2)
     disp('The considered precursors and postcursors cannot be more that the actual ones!')
@@ -179,7 +189,7 @@ for k = 1 : length(r)
     % Update the cost to be used as cost at time k-1 in the next iteration
     cost = costnew;
     
-    % -------------------
+    % ------------------- This is specific to the Kd estimation function
     %  Check what would be, at this iteration k, the minimum Kd in order to not discard
     %  any useful information. Store this value, compute the ecdf at the end.
     %  This is only done from k==Kd+1 on.
