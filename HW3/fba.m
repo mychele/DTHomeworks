@@ -84,7 +84,7 @@ fprintf('done\n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Forward metric, state metric, log-like func computations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-f_old = zeros(Ns, 1);   % f_old represents the forward metric at time k-1
+f_old = zeros(Ns, 1);   % f_old represents the forward metric at time k-1, it also initializes k = -1
 f_new = zeros(Ns, 1);   % f_new represents the fwd metric at time k
 % v = zeros(Ns, K); % since the decision is taken upon the likelyhood we
 % don't need this
@@ -92,12 +92,11 @@ l = zeros(M, 1);
 decisions = zeros(K, 1);
 row_step = (0:M-1)*M^(L1+L2-1);
 fprintf('fwd...')
-% initialize k = -1!
-for j = 1:Ns
-    % Only keep the maximum among the fwd metrics
-    f_old(j) = 0; %max(0 + c(j, 1:Ns, 1)); % 0 until we don't have smth better
-    
-end
+% for j = 1:Ns
+%     % Only keep the maximum among the fwd metrics
+%     f_old(j) = 0; %max(0 + c(j, 1:Ns, 1)); % 0 until we don't have smth better
+%     
+% end
 for k = 1:K   % F_(-1) is the initial condition!
     for j = 1:Ns       
         % Only keep the maximum among the fwd metrics
@@ -117,6 +116,8 @@ for k = 1:K   % F_(-1) is the initial condition!
     f_old = f_new;
 end
 fprintf('done\n')
+
+
 
 % toc
 
