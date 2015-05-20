@@ -84,89 +84,51 @@ fprintf('done\n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 b = zeros(Ns, K+1);   % This will also initialize the last state
 fprintf('bck...')
-for k = K:-1:1
-        
+for k = K:-1:1      
     for i = 1:Ns
-        % TODO check if correct!
         b(i, k) = max(b(1:Ns, k+1) + c(1:Ns, i, k+1));
-        
-        % Iterate over the trellis transitions for the current state
-%         for m = 1:Ns
-%             
-%             % Compute backward metric for each of the new states
-%             curr_bkw_metric(m) = b(m, k+1) + c(m, i, k+1);
-%         end
-        
-        % Only keep the maximum among the bkw metrics
-%         b(i,k) = max(curr_bkw_metric);
     end
 end
 fprintf('done\n')
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Forward metric computation
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-f = zeros(Ns, K);   % This will also initialize the initial state condition
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Forward metric, state metric, log-like func computations
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+f_old = zeros(Ns, 1);   % f_old represents the forward metric at time k-1
+f_new = zeros(Ns, 1);   % f_new represents the fwd metric at time k
+% v = zeros(Ns, K); % since the decision is taken upon the likelyhood we
+% don't need this
+l = zeros(M, 1);
+decisions = zeros(K, 1);
 fprintf('fwd...')
-% for k = 1 (i.e. 0 in reality)
+% initialize k = -1!
 for j = 1:Ns
+    % Only keep the maximum among the fwd metrics
+    f_old(j) = max(0 + c(j, 1:Ns, 1)); % 0 until we don't have smth better
     
-%     curr_fwd_metric = zeros(1,Ns);
-%     
-%     % Iterate over the branches
-%     for l = 1:Ns
-%         % Compute backward metric for each of the new states
-%         curr_fwd_metric(l) = 0 + c(j, l, 1); 
-%     end
-    
-    % Only keep the maximum among the bkw metrics
-    f(j,1) = max(0 + c(j, 1:Ns, 1)); % 0 until we don't have smth better
 end
-
-for k = 2:K   % F_(-1) is the initial condition!
-    for j = 1:Ns
-%         curr_fwd_metric = zeros(1,Ns);
-%         
-%         % Iterate over the branches
-%         for l = 1:Ns
-%             % Compute backward metric for each of the new states
-%             curr_fwd_metric(l) = f(l, k-1) + c(j, l, k);
-%         end
-%         
-        % Only keep the maximum among the bkw metrics
-        f(j,k) = max(f(1:Ns, k-1) + c(j, 1:Ns, k).');
+for k = 1:K   % F_(-1) is the initial condition!
+    for j = 1:Ns       
+        % Only keep the maximum among the fwd metrics
+        f_new(j) = max(f_old(1:Ns) + c(j, 1:Ns, k).');
     end
+    v = f_new + b(:, k);
+    for beta = 1:M
+        ind = find(states_symbols(:,M) == symb(beta));
+        l(beta) = max(v(ind));
+    end
+    [~, maxind] = max(l);
+    decisions(k) = symb(maxind);
+    f_old = f_new;
 end
 fprintf('done\n')
 
-% State metric computation
-v = f+b(:, 1:end-1); %zeros(Ns, K);
-% for k = 1:K
-%     for i = 1:Ns
-%         v(i, k) = f(i, k) + b(i, k);
-%     end
-% end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Likelihood function computation
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-l = zeros(M, K);
-for k = 1:K
-    for beta = 1:M
-        l(beta, k) = max(v(find(states_symbols(:,M) == symb(beta)),k));
-    end
-end
-
-% Decision
-[~, maxind] = max(l);
-decisions = symb(maxind);
 % disp(toc)
 
 % Pbit computation
 [pbit, num_bit_errors] = BER(packet, decisions);
 
-num_errors = sum(packet-decisions.' ~= 0);
+num_errors = sum(packet-decisions ~= 0);
 fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
 fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
