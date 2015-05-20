@@ -45,14 +45,14 @@ iecdfyavg = 1 - mean(ecdfy);
 ecdfx = 0:MAX_Kd;
 
 % Save
-save('viterbi_Kd_estimation', 'iecdfyavg', 'ecdfx');
+save('viterbi_Kd_estimation', 'iecdfyavg', 'ecdfx', 'numsim');
 
 % Plot
 % stairs(ecdfx, iecdfyavg)
-% title(['Inverse CDF averaged over ', int2str(numsim), ' simulations'])
+% title(['Complementary CDF averaged over ', int2str(numsim), ' simulations'])
 % xlabel('K_{d, min}')
 % set(gca, 'YScale', 'log')
-% ylim([1e-9 1e-3]), xlim([find(iecdfyavg < 1e-3, 1)-1, find(iecdfyavg < 1e-9, 1)+1])
+% ylim([1e-8 1e-3]), xlim([find(iecdfyavg < 1e-3, 1)-1, find(iecdfyavg < 1e-8, 1)+1])
 
 
 end
