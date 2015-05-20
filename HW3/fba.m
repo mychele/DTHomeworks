@@ -1,16 +1,4 @@
-% TODO functionise me
-
-%function [ detected, pbit ] = fba( packet, r, hi, L1, L2 ) %#ok<INUSL,STOUT>
-clear
-receiver_util
-close all
-clc
-r = x(1+assumed_dly:1+assumed_dly+length(packet)-1);
-M = 4;
-L1 = 0;
-L2 = 4;
-% Fucking ugly, I know.
-
+function [ decisions, pbit, num_bit_errors] = fba( packet, r, hi, L1, L2 )
 % This function executes the Max-Log-MAP Algorithm.
 % packet: The originally sent data
 % r: The received data
@@ -18,15 +6,12 @@ L2 = 4;
 % L1: The number of precursors for each symbol
 % L2: The number of postcursors for each symbol
 
-% State definition: s_k = (a_k+L1 ... a_k ... a_k-L2+1)
-% States are identified by their indices.
-
-% The desired signal u_k can be obtained as linear combination of s_k
-% and s_k-1
-% tic
+%%%%%%%%%%%%%%%%
 % Initialization
-Ns = M^(L1+L2); % Number of states
-K = length(r);
+%%%%%%%%%%%%%%%%
+M = 4;              % Number of symbols
+Ns = M^(L1+L2);     % Number of states
+K = length(r);      % Length of the sequence
 symb = [1+1i, 1-1i, -1+1i, -1-1i]; % Possible transmitted symbols (QPSK)
 
 % -- Define u_mat matrix
@@ -55,10 +40,6 @@ end
 % Channel transition metrics computation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% TODO options: operate on windows, therefore c can be handle and
-% precomputed OR try to define it ONLY for the states for which there's a
-% transition
-
 c = zeros(M, Ns, K+1);
 fprintf('channel transition metric...')
 for k = 1:K
@@ -84,14 +65,16 @@ fprintf('done\n')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Forward metric, state metric, log-like func computations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-f_old = zeros(Ns, 1);   % f_old represents the forward metric at time k-1, it also initializes k = -1
+
+% f_old represents the forward metric at time k-1, also initializes k = -1
+f_old = zeros(Ns, 1);   
 f_new = zeros(Ns, 1);   % f_new represents the fwd metric at time k
-% v = zeros(Ns, K); % since the decision is taken upon the likelyhood we
-% don't need this
 l = zeros(M, 1);
 decisions = zeros(K, 1);
 row_step = (0:M-1)*M^(L1+L2-1);
 fprintf('fwd...')
+% Initialize f_old here with the initial conditions (the end of the ML
+% training sequence)
 % for j = 1:Ns
 %     % Only keep the maximum among the fwd metrics
 %     f_old(j) = 0; %max(0 + c(j, 1:Ns, 1)); % 0 until we don't have smth better
@@ -111,21 +94,18 @@ for k = 1:K   % F_(-1) is the initial condition!
         l(beta) = max(v(ind));
     end
     [~, maxind] = max(l);
-    decisions(k) = symb(maxind); % TODO, check if moving out some things that
-    % can be computed with matrices improves the performances
+    decisions(k) = symb(maxind); 
     f_old = f_new;
 end
 fprintf('done\n')
 
-
-
-% toc
-
+%%%%%%%%%%%%%%%%%%
 % Pbit computation
+%%%%%%%%%%%%%%%%%%
 [pbit, num_bit_errors] = BER(packet, decisions);
 
 num_errors = sum(packet-decisions ~= 0);
 fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
 fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
-%end
+end
