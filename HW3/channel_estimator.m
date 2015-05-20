@@ -65,16 +65,7 @@ xlabel('N_2'), ylabel('\epsilon [dB]'), grid on, xlim([0 8])
 
 %% Plot hi for two choices of N1 and N2
 
-N1 = 2; N2 = 4;
-N = N1+N2+1;
-x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end ...
-    - (length(q)-4) + T*(delay-N1) + init_offs);
-% Now d_for_ls is delayed by N1 samples wrt x_for_ls.
-[hi, ~] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
-figure, stem(-N1:N2, abs(hi)), grid on, xlabel('i'), ylabel('hi'), title('hi vs i \in [-N1, N2]')
-xlim([- N1 - 0.2, N2 + 0.2])
-
+figure, hold on
 N1 = 0; N2 = 4;
 N = N1+N2+1;
 x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
@@ -82,5 +73,18 @@ d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :
     - (length(q)-4) + T*(delay-N1) + init_offs);
 % Now d_for_ls is delayed by N1 samples wrt x_for_ls.
 [hi, ~] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
-figure, stem(-N1:N2, abs(hi)), grid on, xlabel('i'), ylabel('hi'), title('hi vs i \in [-N1, N2]')
-xlim([- N1 - 0.2, N2 + 0.2])
+
+stem(-N1:N2, abs(hi), 'rx')
+
+N1 = 2; N2 = 4;
+N = N1+N2+1;
+x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
+d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end ...
+    - (length(q)-4) + T*(delay-N1) + init_offs);
+% Now d_for_ls is delayed by N1 samples wrt x_for_ls.
+[hi, ~] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
+
+stem(-N1:N2, abs(hi), 'bo')
+
+grid on, xlabel('i'), ylabel('|h_i|'), title('Estimated |h_i| vs i')
+xlim([-N1 - 0.2, N2 + 0.2]), legend('|h_i| with N_1=0', '|h_i| with N_1=2')
