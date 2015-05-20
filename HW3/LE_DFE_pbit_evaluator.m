@@ -3,39 +3,39 @@ clear
 close all
 clc
 rng default
+parpool(8);
 
 T = 1;
-snr_vec = 6:2:14; %[5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]; % dB
+snr_vec = 5 : 15; % dB
+L_data = 2.^[18 20 20 20 20 20 20 20 22 22 22] - 1;
+if length(L_data) ~= length(snr_vec), disp('Check L_data'), return, end
+sim_each = 4;
+
 % From exercise 1
 assumed_dly = 2;
 assumed_m_opt = 10;
-init_offs = mod(assumed_m_opt, 4);  % offset in T/4
-t0 = assumed_dly;                   % t0 is @ T; TODO this is N1, we should refactor
 N1 = 0;
 N2 = 4;
 
 %% LE pbit evaluation
-L_data = 2^20-1; % be patient
 
-sim_each = 32;
 pbitLE = zeros(length(snr_vec), sim_each);
 num_bit_errorLE = zeros(length(snr_vec), sim_each);
 
-parpool(8);
-
-for snr_i = 1:length(snr_vec)
+parfor snr_i = 1:length(snr_vec)
     snr_ch = snr_vec(snr_i);
-    parfor sim = 1:sim_each
-        % perform sim_each simulations
+    L_data_i = L_data(snr_i);
+    for sim = 1:sim_each
+        % Perform sim_each simulations
         
         % Create, send and receive data with the given channel
         fprintf('Generating input symbols and channel output... ')
-        [packet, r, sigma_w] = txrc(L_data, snr_ch, assumed_m_opt);
+        [packet, r, sigma_w] = txrc(L_data_i, snr_ch, assumed_m_opt);
         fprintf('done!\n')
         
         % Estimate the channel using the first 100 samples (4*length(ts))
         fprintf('Estimating timing phase and IR... ')
-        [ h, est_sigmaw ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4);
+        [ h, est_sigmaw ] = get_channel_info(r(assumed_dly+1:25+assumed_dly), N1, N2);
         fprintf('done!\n')
         
         % Sample to get r @ T
@@ -45,38 +45,40 @@ for snr_i = 1:length(snr_vec)
         % Detection begins
         N = N1+N2+1;    % For each symbol, we have N-1 interferers + the symbol
         M1 = 20;        % FF filter: equal to the span of h
-        D = 16;
+        D = 15;
         M2 = 0;      % FB filter not present in LE
         % Print progress update
         fprintf('LE, snr = %d, M1 = %d, D = %d... ', snr_ch, M1, D);
         % Compute
-        [~, pbit, num_err, ~] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2, est_sigmaw, t0, D, M1, M2, 0);
+        [~, pbit, num_err, ~] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), ...
+                                    hi, N1, N2, est_sigmaw, assumed_dly, D, M1, M2, 0);
         pbitLE(snr_i, sim) = pbit;
         num_bit_errorLE(snr_i, sim) = num_err;
         fprintf('done!\n');
     end
 end
 
-save('pbit_LE', 'pbitLE', 'num_bit_errorLE');
-
+save('pbit_LE', 'pbitLE', 'num_bit_errorLE', 'snr_vec');
 
 %% DFE pbit evaluation
 
 pbitDFE = zeros(length(snr_vec), sim_each);
 num_bit_errorDFE = zeros(length(snr_vec), sim_each);
 
-for snr_i = 1:length(snr_vec)
+parfor snr_i = 1:length(snr_vec)
     snr_ch = snr_vec(snr_i);
+    L_data_i = L_data(snr_i);
+
     % perform sim_each simulations
-    parfor sim = 1:sim_each
+    for sim = 1:sim_each
         % Create, send and receive data with the given channel
         fprintf('Generating input symbols and channel output... ')
-        [packet, r, sigma_w] = txrc(L_data, snr_ch, assumed_m_opt);
+        [packet, r, sigma_w] = txrc(L_data_i, snr_ch, assumed_m_opt);
         fprintf('done!\n')
         
         % Estimate the channel using the first 100 samples (4*length(ts))
         fprintf('Estimating timing phase and IR... ')
-        [ h, est_sigmaw ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4);
+        [ h, est_sigmaw ] = get_channel_info(r(assumed_dly+1:25+assumed_dly), N1, N2);
         fprintf('done!\n')
         
         % Sample to get r @ T
@@ -91,14 +93,15 @@ for snr_i = 1:length(snr_vec)
         % Print progress update
         fprintf('DFE, snr = %d, M1 = %d, D = %d\n', snr_ch, M1, D);
         % Compute
-        [~, pbit, num_err, ~] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2, est_sigmaw, t0, D, M1, M2, 0);
+        [~, pbit, num_err, ~] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), ... 
+                                        hi, N1, N2, est_sigmaw, assumed_dly, D, M1, M2, 0);
         pbitDFE(snr_i, sim) = pbit;
         num_bit_errorDFE(snr_i, sim) = num_err;
         fprintf('done!\n');
     end
 end
 
-save('pbit_DFE', 'pbitDFE', 'num_bit_errorDFE');
+save('pbit_DFE', 'pbitDFE', 'num_bit_errorDFE', 'snr_vec');
 
 delete(gcp);
 
