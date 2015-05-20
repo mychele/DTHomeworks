@@ -15,7 +15,6 @@ end
 
 M = 4;
 symb = [1+1i, 1-1i, -1+1i, -1-1i]; % All possible transmitted symbols (QPSK)
-N = N1 + N2 + 1;
 Kd = 28; % Size of the Trellis diagram (and of the matrix)
 % Kd=28 yields at most 7e-7 probability that the first col has different symbols
 Ns = M ^ (L1+L2); % Number of states
@@ -30,8 +29,6 @@ hi = hi(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of hi
 
 tStart = tic;   % Use a variable to avoid conflict with parallel calls to tic/toc
 survSeq = zeros(Ns, Kd);
-%survSeq(:, Kd+1) = symb(mod(0:Ns-1, M) + 1);
-% TODO: init the first elements to the end of ML sequence.
 detectedSymb = zeros(1, length(packet));
 cost = zeros(Ns, 1); % Define Gamma(-1), i.e. the cost, for each state
 
@@ -76,7 +73,7 @@ for k = 1 : length(r)
     pred = zeros(Ns, 1);
     
     % Counter for the new state. It is determined iteratively even though a
-    % closed form expression exists: (mod(state-1, M^(N1+N2-1)) * M + j).
+    % closed form expression exists: (mod(state-1, M^(L1+L2-1)) * M + j).
     newstate = 0;
     
     
@@ -84,7 +81,7 @@ for k = 1 : length(r)
         
         for j = 1 : M   % M possibilities for the new symbol
             
-            % Index of the new state: it's mod(state-1, M^(N1+N2-1)) * M + j
+            % Index of the new state: it's mod(state-1, M^(L1+L2-1)) * M + j
             newstate = newstate + 1;
             if newstate > Ns, newstate = 1; end
             
