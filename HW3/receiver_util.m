@@ -7,7 +7,7 @@ clc
 
 T = 1;
 snr = 14; % 6, 8, 10, 12, 14 % dB
-L_data = 2^20-1; %2^18-1;
+L_data = 2^10-1; %2^18-1;
 
 % From exercise 1
 N1 = 0;
@@ -44,6 +44,10 @@ M2 = 0; %N2 + M1 - 1 - D;      % FB filter: one less than the FF filter
 %[decisions, pbit, num_bit_error, Jmin] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2, est_sigmaw, assumed_dly, D, M1, M2, (L_data<=128));
 
 % Viterbi
-[decisions, pbit, num_bit_error] = viterbi(packet, x(1+assumed_dly-N1:end), ...
-    hi, N1, N2, 0, N2, 25); % 25 is the length of the training sequence, that is only used
+%[decisions, pbit, num_bit_error] = viterbi(packet, x(1+assumed_dly-N1:end), ...
+%    hi, N1, N2, 0, N2, 25); % 25 is the length of the training sequence, that is only used
                             % to train Viterbi and is not considered for pbit evaluation.
+
+% Max-Log-MAP
+%[decisions, pbit, num_bit_error] = fba(packet, ...
+%        x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2);
