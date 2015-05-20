@@ -1,14 +1,6 @@
 function [ p ] = MLsequence( L )
 % Generate a Maximum Length Pseudo Noise sequence, using shift and xor
-% operators. L is the desired length of the resulting PN sequence. The
-% script can handle L = 3, 7, 15, 31, 63 and 127.
-
-% TODO: remove this or find a decent way of doing this?
-if (L == 3*(2^20 - 1))    % NB this is NOT a ML sequence.
-    p = MLsequence(2^20-1);
-    p = repmat(p, 3, 1);
-    return
-end
+% operators. L is the desired length of the resulting PN sequence.
 
 % Extract r from the given L
 r = log2(L+1);
