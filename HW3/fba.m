@@ -59,20 +59,15 @@ end
 % precomputed OR try to define it ONLY for the states for which there's a
 % transition
 
-c = -1000*ones(Ns, Ns, K+1);
+c = zeros(M, Ns, K+1);
 fprintf('channel transition metric...')
 for k = 1:K
-    newstate = 0;
-    
     for state = 1:Ns
         % Iterate over the branches
         for j = 1:M
-            newstate = newstate + 1;
-            if newstate > Ns, newstate = 1; end
-            
             % Compute cost
             u_k = u_mat(state, j);
-            c(newstate, state, k) = - abs(r(k) - u_k)^2;
+            c(j, state, k) = - abs(r(k) - u_k)^2;
         end
     end
 end
@@ -86,7 +81,9 @@ b = zeros(Ns, K+1);   % This will also initialize the last state
 fprintf('bck...')
 for k = K:-1:1      
     for i = 1:Ns
-        b(i, k) = max(b(1:Ns, k+1) + c(1:Ns, i, k+1));
+        % Index of the new state: it's mod(state-1, M^(L1+L2-1)) * M + j
+        first_poss_state = mod(i-1, M^(L1 + L2 - 1))*M + 1;
+        b(i, k) = max(b(first_poss_state:first_poss_state+M-1, k+1) + c(:, i, k+1));
     end
 end
 fprintf('done\n')
@@ -100,17 +97,21 @@ f_new = zeros(Ns, 1);   % f_new represents the fwd metric at time k
 % don't need this
 l = zeros(M, 1);
 decisions = zeros(K, 1);
+row_step = (0:M-1)*M^(L1+L2-1);
 fprintf('fwd...')
 % initialize k = -1!
 for j = 1:Ns
     % Only keep the maximum among the fwd metrics
-    f_old(j) = max(0 + c(j, 1:Ns, 1)); % 0 until we don't have smth better
+    f_old(j) = 0; %max(0 + c(j, 1:Ns, 1)); % 0 until we don't have smth better
     
 end
 for k = 1:K   % F_(-1) is the initial condition!
     for j = 1:Ns       
         % Only keep the maximum among the fwd metrics
-        f_new(j) = max(f_old(1:Ns) + c(j, 1:Ns, k).');
+        % The state l from which I can go to j are ceil(j/M) +
+        % r*M^(L1+L2-1), r = 0, 1, .... , M-1
+        in_vec = ceil(j/M) + row_step;
+        f_new(j) = max(f_old(in_vec) + c(mod(j-1, 4)+1, in_vec, k).');
     end
     v = f_new + b(:, k);
     for beta = 1:M
@@ -118,12 +119,13 @@ for k = 1:K   % F_(-1) is the initial condition!
         l(beta) = max(v(ind));
     end
     [~, maxind] = max(l);
-    decisions(k) = symb(maxind);
+    decisions(k) = symb(maxind); % TODO, check if moving out some things that
+    % can be computed with matrices improves the performances
     f_old = f_new;
 end
 fprintf('done\n')
 
-% disp(toc)
+% toc
 
 % Pbit computation
 [pbit, num_bit_errors] = BER(packet, decisions);
