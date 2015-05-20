@@ -1,9 +1,10 @@
 % This script solves the first problem.
 clear, clc, close all
-rng default % for reproducibility
+%rng default % for reproducibility
 
 Tc = 1;
 T = 4*Tc;
+sigma_a = 2; % for the QPSK
 
 
 %% Training sequence generation
@@ -20,6 +21,7 @@ snr_lin = 10^(snr/10);
 [r, sigma_w, q] = channel_output(trainingsymbols, T, Tc, snr_lin);
 
 
+
 %% Estimate t0 as in pag 617 bc
 
 m_min = 0;
@@ -34,6 +36,7 @@ end
 m_opt = m_opt - 1; % because of MATLAB indexing
 init_offs = mod(m_opt, T);
 delay = floor(m_opt / T);   % timing phase @T, that is the delay of the channel @T
+
 
 
 %% Error functional for different N1 and N2 (@T), given the delay
@@ -63,18 +66,27 @@ legend('N_1 = 0', 'N_1 = 1', 'N_1 = 2', '\sigma_w')
 xlabel('N_2'), ylabel('\epsilon [dB]'), grid on, xlim([0 8])
 
 
-%% Plot hi for two choices of N1 and N2
 
-figure, hold on
+%% Channel estimation, and computation of Lambda_n, for two choices of N1 and N2
+
+% --- N1 = 0
+
 N1 = 0; N2 = 4;
 N = N1+N2+1;
 x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
 d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end ...
     - (length(q)-4) + T*(delay-N1) + init_offs);
 % Now d_for_ls is delayed by N1 samples wrt x_for_ls.
-[hi, ~] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
+[hi_0, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
+d_no_trans = d_for_ls(N : N+L-1);
+est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 
-stem(-N1:N2, abs(hi), 'rx')
+h_true = q(1+init_offs + T*(delay-N1) : T : end);
+lambdan_0_estim = est_sigmaw / (sigma_a * sum(abs(hi_0 - h_true).^2));
+lambdan_0_true = 2 * (L+1) * (L+1-N) / (N * (L+2-N));
+
+
+% --- N1 = 2
 
 N1 = 2; N2 = 4;
 N = N1+N2+1;
@@ -82,9 +94,31 @@ x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
 d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end ...
     - (length(q)-4) + T*(delay-N1) + init_offs);
 % Now d_for_ls is delayed by N1 samples wrt x_for_ls.
-[hi, ~] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
+[hi_2, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
+d_no_trans = d_for_ls(N : N+L-1);
+est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 
-stem(-N1:N2, abs(hi), 'bo')
+h_true = q(1+init_offs + T*(delay-N1) : T : end);
+lambdan_2_estim = est_sigmaw / (sigma_a * sum(abs(hi_2 - h_true).^2));
+lambdan_2_true = 2 * (L+1) * (L+1-N) / (N * (L+2-N));
 
-grid on, xlabel('i'), ylabel('|h_i|'), title('Estimated |h_i| vs i')
+
+% --- Output Lambda_n
+
+fprintf('N1 = 2\n')
+fprintf('Lambda_n estimate: %.2f\n', lambdan_2_estim)
+fprintf('Lambda_n true:     %.2f\n', lambdan_2_true)
+fprintf('N1 = 0\n')
+fprintf('Lambda_n estimate: %.2f\n', lambdan_0_estim)
+fprintf('Lambda_n true:     %.2f\n', lambdan_0_true)
+
+
+
+%% Plot hi for two choices of N1 and N2
+
+figure, hold on
+stem(-2:N2, abs(hi_2), 'x', 'Color', [0.85 0.325 0.098])
+stem(0:N2, abs(hi_0), 'o')
+grid on, box on
+xlabel('i'), ylabel('|h_i|'), title('Estimated |h_i| vs i')
 xlim([-N1 - 0.2, N2 + 0.2]), legend('|h_i| with N_1=0', '|h_i| with N_1=2')
