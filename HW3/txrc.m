@@ -10,9 +10,16 @@ Nseq = 10;
 
 trainingsymbols = ts_generation(L, Nseq);
 
-dataseq = MLsequence(L_data);
-datasymbols = bitmap(dataseq(1:end-1)); % the ML sequence has an odd length,
-% qpsk requires even symbols
+MAX_ML = 2^20 - 1;
+if (L_data > MAX_ML)
+    dataseq = MLsequence(MAX_ML);
+    dataseq = repmat(dataseq, ceil(L_data / MAX_ML), 1);
+    dataseq = dataseq(1:L_data);
+else
+    dataseq = MLsequence(L_data);
+end
+datasymbols = bitmap(dataseq(1 : end - mod(L_data, 2)));
+% QPSK requires an even number of bits
 
 packet = [trainingsymbols; datasymbols];
 %% Generate the channel output
