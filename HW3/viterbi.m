@@ -16,7 +16,8 @@ end
 M = 4;
 symb = [1+1i, 1-1i, -1+1i, -1-1i]; % All possible transmitted symbols (QPSK)
 N = N1 + N2 + 1;
-Kd = 20 * N;      % Trellis size, that is the size of the state matrix as well
+Kd = 28; % Size of the Trellis diagram (and of the matrix)
+% Kd=28 yields at most 7e-7 probability that the first col has different symbols
 Ns = M ^ (L1+L2); % Number of states
 r  =  r(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of r
 hi = hi(1+N1-L1 : end-N2+L2);   % Discard initial and final samples of hi
