@@ -84,8 +84,33 @@ basicstyle=\footnotesize\ttfamily
 
 \maketitle
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% PROBLEM 1 %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \section*{Problem 1}
 
+% Spiegare cosa mandiamo e come lo generiamo
+
+% Spiegare che channel_output funziona da polifase
+
+% !!! Spiegare come stimiamo t0, riportare l'equazione (Formula 7.269, channel_estimator)
+
+% Spiegare differenza tra m_opt (in T/4, che è t0), init_offs (in T/4) e delay (in T)
+
+% Funzionale per la scelta di N1 e N2 
+% 1 - Considerations sulla modification della formulation per il metodo ls visto che la sequenza ha simboli che distano 2sqrt(2)
+% (2 - Considerazioni su scelta di N1 legata al funzionale che sta sempre lì e cambia proprio poco - anche in funzione dell'esercizio 2)
+
+% !!! Riportare l'equazione per la stima di {h_i_hat}
+
+% !!! Riportare valori di {h_i_hat} in una tabella, ampiezza e fase
+
+% !!! Plottare {h_i_hat} per i = -N1, ..., N2
+
+% !!! Determinare la stima della varianza del rumore, sigma_w_hat_squared, compararla con sigma_w_squared in dB.
+
+% !!! Comparare la stima di Lambda_n_hat con il valore "vero" di Lambda_n_hat, fare le considerazioni su LS per cui il Lambda_n teorico raddoppia quando si usano i simboli ±1±j al posto di ±1.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%% PROBLEM 2 %%%%%%%%%%%%%%%%
@@ -100,12 +125,6 @@ basicstyle=\footnotesize\ttfamily
 
 \bibitem{bc}
 Benvenuto, Cherubini, Algorithms for Communications Systems and their Applications, Wiley, 2004
-
-\bibitem{anachugg}
-Anastasopolous, Chugg, An efficient method for simulation of frequency selective isotropic Rayleigh fading, IEEE 47th Vehicular Technology Conference, vol 3, pages 2084 - 2088, 1997
-
-\bibitem{tucker}
-Tucker, A Generalization of the Glivenko-Cantelli Theorem. Ann. Math. Statist. 30 (1959), no. 3, 828--830.
 
 \end{thebibliography}
 
