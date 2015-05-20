@@ -1,4 +1,4 @@
-%% This script performs simulation of BER for LD, DFE
+%% This script performs simulation of BER for Viterbi
 clear
 close all
 clc
@@ -6,13 +6,13 @@ rng default
 
 Tc = 1;
 T = 4 * Tc;
-snr_vec = 6 : 2 : 14; % dB
-L_data = 2.^ [18 20 20 20 20] - 1;
-if length(L_data) ~= length(snr_vec), disp('Check L_data'), return, end
+snr_vec_viterbi = 5 : 15; % dB
+L_data = 2.^[18 20 20 20 20 20 20 20 22 22 22] - 1;
+if length(L_data) ~= length(snr_vec_viterbi), disp('Check L_data'), return, end
 
-sim_each = 8;
-pbit_viterbi = zeros(length(snr_vec), sim_each);
-n_biterr_viterbi = zeros(length(snr_vec), sim_each);
+sim_each = 4;
+pbit_viterbi = zeros(length(snr_vec_viterbi), sim_each);
+n_biterr_viterbi = zeros(length(snr_vec_viterbi), sim_each);
 
 % From exercise 1
 N1 = 0;
@@ -23,11 +23,12 @@ init_offs = mod(assumed_m_opt, 4);  % offset in T/4
 t0 = assumed_dly;
 
 
-parpool(8);
+parpool(length(snr_vec_viterbi));
 
-for snr_i = 1:length(snr_vec)
-    snr_curr = snr_vec(snr_i);
-    parfor sim = 1:sim_each     % perform sim_each simulations
+parfor snr_i = 1:length(snr_vec_viterbi)
+    parforstart = tic;
+    snr_curr = snr_vec_viterbi(snr_i);
+    for sim = 1:sim_each     % perform sim_each simulations
         
         % --- Create, send and receive data, estimate channel and prepare for detection
         
@@ -55,18 +56,10 @@ for snr_i = 1:length(snr_vec)
         n_biterr_viterbi(snr_i, sim) = n_biterr_this;
     end
     
-    fprintf('%.1f%% completed\n', snr_i*100/length(snr_vec))
+    parforelapsed = toc(parforstart);
+    fprintf('Completed %d simulations for SNR=%ddB in %.2f minutes\n', sim_each, snr_curr, parforelapsed/60)
 end
 
 delete(gcp);
 
-save('pbit_viterbi', 'pbit_viterbi', 'n_biterr_viterbi');
-
-%% Statistics
-
-BER_viterbi = median(pbit_viterbi, 2);
-BER_ideal = BER_awgn(snr_vec);
-
-figure, semilogy(snr_vec, BER_viterbi), hold on, semilogy(snr_vec, BER_ideal)
-xlabel('snr [dB]'), ylabel('BER'), legend('Viterbi', 'AWGN')
-ylim([10^-6, 10^-1])
+save('pbit_viterbi', 'pbit_viterbi', 'n_biterr_viterbi', 'snr_vec_viterbi');
