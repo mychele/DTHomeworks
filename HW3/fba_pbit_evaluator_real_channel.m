@@ -33,7 +33,7 @@ h = h(:);
 E_h = sum(abs(h).^2);
 sigma_a_2 = 2;
 
-parpool(length(snr_vec_fba));
+parpool(length(snr_vec_fba_real_channel));
 
 parfor snr_i = 1:length(snr_vec_fba_real_channel)
     thissnrstart = tic;
