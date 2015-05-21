@@ -12,6 +12,6 @@
 # Specify parallel queue
 #$ -q parallel
 # and set the number of parallel jobs
-#$ -l par_cpu=11
+#$ -l par_cpu=8
 
-matlab -nodesktop -nosplash -r "fba_pbit_evalutator"
+matlab -nodesktop -nosplash -r "fba_pbit_evaluator_513db"
