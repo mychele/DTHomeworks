@@ -1,11 +1,11 @@
 % This script solves the first problem.
 clear, clc, close all
+
 %rng default % for reproducibility
 
 Tc = 1;
 T = 4*Tc;
 sigma_a = 2; % for the QPSK
-
 
 %% Training sequence generation
 
@@ -13,19 +13,16 @@ L = 15;
 Nseq = 10;
 trainingsymbols = ts_generation(L, Nseq);
 
-
 %% Generate the channel output
 
 snr = 20; %dB
 snr_lin = 10^(snr/10);
 [r, sigma_w, q] = channel_output(trainingsymbols, T, Tc, snr_lin);
 
-
-
 %% Estimate t0 as in pag 617 bc
 
 m_min = 0;
-m_max = 43;
+m_max = 40; 
 crossvec = zeros(m_max - m_min, 1);
 for m = m_min : m_max
     r_part = r(m+1 : T : m+1+T*(L-1));  % pick L samples from r, spaced by T
@@ -36,8 +33,6 @@ end
 m_opt = m_opt - 1; % because of MATLAB indexing
 init_offs = mod(m_opt, T);
 delay = floor(m_opt / T);   % timing phase @T, that is the delay of the channel @T
-
-
 
 %% Error functional for different N1 and N2 (@T), given the delay
 
