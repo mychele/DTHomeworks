@@ -91,12 +91,40 @@ basicstyle=\footnotesize\ttfamily
 \section*{Problem 1}
 
 % Spiegare cosa mandiamo e come lo generiamo
+In this problem the channel $q(n\frac{T}{4})$ is given at $\frac{T}{4}$. The goal is to estimate at the receiver the timing phase $t_0$ and the equivalent channel impulse response in $T$ with LS method.
+The setting of the system is as in Fig.~\ref{fig:channel_T4}. In order to perform LS estimation the first $L + N_{seq} = 15 + 10$ symbols of the sequence $a_k$ are binary symbols out of a QPSK constellation with $\sigma_a^2 = 2$. 
+In particular they are $1+j$ and $-1-j$ and map the $+1$ and $-1$ values of a ML sequence of length $L = 15$, partially repeated by $N_{seq}=10$. Then QPSK data follows. 
+The conversion between a bit stream and QPSK is carried out by the \texttt{bitmap} function. %% TODO some more on this?? 
+
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.8\textwidth]{channel_T4}
+	\caption{System setting for problem 1}
+	\label{fig:channel_T4}
+\end{figure}
+
+%%TODO Does Eq go in dB???? 
 
 % Spiegare che channel_output funziona da polifase
+The noisy output $r_n$ of the channel is computed with a polyphase version of the channel impulse response $q(n\frac{T}{4})$. Each branch is $q^{i}(mT) = q(mT + i)$ with $i \in [0, 3]$ , and since it is not time-varying it is possible to directly compute the convolution of each branch and the $a_k$ sequence. At the output of each convolution white noise $w_n$ is added, with variance $\sigma_w^2 = \frac{\sigma_a^2 E_q}{4 \Gamma} = -19.2411$ dB, where $\sigma_a^2 = 2$, $E_q = 2.3819$ and $\Gamma = 20$ dB is the given SNR at receiver input. Then a parallel to series converter generates the output at time $\frac{T}{4}$.
 
 % !!! Spiegare come stimiamo t0, riportare l'equazione (Formula 7.269, channel_estimator)
+The first operation which the receiver does is estimating $t_0$ as optimal timing phase in $\frac{T}{4}$. In particular, given the stream of symbols $r_n$, and the knowledge of the ML sequence $a_l, l\in [0, L-1]$, the receiver computes
+
+\begin{equation}
+	m_{opt} = \argmax_m | x_{ra}(m\frac{T}{4}) | = \argmax_{m} | \frac{1}{L} \sum_{l = 0}^{L - 1} x(lT + m\frac{T}{4})a^* (l) |
+\end{equation}
+for $ 0 < m < 40$ and finds that
+\begin{equation}
+	m_{opt} = 10
+\end{equation}
+\begin{equation}
+	t_{0} = m_{opt}\frac{T}{4} = 10 \frac{T}{4}
+\end{equation}
 
 % Spiegare differenza tra m_opt (in T/4, che è t0), init_offs (in T/4) e delay (in T)
+% Is it really useful? Michele
+
 
 % Funzionale per la scelta di N1 e N2 
 % 1 - Considerations sulla modification della formulation per il metodo ls visto che la sequenza ha simboli che distano 2sqrt(2)
@@ -109,7 +137,7 @@ basicstyle=\footnotesize\ttfamily
 % !!! Plottare {h_i_hat} per i = -N1, ..., N2
 
 % !!! Determinare la stima della varianza del rumore, sigma_w_hat_squared, compararla con sigma_w_squared in dB.
-
+The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the estimate $\hat{\sigma}_w^2 = something = take value from report$ is lower. Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
 % !!! Comparare la stima di Lambda_n_hat con il valore "vero" di Lambda_n_hat, fare le considerazioni su LS per cui il Lambda_n teorico raddoppia quando si usano i simboli ±1±j al posto di ±1.
 
 \clearpage
