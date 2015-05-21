@@ -7,7 +7,7 @@ rng default
 Tc = 1;
 T = 4 * Tc;
 snr_vec_viterbi = 5 : 15; % dB
-L_data = 2.^[18 20 20 20 20 20 20 20 22 23 23] - 1;
+L_data = 2.^[15 15 15 15 18 18 20 20 22 25 25] - 1;
 if length(L_data) ~= length(snr_vec_viterbi), disp('Check L_data'), return, end
 
 numsim = 12;
