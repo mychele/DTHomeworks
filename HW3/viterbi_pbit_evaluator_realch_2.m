@@ -12,6 +12,7 @@ snr_vec_viterbi = snr_vec_viterbi(10:11);
 L_data = L_data(10:11);
 if length(L_data) ~= length(snr_vec_viterbi), disp('Check L_data'), return, end
 
+numsim = 1;
 pbit_viterbi = zeros(length(snr_vec_viterbi), numsim);
 n_biterr_viterbi = zeros(length(snr_vec_viterbi), numsim);
 
@@ -34,7 +35,6 @@ h = h(:);
 E_h = sum(abs(h).^2);
 sigma_a_2 = 2;
 
-numsim = 1;
 parpool(2);
 
 parfor snr_i = 1:length(snr_vec_viterbi)
