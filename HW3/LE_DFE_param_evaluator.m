@@ -12,12 +12,14 @@ assumed_m_opt = 10;
 init_offs = mod(assumed_m_opt, 4);
 assumed_dly = 2;
 N = 5;
+N1 = 0;
+N2 = 4;
 
 %% LE
 printmsg_delete = ''; % Just to display progress updates
 L_data = 127; % it should be ininfluent
 M1_max = N+50;
-D_max = (N-1)/2 + 15;
+D_max = (N-1)/2 + 40;
 JminLE = zeros(length(snr_vec), M1_max, D_max);
 
 for snr_i = 1:length(snr_vec)
@@ -30,7 +32,7 @@ for snr_i = 1:length(snr_vec)
     
     % Estimate the channel using the first 100 samples (4*length(ts))
     fprintf('Estimating timing phase and IR... ')
-    [ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4, assumed_m_opt);
+    [ h, est_sigmaw ] = get_channel_info(r(assumed_dly+1:25+assumed_dly), N1, N2);
     fprintf('done!\n')
     
     % Sample to get r @ T
@@ -57,7 +59,7 @@ for i = 1:length(snr_vec)
     title(strcat('Jmin for LE, snr= ', num2str(snr_vec(i))))
     xlabel('D'), ylabel('M1'), zlabel('Jmin')
 end
-
+return
 %% DFE
 
 printmsg_delete = ''; % Just to display progress updates
@@ -76,7 +78,7 @@ for snr_i = 1:length(snr_vec)
     
     % Estimate the channel using the first 100 samples (4*length(ts))
     fprintf('Estimating timing phase and IR... ')
-    [ h, est_sigmaw, N1, N2 ] = get_channel_info(r(init_offs+1:25+init_offs), 0, 4, assumed_m_opt);
+    [ h, est_sigmaw ] = get_channel_info(r(assumed_dly+1:25+assumed_dly), N1, N2);
     fprintf('done!\n')
     
     % Sample to get r @ T
