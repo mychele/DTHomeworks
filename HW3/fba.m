@@ -41,18 +41,18 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 c = zeros(M, Ns, K+1);
-fprintf('channel transition metric...')
+%fprintf('channel transition metric...')
 for k = 1:K
     c(:, :, k) = (-abs(r(k) - u_mat).^2).';
 end
 c(:,:,K+1) = 0;
-fprintf('done\n')
+%fprintf('done\n')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Backward metric computation
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 b = zeros(Ns, K+1);   % This will also initialize the last state
-fprintf('bck...')
+%fprintf('bck...')
 for k = K:-1:1      
     for i = 1:Ns
         % Index of the new state: it's mod(state-1, M^(L1+L2-1)) * M + j
@@ -60,7 +60,7 @@ for k = K:-1:1
         b(i, k) = max(b(first_poss_state:first_poss_state+M-1, k+1) + c(:, i, k+1));
     end
 end
-fprintf('done\n')
+%fprintf('done\n')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Forward metric, state metric, log-like func computations
@@ -72,7 +72,7 @@ f_new = zeros(Ns, 1);   % f_new represents the fwd metric at time k
 l = zeros(M, 1);
 decisions = zeros(K, 1);
 row_step = (0:M-1)*M^(L1+L2-1);
-fprintf('fwd...')
+%fprintf('fwd...')
 % Initialize f_old here with the initial conditions (the end of the ML
 % training sequence)
 % for j = 1:Ns
@@ -97,7 +97,7 @@ for k = 1:K   % F_(-1) is the initial condition!
     decisions(k) = symb(maxind); 
     f_old = f_new;
 end
-fprintf('done\n')
+%fprintf('done\n')
 
 %%%%%%%%%%%%%%%%%%
 % Pbit computation
@@ -105,7 +105,7 @@ fprintf('done\n')
 [pbit, num_bit_errors] = BER(packet, decisions);
 
 num_errors = sum(packet-decisions ~= 0);
-fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
+%fprintf('P_err = %.g (%d errors)\n', num_errors / length(packet), num_errors)
 fprintf('P_bit = %.g (%d errors)\n', pbit, num_bit_errors)
 
 end
