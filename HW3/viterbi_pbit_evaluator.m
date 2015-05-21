@@ -52,7 +52,7 @@ for snr_i = 1:length(snr_vec_viterbi)
         n_biterr_viterbi(snr_i, sim) = n_biterr_this;
     end
     
-    fprintf('SNR=%ddB completed in %.2f minutes\n', snr_i*100/length(snr_vec), toc(thissnrstart)/60)
+    fprintf('SNR=%ddB completed in %.2f minutes\n', snr_i*100/length(snr_vec_viterbi), toc(thissnrstart)/60)
 end
 
 delete(gcp);
