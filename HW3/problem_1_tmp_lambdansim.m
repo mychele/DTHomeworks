@@ -12,6 +12,7 @@ sigma_a = 2; % for the QPSK
 L = 2^10-1;
 Nseq = 10;
 trainingsymbols = ts_generation(L, Nseq);
+M_a = 2; % (sum(abs(trainingsymbols).^2)/numel(trainingsymbols))
 
 numsim = 1000;
 for sim_i=1:numsim
@@ -82,7 +83,7 @@ est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 
 h_true = q(1+init_offs + T*(delay-N1) : T : end);
 lambdan_0_estim(sim_i) = est_sigmaw / (sigma_a * sum(abs(hi_0 - h_true).^2));
-lambdan_0_true(sim_i) = 2 * (L+1) * (L+1-N) / (N * (L+2-N));
+lambdan_0_true(sim_i) = 2 / M_a * (L+1) * (L+1-N) / (N * (L+2-N));
 
 
 % --- N1 = 2
@@ -99,7 +100,7 @@ est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 
 h_true = q(1+init_offs + T*(delay-N1) : T : end);
 lambdan_2_estim(sim_i) = est_sigmaw / (sigma_a * sum(abs(hi_2 - h_true).^2));
-lambdan_2_true(sim_i) = 2 * (L+1) * (L+1-N) / (N * (L+2-N));
+lambdan_2_true(sim_i) = 2 / M_a * (L+1) * (L+1-N) / (N * (L+2-N));
 
 
 end
@@ -107,11 +108,11 @@ end
 % --- Output Lambda_n
 
 fprintf('N1 = 2\n')
-fprintf('Lambda_n estimate: %.2f  %.2f\n', mean(lambdan_2_estim), std(lambdan_2_estim))
-fprintf('Lambda_n true:     %.2f\n', mean(lambdan_2_true))
+fprintf('Lambda_n estimate: %.2f  %.2f\n', 10*log10(mean(lambdan_2_estim)), 10*log10(std(lambdan_2_estim)))
+fprintf('Lambda_n true:     %.2f\n', 10*log10(mean(lambdan_2_true)))
 fprintf('N1 = 0\n')
-fprintf('Lambda_n estimate: %.2f  %.2f\n', mean(lambdan_0_estim), std(lambdan_0_estim))
-fprintf('Lambda_n true:     %.2f\n', mean(lambdan_0_true))
+fprintf('Lambda_n estimate: %.2f  %.2f\n', 10*log10(mean(lambdan_0_estim)), 10*log10(std(lambdan_0_estim)))
+fprintf('Lambda_n true:     %.2f\n', 10*log10(mean(lambdan_0_true)))
 
 
 
