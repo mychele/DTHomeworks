@@ -11,7 +11,7 @@ L_data = 2.^[15 15 15 15 18 18 20 20 22] - 1;
 
 if length(L_data) ~= length(snr_vec_fba_513), disp('Check L_data'), return, end
 
-numsim = 8;
+numsim = 2;
 pbit_fba_513 = zeros(length(snr_vec_fba_513), numsim);
 n_biterr_fba_513 = zeros(length(snr_vec_fba_513), numsim);
 
