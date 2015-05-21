@@ -1,0 +1,246 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2015 The MathWorks, Inc.
+                   R2015a (8.5.0.197613) 64-bit (glnxa64)
+                             February 12, 2015
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+
+	Academic License
+
+Starting parallel pool (parpool) using the 'local' profile ... connected to 11 workers.
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+channel transition metric...done
+bck...done
+fwd...done
+P_err = 0.3 (34313 errors)
+P_bit = 0.1 (36647 errors)
+channel transition metric...done
+bck...done
+bck...done
+fwd...done
+P_err = 0.2 (23487 errors)
+P_bit = 0.09 (24735 errors)
+channel transition metric...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+fwd...done
+P_err = 0.2 (21126 errors)
+P_bit = 0.08 (22091 errors)
+channel transition metric...done
+bck...done
+fwd...done
+P_err = 0.06 (30574 errors)
+P_bit = 0.03 (31248 errors)
+fwd...done
+P_err = 0.2 (23667 errors)
+P_bit = 0.09 (24853 errors)
+Completed 4 simulations for SNR=5dB in 65.99 minutes
+channel transition metric...done
+fwd...done
+P_err = 0.0008 (401 errors)
+P_bit = 0.0004 (402 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.01 (7754 errors)
+P_bit = 0.007 (7820 errors)
+fwd...done
+channel transition metric...done
+P_err = 0.02 (11017 errors)
+P_bit = 0.01 (11043 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.001 (620 errors)
+P_bit = 0.0006 (621 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.08 (43733 errors)
+P_bit = 0.04 (44859 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.1 (72216 errors)
+P_bit = 0.07 (75051 errors)
+channel transition metric...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+fwd...done
+P_err = 0.05 (25025 errors)
+P_bit = 0.02 (25407 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.0008 (397 errors)
+P_bit = 0.0004 (397 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.03 (13542 errors)
+P_bit = 0.01 (13674 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.008 (4300 errors)
+P_bit = 0.004 (4323 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.001 (750 errors)
+P_bit = 0.0007 (751 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.07 (34181 errors)
+P_bit = 0.03 (35035 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.1 (62519 errors)
+P_bit = 0.06 (65024 errors)
+bck...done
+channel transition metric...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+bck...done
+fwd...done
+P_err = 0.04 (22248 errors)
+P_bit = 0.02 (22635 errors)
+channel transition metric...done
+bck...done
+fwd...done
+bck...done
+P_err = 0.0007 (390 errors)
+P_bit = 0.0004 (390 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.02 (10998 errors)
+P_bit = 0.01 (11080 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.006 (3341 errors)
+P_bit = 0.003 (3348 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.003 (1457 errors)
+P_bit = 0.001 (1460 errors)
+bck...done
+channel transition metric...done
+bck...done
+fwd...done
+P_err = 0.06 (32277 errors)
+P_bit = 0.03 (32941 errors)
+bck...done
+channel transition metric...done
+bck...done
+fwd...done
+P_err = 0.1 (54458 errors)
+P_bit = 0.05 (56079 errors)
+channel transition metric...done
+fwd...done
+P_err = 0.03 (15499 errors)
+P_bit = 0.01 (15629 errors)
+Completed 4 simulations for SNR=8dB in 256.31 minutes
+bck...done
+fwd...done
+P_err = 0.0007 (380 errors)
+P_bit = 0.0004 (380 errors)
+Completed 4 simulations for SNR=12dB in 262.47 minutes
+fwd...done
+P_err = 0.01 (7435 errors)
+P_bit = 0.007 (7464 errors)
+Completed 4 simulations for SNR=9dB in 262.90 minutes
+fwd...done
+P_err = 0.005 (2391 errors)
+P_bit = 0.002 (2396 errors)
+Completed 4 simulations for SNR=10dB in 265.07 minutes
+bck...done
+bck...done
+fwd...done
+P_err = 0.001 (542 errors)
+P_bit = 0.0005 (542 errors)
+Completed 4 simulations for SNR=11dB in 292.58 minutes
+fwd...done
+P_err = 0.08 (42323 errors)
+P_bit = 0.04 (43246 errors)
+Completed 4 simulations for SNR=7dB in 304.80 minutes
+fwd...done
+P_err = 0.1 (51186 errors)
+P_bit = 0.05 (52435 errors)
+Completed 4 simulations for SNR=6dB in 308.00 minutes
+fwd...done
+P_err = 9e-05 (190 errors)
+P_bit = 5e-05 (190 errors)
+channel transition metric...done
+fwd...done
+P_err = 2e-06 (4 errors)
+P_bit = 1e-06 (4 errors)
+channel transition metric...done
+fwd...done
+P_err = 1e-06 (2 errors)
+P_bit = 5e-07 (2 errors)
+channel transition metric...done
+bck...done
+bck...done
+bck...done
+fwd...done
+P_err = 8e-05 (166 errors)
+P_bit = 4e-05 (166 errors)
+channel transition metric...done
+fwd...done
+P_err = 5e-07 (1 errors)
+P_bit = 2e-07 (1 errors)
+channel transition metric...done
+fwd...done
+P_err = 1e-05 (22 errors)
+P_bit = 5e-06 (22 errors)
+channel transition metric...done
+bck...done
+bck...done
+bck...done
+fwd...done
+P_err = 9e-05 (199 errors)
+P_bit = 5e-05 (199 errors)
+fwd...done
+P_err = 0 (0 errors)
+P_bit = 0 (0 errors)
+channel transition metric...done
+channel transition metric...done
+fwd...done
+P_err = 2e-05 (36 errors)
+P_bit = 9e-06 (36 errors)
+channel transition metric...done
+bck...done
+bck...done
+bck...done
+fwd...done
+P_err = 7e-05 (149 errors)
+P_bit = 4e-05 (149 errors)
+Completed 4 simulations for SNR=13dB in 1124.36 minutes
+fwd...done
+P_err = 0 (0 errors)
+P_bit = 0 (0 errors)
+Completed 4 simulations for SNR=15dB in 1135.82 minutes
+fwd...done
+P_err = 5e-06 (10 errors)
+P_bit = 2e-06 (10 errors)
+Completed 4 simulations for SNR=14dB in 1204.87 minutes
+Parallel pool using the 'local' profile is shutting down.
