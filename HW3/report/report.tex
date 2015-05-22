@@ -127,17 +127,45 @@ for $ 0 < m < 40$ and finds that
 
 
 % Funzionale per la scelta di N1 e N2 
-% 1 - Considerations sulla modification della formulation per il metodo ls visto che la sequenza ha simboli che distano 2sqrt(2)
 % (2 - Considerazioni su scelta di N1 legata al funzionale che sta sempre lì e cambia proprio poco - anche in funzione dell'esercizio 2)
 
 % !!! Riportare l'equazione per la stima di {h_i_hat}
 
 % !!! Riportare valori di {h_i_hat} in una tabella, ampiezza e fase
+\begin{table}
+	\centering
+	\begin{tabular}{c|c|c|c|c|c}
+		$i \in [-N1, N2]$ & 0 & 1 & 2 & 3 & 4 \\ \hline
+		$|h_i|$ 		& 0.7140  &  0.2463  &  0.1553  &  0.5778  &  0.4001 \\
+		$\angle(h_i)$ 	& -2.5815  &  1.3137  & -2.5666  & -1.5096  & -1.6715 \\
+	\end{tabular}
+	\caption{Amplitue and phase of $h_i, i \in [-N1, N2]$, for the choice $N1 = 0$}
+	\label{table:hN1}
+\end{table}
+
+\begin{table}
+	\centering
+	\begin{tabular}{c|c|c|c|c|c|c|c}
+		$i \in [-N1, N2]$ & -2 & -1 & 0 & 1 & 2 & 3 & 4 \\ \hline
+		$|h_i|$ 	&	0.0121  &  0.0137  &  0.7136   & 0.2446  &  0.1551  &  0.5853  &  0.4068 \\
+		$\angle(h_i)$ &	0.3575  & -2.0494  & -2.5692   & 1.3064  & -2.5498  & -1.5017  & -1.6574 \\
+	\end{tabular}
+	\caption{Amplitude and phase of $h_i, i \in [-N1, N2]$, for the choice $N1 = 2$}
+	\label{table:hN1}
+\end{table}
 
 % !!! Plottare {h_i_hat} per i = -N1, ..., N2
+\begin{figure}
+ \centering
+ \includegraphics[width = 0.9\textwidth]{h1_p1}
+ \caption{$|h_i|, i \in [-N1, N2]$ for $N1 = 0$ and $N1 = -2$}
+ \label{fig:h1p1}
+\end{figure}
+
+% 1 - Considerations sulla modification della formulation per il metodo ls visto che la sequenza ha simboli che distano 2sqrt(2)
 
 % !!! Determinare la stima della varianza del rumore, sigma_w_hat_squared, compararla con sigma_w_squared in dB.
-The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the estimate $\hat{\sigma}_w^2 = something = take value from report$ is lower. Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
+The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the estimate $\hat{\sigma}_w^2 = something = -20.5327$ dB is lower (for the choice $N1 = 0$, or $\hat{\sigma}_w^2 = -20.851$ for $N1 = -2$). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
 % !!! Comparare la stima di Lambda_n_hat con il valore "vero" di Lambda_n_hat, fare le considerazioni su LS per cui il Lambda_n teorico raddoppia quando si usano i simboli ±1±j al posto di ±1.
 
 \clearpage
