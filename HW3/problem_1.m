@@ -22,7 +22,7 @@ snr_lin = 10^(snr/10);
 %% Estimate t0 as in pag 617 bc
 
 m_min = 0;
-m_max = 40; 
+m_max = 40;
 crossvec = zeros(m_max - m_min, 1);
 for m = m_min : m_max
     r_part = r(m+1 : T : m+1+T*(L-1));  % pick L samples from r, spaced by T
@@ -39,11 +39,13 @@ delay = floor(m_opt / T);   % timing phase @T, that is the delay of the channel 
 maxN1 = delay; % we already know it can't be larger than this
 maxN = 11;
 error_func = zeros(maxN, maxN1);
+rT = r(init_offs+1 : T : end);
 for N1 = 0:maxN1
     for N2 = 0:maxN-N1-1
         N = N1+N2+1;
-        x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-        d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end - (length(q)-4) + T*(delay-N1) + init_offs);
+        x_for_ls = trainingsymbols(1 : L+N-1);
+        d_for_ls = rT(1+delay-N1 : (delay-N1)+(L+N-1));
+        %d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end - (length(q)-4) + T*(delay-N1) + init_offs);
         % Now d_for_ls is delayed by N1 samples wrt x_for_ls.
         [~, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
         % We discarded the first t0-N1 samples, so the "perceived delay" is N1 < t0.
@@ -55,11 +57,10 @@ for N1 = 0:maxN1
 end
 
 figure
-plot(0:maxN-1, 10*log10(error_func)), hold on, plot([0 maxN-1], 10*log10(sigma_w*[1 1]))
+plot(0:maxN-1, 10*log10(error_func))
 title('Error functional estimating h @T, given t_0 and varying N_1')
-legend('N_1 = 0', 'N_1 = 1', 'N_1 = 2', '\sigma_w')
+legend('N_1 = 0', 'N_1 = 1', 'N_1 = 2')
 xlabel('N_2'), ylabel('\epsilon [dB]'), grid on, xlim([0 8])
-
 
 
 %% Channel estimation, and computation of Lambda_n, for two choices of N1 and N2
@@ -68,9 +69,8 @@ xlabel('N_2'), ylabel('\epsilon [dB]'), grid on, xlim([0 8])
 
 N1 = 0; N2 = 4;
 N = N1+N2+1;
-x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end ...
-    - (length(q)-4) + T*(delay-N1) + init_offs);
+x_for_ls = trainingsymbols(1 : L+N-1);
+d_for_ls = rT(1+delay-N1 : (delay-N1)+(L+N-1));
 % Now d_for_ls is delayed by N1 samples wrt x_for_ls.
 [hi_0, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
 d_no_trans = d_for_ls(N : N+L-1);
@@ -78,16 +78,15 @@ est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 
 h_true = q(1+init_offs + T*(delay-N1) : T : end);
 lambdan_0_estim = est_sigmaw / (sigma_a * sum(abs(hi_0 - h_true).^2));
-lambdan_0_true = 2 * (L+1) * (L+1-N) / (N * (L+2-N));
+lambdan_0_true = (L+1) * (L+1-N) / (N * (L+2-N));
 
 
 % --- N1 = 2
 
 N1 = 2; N2 = 4;
 N = N1+N2+1;
-x_for_ls = trainingsymbols(end-(L+N-1) + 1 : end);
-d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end ...
-    - (length(q)-4) + T*(delay-N1) + init_offs);
+x_for_ls = trainingsymbols(1 : L+N-1);
+d_for_ls = rT(1+delay-N1 : (delay-N1)+(L+N-1));
 % Now d_for_ls is delayed by N1 samples wrt x_for_ls.
 [hi_2, r_hat] = h_estimation_onebranch(x_for_ls, d_for_ls, L, N);
 d_no_trans = d_for_ls(N : N+L-1);
@@ -95,7 +94,7 @@ est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 
 h_true = q(1+init_offs + T*(delay-N1) : T : end);
 lambdan_2_estim = est_sigmaw / (sigma_a * sum(abs(hi_2 - h_true).^2));
-lambdan_2_true = 2 * (L+1) * (L+1-N) / (N * (L+2-N));
+lambdan_2_true = (L+1) * (L+1-N) / (N * (L+2-N));
 
 
 % --- Output Lambda_n
