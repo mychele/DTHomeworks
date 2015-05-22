@@ -6,13 +6,14 @@ rng default
 
 Tc = 1;
 T = 4 * Tc;
-snr_vec_fba_real_channel = 5 : 15; % dB
-L_data = 2.^[15 15 15 15 18 18 20 20 22 23 23] - 1;
+snr_vec_fba_real_channel = 14 : 15; % dB
+L_data = 2.^[23 23] - 1;
+numsim = 4;
 
 if length(L_data) ~= length(snr_vec_fba_real_channel), disp('Check L_data'), return, end
 
-pbit_fba_real_channel = zeros(length(snr_vec_fba_real_channel));
-n_biterr_fba_real_channel = zeros(length(snr_vec_fba_real_channel));
+pbit_fba_real_channel = zeros(length(snr_vec_fba_real_channel),numsim);
+n_biterr_fba_real_channel = zeros(length(snr_vec_fba_real_channel),numsim);
 
 % From exercise 1
 N1 = 0;
@@ -35,6 +36,8 @@ sigma_a_2 = 2;
 
 parpool(length(snr_vec_fba_real_channel));
 
+for sim = 1:numsim
+
 parfor snr_i = 1:length(snr_vec_fba_real_channel)
     thissnrstart = tic;
     snr_curr = snr_vec_fba_real_channel(snr_i);
@@ -52,13 +55,15 @@ parfor snr_i = 1:length(snr_vec_fba_real_channel)
         x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2);
     % 25 is the length of the training sequence, that is only used
     % to train Viterbi and is not considered for pbit evaluation.
-    pbit_fba_real_channel(snr_i) = pbit_this;
-    n_biterr_fba_real_channel(snr_i) = n_biterr_this;
+    pbit_fba_real_channel(snr_i,sim) = pbit_this;
+    n_biterr_fba_real_channel(snr_i,sim) = n_biterr_this;
     
     
     fprintf('SNR=%ddB completed in %.2f minutes\n', snr_vec_fba_real_channel(snr_i), toc(thissnrstart)/60)
 end
 
+end
+
 delete(gcp);
 
-save('pbit_fba_real_channel', 'pbit_fba_real_channel', 'n_biterr_fba_real_channel', 'snr_vec_fba_real_channel');
+save('pbit_fba_real_channel_1415', 'pbit_fba_real_channel', 'n_biterr_fba_real_channel', 'snr_vec_fba_real_channel');
