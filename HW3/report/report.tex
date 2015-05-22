@@ -94,7 +94,7 @@ basicstyle=\footnotesize\ttfamily
 In this problem the channel $q(n\frac{T}{4})$ is given at $\frac{T}{4}$. The goal is to estimate at the receiver the timing phase $t_0$ and the equivalent channel impulse response in $T$ with LS method.
 The setting of the system is as in Fig.~\ref{fig:channel_T4}. In order to perform LS estimation the first $L + N_{seq} = 15 + 10$ symbols of the sequence $a_k$ are binary symbols out of a QPSK constellation with $\sigma_a^2 = 2$. 
 In particular they are $1+j$ and $-1-j$ and map the $+1$ and $-1$ values of a ML sequence of length $L = 15$, partially repeated by $N_{seq}=10$. Then QPSK data follows. 
-The conversion between a bit stream and QPSK is carried out by the \texttt{bitmap} function. %% TODO some more on this?? 
+The conversion between a bit stream and QPSK is carried out by the \texttt{bitmap} function. %% TODO some more on this?? Give a better formulation
 
 \begin{figure}
 	\centering
@@ -124,48 +124,85 @@ for $ 0 < m < 40$ and finds that
 
 % Spiegare differenza tra m_opt (in T/4, che è t0), init_offs (in T/4) e delay (in T)
 % Is it really useful? Michele
+Remeber that $t_0 = 10$ in $\frac{T}{4}$ and the corresponding $D_{ch} = (t_0 \% 4)T = 2T$ represent the number of samples after which the receiver receives the first sample of the training sequence multiplied by $h_0$, which is the coefficient of the channel impulse response with the gratest amplitude. In other words, if the receiver and the transmitter use the same time index $k$ and if $x_k$ is the output at time $T$ of the receiver then
+\begin{equation}
+x_{k} = h_0a_{k-D_{ch}} + i_k, \quad i_k = \sum_{\substack{i = -N_1 \\ i \neq 0}}^{N_2} h_i a_{k-D_{ch}-i}
+\end{equation}
+where $i_k$ is the inter-symbol interference. Therefore, if $t_0 = 10\frac{T}{4}$ and $D_{ch} = 2T$ there could be at most 2 precursors (i.e. the coefficients of $h_i$ for $i = -N_1, \dots, -1$), and they can be equal to 0 (they don't introduce ISI but just the delay $D_{ch}$) or different from 0 but with an amplitude lower than $h_0$. 
 
+The receiver can now the estimate of the channel impulse response at time $T$. The output of the channel $r_n$ is sampled at $n = t_0 + kT$ to get $x_k = r_{t_0 + kT}$. Then the LS estimate is computed using the symbols of the known ML sequence $a_k$ sent and a suitable section of the output. Note that the training sequence sent of lenght $L + N_{seq} = 25$ has $N_{seq} = 10$ which is enough to avoid the transient of the channel which is $N - 1$, with $N = N_1 + N_2 + 1$ which is the real length of the impulse response.
+Note also that the LS method can estimate a causal impulse response, $\tilde{h}_j, j = 0, \dots, N$, while the channel impulse response could have some precursors which are different from 0, and therefore an anticausal component. In order to correctly estimate $h_i, i = -N_1, \dots, N_2$, given a supposed length $\hat{N} = \hat{N}_1 + \hat{N}_2 + 1$, LS considers $a_k, k = 0, \dots, L+\hat{N}-1$ and the output $x_k, k = D_{ch} - N_1, \dots, D_{ch} - N_1 + L + \hat{N} - 1$ and it performs the estimation in the standard way. This is the same as considering a causal impulse response, with $\hat{N}$ coefficients, but since we suppose that $N_1$ assumes a given value in $0, D_{ch}$, then it is possible to shift the estimate left of $N_1$ samples and obtain the estimate for $\hat{h}_i, i = -N_1, N_2$. 
+The actual estimation is performed as in \cite[p.~246]{bc}, i.e. using a $L \times \hat{N}$ observation matrix
 
-% Funzionale per la scelta di N1 e N2 
-% (2 - Considerazioni su scelta di N1 legata al funzionale che sta sempre lì e cambia proprio poco - anche in funzione dell'esercizio 2)
+\begin{equation}
+	\boldsymbol{\mathcal{I}} =
+ \begin{bmatrix}
+  a(\hat{N}-1) & \cdots & a(0) \\
+  \vdots  & \ddots & \vdots  \\
+a[(\hat{N}-1)+(L-1)] & \cdots & a(L-1) \\
+ \end{bmatrix}
+\end{equation}
+and a desired sample vector
+\begin{equation}
+\mathbf{o}^T = \left[ x(\hat{N}-1)\;,\; \ldots\; , \;x((\hat{N}-1)+(L-1)) \right].
+\end{equation}
+Therefore we can solve the LS problem as
+\begin{equation}
+	\hat{\mathbf{h}}= \mathbf{\Phi}^{-1} \boldsymbol{\vartheta}, \quad\mathrm{ with } \quad \mathbf{\Phi}=\boldsymbol{\mathcal{I}}^H \boldsymbol{\mathcal{I}} \quad \mathrm{ and }\quad \boldsymbol{\vartheta} = \boldsymbol{\mathcal{I}}^H \mathbf{o}.
+\end{equation}
 
-% !!! Riportare l'equazione per la stima di {h_i_hat}
+In particular, in order to estimate as first the length of the impulse response and $N_1, N_2$, we operate as follows. Let $N_{max} = N_{seq} = 10$ the maximum possible length of the impulse response. As first, we set $N_1 = 0$ and compute the functional of the error 
+\begin{equation} %% TODO define N
+	\mathcal{E} = \frac{1}{L}\sum_{k = N - 1}^{(L-1)+(N-1)}|d(k)-\hat{d}(k)|^2
+	\label{eq:functional}
+\end{equation}
+for $N_2 = 0, 1, \dots, N_{max} - N_1 - 1$. This procedure is repeated for $N_1 = 1$ and $2$. The functionals $\mathcal{E}$ for different $N_1$ are then plotted together, against $N_2$, in Fig.~\ref{fig:functional}.
+\begin{figure}
+	\centering
+	\includegraphics[width = 0.8\textwidth]{error_func_p1}
+	\caption{$\mathcal{E}$ vs $N_2$ for different $N_1$}
+	\label{fig:functional}
+\end{figure}
+It can be seen that there's a knee for $N_2 = 4 \forall N_1$, therefore we pick $N_2 = 4$. Then $N_1$ that minimizes $\mathcal{E}$ should be chosen, therefore $N_1 = 2$. However the 3 curves are very close to each other, and choosing $N_1 = 0$ would bring a similar functional $\mathcal{E}$ but a much lower complexity for Viterbi and FBA in the second problem. 
+
+In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase of $h_i, i = -N_1, \dots, N_2$, while in Fig.~\ref{fig:hi_p1} is reported the amplitude of both the choice $N_1 = 0$ and $N_1 = 2$. Note that they are very similar.
+
 
 % !!! Riportare valori di {h_i_hat} in una tabella, ampiezza e fase
 \begin{table}
 	\centering
 	\begin{tabular}{c|c|c|c|c|c}
-		$i \in [-N1, N2]$ & 0 & 1 & 2 & 3 & 4 \\ \hline
+		$i \in [-N_1, N_2]$ & 0 & 1 & 2 & 3 & 4 \\ \hline
 		$|h_i|$ 		& 0.7140  &  0.2463  &  0.1553  &  0.5778  &  0.4001 \\
 		$\angle(h_i)$ 	& -2.5815  &  1.3137  & -2.5666  & -1.5096  & -1.6715 \\
 	\end{tabular}
-	\caption{Amplitue and phase of $h_i, i \in [-N1, N2]$, for the choice $N1 = 0$}
-	\label{table:hN1}
+	\caption{Amplitue and phase of $h_i, i \in [-N_1, N_2]$, for the choice $N_1 = 0$}
+	\label{table:h0}
 \end{table}
 
 \begin{table}
 	\centering
 	\begin{tabular}{c|c|c|c|c|c|c|c}
-		$i \in [-N1, N2]$ & -2 & -1 & 0 & 1 & 2 & 3 & 4 \\ \hline
+		$i \in [-N_1, N_2]$ & -2 & -1 & 0 & 1 & 2 & 3 & 4 \\ \hline
 		$|h_i|$ 	&	0.0121  &  0.0137  &  0.7136   & 0.2446  &  0.1551  &  0.5853  &  0.4068 \\
 		$\angle(h_i)$ &	0.3575  & -2.0494  & -2.5692   & 1.3064  & -2.5498  & -1.5017  & -1.6574 \\
 	\end{tabular}
-	\caption{Amplitude and phase of $h_i, i \in [-N1, N2]$, for the choice $N1 = 2$}
-	\label{table:hN1}
+	\caption{Amplitude and phase of $h_i, i \in [-N_1, N_2]$, for the choice $N_1 = 2$}
+	\label{table:h2}
 \end{table}
 
-% !!! Plottare {h_i_hat} per i = -N1, ..., N2
+% !!! Plottare {h_i_hat} per i = -N_1, ..., N_2
 \begin{figure}
  \centering
- \includegraphics[width = 0.9\textwidth]{h1_p1}
- \caption{$|h_i|, i \in [-N1, N2]$ for $N1 = 0$ and $N1 = -2$}
+ \includegraphics[width = 0.9\textwidth]{hi_p1}
+ \caption{$|h_i|, i \in [-N_1, N_2]$ for $N_1 = 0$ and $N_1 = -2$}
  \label{fig:h1p1}
 \end{figure}
 
 % 1 - Considerations sulla modification della formulation per il metodo ls visto che la sequenza ha simboli che distano 2sqrt(2)
 
 % !!! Determinare la stima della varianza del rumore, sigma_w_hat_squared, compararla con sigma_w_squared in dB.
-The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the estimate $\hat{\sigma}_w^2 = something = -20.5327$ dB is lower (for the choice $N1 = 0$, or $\hat{\sigma}_w^2 = -20.851$ for $N1 = -2$). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
+The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the estimate $\hat{\sigma}_w^2 = something = -20.5327$ dB is lower (for the choice $N_1 = 0$, or $\hat{\sigma}_w^2 = -20.851$ for $N_1 = -2$). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
 % !!! Comparare la stima di Lambda_n_hat con il valore "vero" di Lambda_n_hat, fare le considerazioni su LS per cui il Lambda_n teorico raddoppia quando si usano i simboli ±1±j al posto di ±1.
 
 \clearpage
@@ -178,7 +215,7 @@ The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the e
 
 % Breve descrizione del sistema in T
 
-% Se non fatto nel problema 1 riportare le considerazioni su N1
+% Se non fatto nel problema 1 riportare le considerazioni su N_1
 
 % Considerazioni sull'implementazione di LE e DFE, riportare i grafici di Jmin (qualche grafico), considerazioni su M1, M2, D, riportare i grafici di \hat{h}, c, psi, b per \Gamma = 10 dB
 
