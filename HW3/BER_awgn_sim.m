@@ -17,8 +17,8 @@ dataseq_long = [dataseq; dataseq; dataseq; dataseq; dataseq; dataseq];
 datasymbols = bitmap(dataseq_long); % the ML sequence has an odd length,
 % qpsk requires even symbols
 %% 
-snr_vec = 6:2:14;
-numsim = 10;
+snr_vec = 5:15;
+numsim = 1;
 pbit_AWGN_sim = zeros(length(snr_vec), numsim);
 num_bit_error_AWGN_sim = zeros(length(snr_vec), numsim);
 for snr_i = 1:length(snr_vec)
@@ -50,4 +50,4 @@ BER_ideal = BER_awgn(snr_vec);
 
 figure, semilogy(snr_vec, pbit_AWGN_mean), hold on, semilogy(snr_vec, BER_ideal)
 xlabel('snr [dB]'), ylabel('BER'), legend('AWGN, simulation', 'AWGN')
-ylim([10^-6, 10^-1])
+ylim([10^-8, 10^-1])
