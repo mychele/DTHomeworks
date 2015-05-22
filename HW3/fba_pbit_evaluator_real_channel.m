@@ -8,6 +8,7 @@ Tc = 1;
 T = 4 * Tc;
 snr_vec_fba_real_channel = 5 : 15; % dB
 L_data = 2.^[15 15 15 15 18 18 20 20 22 23 23] - 1;
+numsim = 4;
 
 if length(L_data) ~= length(snr_vec_fba_real_channel), disp('Check L_data'), return, end
 
@@ -35,6 +36,8 @@ sigma_a_2 = 2;
 
 parpool(length(snr_vec_fba_real_channel));
 
+for sim = 1:numsim
+
 parfor snr_i = 1:length(snr_vec_fba_real_channel)
     thissnrstart = tic;
     snr_curr = snr_vec_fba_real_channel(snr_i);
@@ -59,6 +62,8 @@ parfor snr_i = 1:length(snr_vec_fba_real_channel)
     fprintf('SNR=%ddB completed in %.2f minutes\n', snr_vec_fba_real_channel(snr_i), toc(thissnrstart)/60)
 end
 
+end
+
 delete(gcp);
 
-save('pbit_fba_real_channel', 'pbit_fba_real_channel', 'n_biterr_fba_real_channel', 'snr_vec_fba_real_channel');
+save('pbit_fba_real_channel_131415', 'pbit_fba_real_channel', 'n_biterr_fba_real_channel', 'snr_vec_fba_real_channel');
