@@ -258,12 +258,17 @@ s_k = \sum_{i=0}^{L_1+L_2-1} M^i \alpha_{k+L_1-i} = \sum_{i=0}^{3} M^i \alpha_{k
 At time $k$, given the state $\mathbf{s}_{k-1}$ represented by $s_{k-1}$, and assuming the new symbol is $a_k$, the new state index is obtained by setting to 0 the two most significant bits (corresponding to the oldest symbol), shifting left by 2 bits and then adding the index of the new symbol in the two least significant bits:
 \begin{equation}
 s_k = \left[ (s_{k-1}) \lmod{M^{L_1+L_2-1}} \right] M + \alpha_k = 4 \, \left[ (s_{k-1})\lmod{64} \right] + \alpha_k.
-\end{equation}
+\label{eq:newstateexpression}\end{equation}
+
 In our implementation, we check all possible transitions by cycling through all state indices $s_{k-1}$ and considering for each of them the $M=4$ new possible symbols. Let the sequence of new state indices $s_k$ defined with this double iteration be $\{ s_k^{(i)} \}_{i=0,\ldots,MN_S-1}$, that has length $MN_S = M^{L_1+L_2+1} = 1024$.  Then, we have
 \begin{equation}
 s_k^{(i)} = i \mod N_S,
 \end{equation}
-hence a simple way of defining the new state indices is initializing a counter to 0 and incrementing it at every iteration of the inner loop. In fact \ldots %TODO
+hence a simple way of defining the new state indices is initializing a counter to 0 and incrementing it at every iteration of the inner loop, setting it again to 0 every time it reaches the value $N_S$. In fact, let us examine the first $N_S$ iterations, that correspond to $\frac{N_S}{M}$ iterations of the outer loop, in which the state indices $s_{k-1} = 0,\ldots,\frac{N_S}{M}-1$ are considered. Then, the first term of \eqref{eq:newstateexpression} takes the sequence of values
+\begin{equation}
+0,\,M,\,2M,\,\ldots,\,\left(\frac{N_S}{M}-1\right)M,
+\end{equation}
+that only has multiples of $M$. For each of them, the inner loop adds a term that takes values $0,\ldots,M-1$. Hence, the overall sequence cycles through all integers from $0$ to $N_S-1$, and the same reasoning applies for iterations $N_S +1$ to $MN_S$ -- the only difference is in the 2 most significant bits of $s_{k-1}$ that are discarded by the modulo operation. Since in our case $M=4$, this wrapping of the sequence happens 4 times.
 
 Using the notation of \cite{bc}, we define $u_k$ as the desired received signal that carries information, that is the convolution of the sent symbol with the impulse response of the channel:
 \begin{equation}
@@ -273,7 +278,7 @@ We observe that, given a fixed impulse response of the channel, $u_k$ only depen
 \begin{equation}
 u_k = f_1(\mathbf{s}_{k-1}, \mathbf{s}_k) = f_2(\mathbf{s}_{k-1}, a_k) = f(s_{k-1}, \alpha_k),
 \end{equation}
-where $f$ has support $\{0,\ldots,N_S-1\} \times \{0,\ldots,M-1\}$. In the initialization phase of the algorithm, we build a $N_S \times M$ matrix, according to \eqref{eq:ukdefinition}, to be used during execution as a lookup table to determine the value of $u_k$ given the previous state and the current assumed received symbol. Note that in the first iterations $u_k$ depends on the initial conditions on $a$, that in our case were set to zero, therefore the lookup table is formally inaccurate. However, this transient error disappears completely before the end of the training sequence, thus the detection of the actual data is formally and practically correct.
+where $f$ has support $\{0,\ldots,N_S-1\} \times \{0,\ldots,M-1\}$. In the initialization phase of the algorithm, we build a $N_S \times M$ matrix, according to \eqref{eq:ukdefinition}, to be used during execution as a lookup table to determine the value of $u_k$ given the previous state and the current assumed received symbol. Note that in the first iterations $u_k$ depends on the initial conditions on the sequence $\{a_i\}$, that in our case were set to zero, therefore the lookup table is formally inaccurate. However, this transient error disappears completely before the end of the training sequence, thus the detection of the actual data is formally and practically correct.
 
 At time $k$, for each possible previous state $\mathbf{s}_{k-1}$, the cost metric
 \begin{equation}
@@ -288,9 +293,9 @@ where $\rho_k$ is the observed sample at time $k$ and $\Gamma_{k-1}$ is the cost
 
 The survivor sequences at time $k$ are stored as symbols of the constellation, i.e. $a_{k-K_d} \ldots,a_{k-1}$, and the symbol $a_{k-K_d}$ is decided at the end of the $k$-th iteration. Therefore the Viterbi algorithm has a finite memory, that is the length $K_d$ of the trellis diagram, also known as trellis depth. It may happen that at time $k$ the symbols $a_{k-K_d}$ of all survivor sequences are the same, which means that the $(k-K_d)$-th symbol, and the previous ones, are already fixed: there is no point in keeping them in the survivor sequences, so we discard them and store the correct symbol in the vector of decided data. On the other hand, if the symbols $a_{k-K_d}$ of the survivor sequences are different then we are deciding based on the path metric up until $k$ (that is $\Gamma_k$), whereas we should decide the whole sequence according to the path metric computed on the whole message. This is an approximation that can in general yield some inaccuracies in the detection. The goal is to minimize $K_d$ for efficiency, without affecting too much the results.
 
-We run 16 simulations of the transmission of 3 ML sequences with length $2^{20} - 1$ over our channel, with the setup used for all experiments of problem 2, and a Viterbi detector with $K_d = 80$. At each iteration (starting after the transient $K_d$), the modified Viterbi detector checks which is the minimum value of $K_d$ that would yield no premature decision. In other words, all survivor sequences contain the same symbols from a certain column backwards, and that column is given by the minimum $K_d$ needed.
+We run 16 simulations of the transmission of 3 ML sequences with length $2^{20} - 1$ over our channel, with the setup used for all experiments of problem 2, and a Viterbi detector with $K_d = 80$. At each iteration (starting after the transient $K_d$), the modified Viterbi detector checks which is the minimum value of $K_d$ that would yield no premature decision. All survivor sequences contain the same symbols from a certain column backwards, and that column is given by the minimum $K_d$ needed.
 
-Finally, we average the results of all experiments to obtain a complementary CDF for the minimum $K_d$. If the resulting complementary CDF is $y$ for a certain value of $K_d$, it means that for that $K_d$ the number of iterations in which the decision on the oldest symbol is actually made among different symbols is $y$ times the total number of iterations (except for the transient during which the survivor sequence is filled for the first time). In those cases, the symbol that belongs to the most likely sequence is chosen, which might turn out to be a suboptimal decision. The number of times we make this approximation on the Viterbi algorithm is $y$ times the length of the sequence.
+Finally, we average the results of all experiments to obtain a complementary CDF for the minimum $K_d$. If the resulting complementary CDF is $y$ for a certain value of $K_d$, then for that $K_d$ the number of iterations in which the decision on the oldest symbol is actually made among different symbols is $y$ times the total number of iterations (minus the number of iterations of the transient, during which the survivor sequence is filled for the first time). In those cases, the symbol that belongs to the most likely sequence is chosen, which might turn out to be a suboptimal decision. The number of times we make this approximation on the Viterbi algorithm is $y$ times the length of the sequence.
 
 The complementary CDF we get is shown in Fig.~\ref{}, from which we chose $K_d = 28$, that yields a probability of at most $7\cdot 10^{-7}$ that the first column of the matrix has different symbols. Therefore, the probability of making a wrong choice due to this approximation cannot be more than $7\cdot 10^{-7}$, which is reasonable unless we are trying to measure SNR's on that order of magnitude.
 
