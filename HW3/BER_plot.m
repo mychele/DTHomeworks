@@ -34,8 +34,8 @@ load('pbit_viterbi_realch.mat')
 figure
 semilogy(snr_vec, pbitLE_real_channel), hold on,
 semilogy(snr_vec, pbitDFE_real_channel), hold on, 
-semilogy(snr_vec_viterbi + 0.3, pbit_viterbi), hold on,
-semilogy(snr_vec_fba_real_channel + 0.3, pbit_fba_real_channel), hold on,
+semilogy(snr_vec_viterbi, pbit_viterbi), hold on,
+semilogy(snr_vec_fba_real_channel, pbit_fba_real_channel), hold on,
 semilogy(snr_vec, BER_awgn(snr_vec)), hold on,
 semilogy(snr_vec, pbit_AWGN_sim)
 xlabel('snr [dB]'), ylabel('BER')
