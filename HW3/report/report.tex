@@ -10,6 +10,7 @@
 \usepackage{graphics,amsfonts}
 \usepackage[pdftex]{graphicx}
 \usepackage[cmex10]{amsmath}
+\usepackage{bm}
 % Also, note that the amsmath package sets \interdisplaylinepenalty to 10000
 % thus preventing page breaks from occurring within multiline equations. Use:
  \interdisplaylinepenalty=2500
@@ -133,7 +134,7 @@ where $i_k$ is the inter-symbol interference. Therefore, if $t_0 = 10T_c$ and $D
 
 The receiver can now the estimate of the channel impulse response at time $T$. The output of the channel $r_n$ is sampled at $n = t_0 + kT$ to get $x_k = r_{t_0 + kT}$. Then the LS estimate is computed using the symbols of the known ML sequence $a_k$ sent and a suitable section of the output. Note that the training sequence sent of lenght $L + N_{seq} = 25$ has $N_{seq} = 10$ which is enough to avoid the transient of the channel which is $N - 1$, with $N = N_1 + N_2 + 1$ which is the real length of the impulse response.
 Note also that the LS method can estimate a causal impulse response, $\tilde{h}_j, j = 0, \dots, N$, while the channel impulse response could have some precursors which are different from 0, and therefore an anticausal component. In order to correctly estimate $h_i, i = -N_1, \dots, N_2$, given a supposed length $\hat{N} = \hat{N}_1 + \hat{N}_2 + 1$, LS considers $a_k, k = 0, \dots, L+\hat{N}-1$ and the output $x_k, k = D_{ch} - N_1, \dots, D_{ch} - N_1 + L + \hat{N} - 1$ and it performs the estimation in the standard way. This is the same as considering a causal impulse response, with $\hat{N}$ coefficients, but since we suppose that $N_1$ assumes a given value in $0, D_{ch}$, then it is possible to shift the estimate left of $N_1$ samples and obtain the estimate for $\hat{h}_i, i = -N_1, N_2$. 
-The actual estimation is performed as in \cite[p.~246]{bc}, i.e. using a $L \times \hat{N}$ observation matrix
+The actual estimation is performed as in~\cite[p.~246]{bc}, i.e. using a $L \times \hat{N}$ observation matrix
 
 \begin{equation}
 	\boldsymbol{\mathcal{I}} =
@@ -197,7 +198,7 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
  \centering
  \includegraphics[width = 0.9\textwidth]{hi_p1}
  \caption{$|h_i|, i \in [-N_1, N_2]$ for $N_1 = 0$ and $N_1 = -2$}
- \label{fig:h1p1}
+ \label{fig:hi_p1}
 \end{figure}
 
 % !!! Determinare la stima della varianza del rumore, sigma_w_hat_squared, compararla con sigma_w_squared in dB.
@@ -246,7 +247,8 @@ The Viterbi algorithm was implemented as a MATLAB function that performs the max
 
 The state of the FSM associated with the algorithm at time $k$ is as in \cite{bc}:
 \begin{equation}
-\mathbf{s}_k = (a_{k+L1}, \ldots, a_{k-L_2+1}) = (a_k, \ldots, a_{k-3}), \quad k=0...K-1,
+	\mathbf{s}_k = (a_{k+L1}, \ldots, a_{k-L_2+1}) = (a_k, \ldots, a_{k-3}), \quad k=0...K-1,
+	\label{eq:state}
 \end{equation}
 where $K$ is the length of the input sequence, therefore the number of states is $N_S = M ^ {L_1 + L_2} = 4^4 = 256$. We associate each symbol of the QPSK constellation to an index $\alpha = 0,\ldots,3$ (the rule is arbitrary and it does not affect the result), so that a symbol $a_k$ at time $k$ is mapped to the corresponding index $\alpha_k$. The internal representation of the state is an integer in base $M$, with the most recent symbol in the least significant position, such that the state $\mathbf{s}_k$ is mapped to the integer
 \begin{equation}
@@ -284,7 +286,56 @@ where $\rho_k$ is the observed sample at time $k$ and $\Gamma_{k-1}$ is the cost
 
 As mentioned above, at each iteration $k$ we make the decision on the oldest symbol, so that the Viterbi algorithm has a finite memory, that is the length $K_d$ of the trellis diagram. The decision is made according to the survivor sequence with the lowest cost $\Gamma_k$, 
 
-% Considerazioni su FBA, implementazioni ecc
+%%% Considerazioni su FBA (dettagli implementativi)
+% Cose di cui parlare:
+% - Matrice u_mat
+% - Computazione della matrice delle channel transition metrics
+% - Dire che teniamo tutta la matrice Backward metric 
+% - Dire che fondiamo il ciclo della Forward con quello per gli stati e la likelihood
+% - Considerazioni sull'occupazione di memoria e sulla velocità in riferimento al Viterbi
+\subsection*{Max-Log-MAP}
+Using the maximum a posteriori probability (MAP) criterion, the decision upon a received symbol is performed according to the expression:
+\begin{equation}
+	\hat{\boldsymbol{a}} = \argmax_{\boldsymbol{\alpha}} P[\boldsymbol{a} = \boldsymbol{\alpha} | \boldsymbol{z} = \boldsymbol{\rho}]
+\end{equation}
+If we introduce the \emph{likelihood function}:
+\begin{equation}
+	\mathtt{L}_k(\beta) = P[a_{k+L_1} = \beta | \mathbf{z}_0^{K-1} = \boldsymbol{\rho}_0^{K-1}]
+\end{equation}
+the criterion becomes:
+\begin{equation}
+	\hat{a}_{k+L1} = \argmax_{\beta \in \mathcal{A}} \mathtt{L}_k(\beta)
+\end{equation}
+In order to solve the problem of the likelihood function maximization, the FBA algorithm can be used. The algorithm performs the computation of four metrics, namely:
+\begin{itemize}
+	\item Forward metric, $F_k(j)$
+	\item Backward metric, $B_k(j)$
+	\item State metric, $V_k(j)$
+	\item Likelihood function of the generic symbol,
+	\begin{equation}
+	 	\mathtt{L}_k(j) = \sum_{\substack{i = 1 \\ [\boldsymbol{\sigma}_i]_1 = \beta}}^{N_S} V_k(i) \quad \beta \in \mathcal{A}
+	 \end{equation} 
+\end{itemize}
+where k is the variable associated with the symbol index and j is the state index, as defined in the Viterbi algorithm (Eq.~\ref{eq:state}).
+
+Applying the logarithm to the above metrics yields the \emph{log-likelihood} function, whose expression is 
+\begin{equation}
+	\ell_k(\beta) = \ln \mathtt{L}_k(\beta) = \ln \sum_{\substack{i = 1 \\ [\boldsymbol{\sigma}_i]_1 = \beta}}^{N_S} e^{v_k(i)} \quad \beta \in \mathcal{A}
+\end{equation}
+where $v_k(i) = \ln V_k(i)$ is the logarithm of the state metric.
+
+Using the logarithm the difference between the state metrics is enhanced, and as a result one term usually dominates within each time index $k$ in the sum above. Therefore, we can introduce the Max-Log-MAP criterion:
+\begin{equation}
+	\hat{a}_{k+L1} = \argmax_{\beta \in \mathcal{A}} \tilde{\ell}_k(\beta)
+\end{equation}
+where we use the approximation 
+\begin{equation}
+	\tilde{\ell}_k(\beta) = \max_{\substack{i \in [1, \dots, N_S] \\ [\boldsymbol{\sigma}_i]_1 = \beta}} v_k(i)
+\end{equation}
+
+% Implementation details
+
+
 
 % Grafici del BER, sia per canale stimato che per canale vero, riportando il numero di bit per le simulazioni
 
