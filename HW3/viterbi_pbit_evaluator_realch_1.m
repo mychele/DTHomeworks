@@ -2,14 +2,13 @@
 clear
 close all
 clc
-rng default
 
 Tc = 1;
 T = 4 * Tc;
 snr_vec_viterbi = 5 : 15; % dB
-L_data = 2.^[15 15 15 15 18 18 20 20 22 24 24] - 1;
-snr_vec_viterbi = snr_vec_viterbi(1:9);
-L_data = L_data(1:9);
+L_data = 2.^[15 15 18 18 20 20 22 22 22 24 24] - 1;
+snr_vec_viterbi = snr_vec_viterbi(1:7);
+L_data = L_data(1:7);
 if length(L_data) ~= length(snr_vec_viterbi), disp('Check L_data'), return, end
 
 numsim = 1;
@@ -67,4 +66,4 @@ end
 
 %delete(gcp);
 
-save('pbit_viterbi_realch_1', 'pbit_viterbi', 'n_biterr_viterbi', 'snr_vec_viterbi');
+save('pbit_viterbi_realch_1_redo_5to11dB', 'pbit_viterbi', 'n_biterr_viterbi', 'snr_vec_viterbi');

@@ -12,6 +12,6 @@
 # Specify parallel queue
 #$ -q parallel
 # and set the number of parallel jobs
-#$ -l par_cpu=2
+#$ -l par_cpu=4
 
 matlab -nodesktop -nosplash -r "viterbi_pbit_evaluator_realch_2"

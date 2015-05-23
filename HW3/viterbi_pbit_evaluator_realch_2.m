@@ -7,9 +7,9 @@ rng default
 Tc = 1;
 T = 4 * Tc;
 snr_vec_viterbi = 5 : 15; % dB
-L_data = 2.^[15 15 15 15 18 18 20 20 22 24 24] - 1;
-snr_vec_viterbi = snr_vec_viterbi(10:11);
-L_data = L_data(10:11);
+L_data = 2.^[15 15 15 15 18 18 22 24 24 25 25] - 1;
+snr_vec_viterbi = snr_vec_viterbi(8:11);
+L_data = L_data(8:11);
 if length(L_data) ~= length(snr_vec_viterbi), disp('Check L_data'), return, end
 
 numsim = 1;
@@ -35,7 +35,7 @@ h = h(:);
 E_h = sum(abs(h).^2);
 sigma_a_2 = 2;
 
-parpool(2);
+parpool(4);
 
 parfor snr_i = 1:length(snr_vec_viterbi)
     thissnrstart = tic;
@@ -67,4 +67,4 @@ end
 
 delete(gcp);
 
-save('pbit_viterbi_realch_2', 'pbit_viterbi', 'n_biterr_viterbi', 'snr_vec_viterbi');
+save('pbit_viterbi_realch_2_11to15dB', 'pbit_viterbi', 'n_biterr_viterbi', 'snr_vec_viterbi');
