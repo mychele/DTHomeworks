@@ -22,7 +22,7 @@ assumed_m_opt = 10;
 init_offs = mod(assumed_m_opt, 4);  % offset in T/4
 t0 = assumed_dly;
 
-parfor snr_i = 1:length(snr_vec_fba_same_channel)
+for snr_i = 1:length(snr_vec_fba_same_channel)
     thissnrstart = tic;
     % --- Create, send and receive data, estimate channel and prepare for detection
     
@@ -30,7 +30,7 @@ parfor snr_i = 1:length(snr_vec_fba_same_channel)
     L_data_i = L_data(snr_i);
     
     % Load data
-    x = load(strcat('inoutch', num2str(snr_ch), '.mat'));
+    load(strcat('inoutch', num2str(snr_ch), '.mat'));
     packet = packet(1:25+(L_data_i-1)/2);
     r = r(1:25+(L_data_i-1)/2+assumed_dly);
     % Sample to get r @ T
@@ -48,7 +48,5 @@ parfor snr_i = 1:length(snr_vec_fba_same_channel)
     
     fprintf('SNR=%ddB completed in %.2f minutes\n', snr_vec_fba_same_channel(snr_i), toc(thissnrstart)/60)
 end
-
-delete(gcp);
 
 save('pbit_fba_same_channel', 'pbit_fba_same_channel', 'n_biterr_fba_same_channel', 'snr_vec_fba_same_channel');
