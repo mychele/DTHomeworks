@@ -297,7 +297,14 @@ We run 16 simulations of the transmission of 3 ML sequences with length $2^{20} 
 
 Finally, we average the results of all experiments to obtain a complementary CDF for the minimum $K_d$. If the resulting complementary CDF is $y$ for a certain value of $K_d$, then for that $K_d$ the number of iterations in which the decision on the oldest symbol is actually made among different symbols is $y$ times the total number of iterations (minus the number of iterations of the transient, during which the survivor sequence is filled for the first time). In those cases, the symbol that belongs to the most likely sequence is chosen, which might turn out to be a suboptimal decision. The number of times we make this approximation on the Viterbi algorithm is $y$ times the length of the sequence.
 
-The complementary CDF we get is shown in Fig.~\ref{}, from which we chose $K_d = 28$, that yields a probability of at most $7\cdot 10^{-7}$ that the first column of the matrix has different symbols. Therefore, the probability of making a wrong choice due to this approximation cannot be more than $7\cdot 10^{-7}$, which is reasonable unless we are trying to measure SNR's on that order of magnitude.
+The complementary CDF we get is shown in Fig.~\ref{fig:Kd_min_estimation}, from which we chose $K_d = 28$, that yields a probability of at most $7\cdot 10^{-7}$ that the first column of the matrix has different symbols. Therefore, the probability of making a wrong choice due to this approximation cannot be more than $7\cdot 10^{-7}$, which is reasonable unless we are trying to measure SNR's on that order of magnitude.
+
+\begin{figure}
+ \centering
+ \includegraphics[width = 0.75\textwidth]{Kd_min_estimation}
+ \caption{Complementary empirical CDF of $K_{d,\mathrm{min}}$ for the choice of $K_d$, over 16 independent simulations.}
+ \label{fig:Kd_min_estimation}
+\end{figure}
 
 
 %%% Considerazioni su FBA (dettagli implementativi)
