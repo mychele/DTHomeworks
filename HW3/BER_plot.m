@@ -61,3 +61,19 @@ semilogy(snr_vec, pbit_AWGN_sim(1:9))
 xlabel('snr [dB]'), ylabel('BER')
 legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'FBA', 'AWGN', 'AWGN with simulation')
 ylim([10^-7, 10^-1]), xlim([5, 15]), grid on
+
+
+%% Statistics for estimated channel, average over independent experiments
+snr_vec = 5:15;
+load('pbit_viterbi')
+
+figure
+semilogy(snr_vec, mean(pbitLE, 2)), hold on,
+semilogy(snr_vec, median(pbitDFE, 2))
+semilogy(snr_vec_viterbi, mean(pbit_viterbi, 2))
+semilogy(snr_vec, pbit_fba)
+semilogy(snr_vec, BER_awgn(snr_vec))
+semilogy(snr_vec, pbit_AWGN_sim)
+xlabel('snr [dB]'), ylabel('BER')
+legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'Viterbi', 'FBA', 'AWGN', 'AWGN with simulation')
+ylim([10^-5.5, 10^-1]), grid on
