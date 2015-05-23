@@ -308,18 +308,13 @@ The complementary CDF we get is shown in Fig.~\ref{fig:Kd_min_estimation}, from 
 
 
 %%% Considerazioni su FBA (dettagli implementativi)
-% Cose di cui parlare:
-% - Matrice u_mat
-% - Computazione della matrice delle channel transition metrics
-% - Dire che teniamo tutta la matrice Backward metric 
-% - Dire che fondiamo il ciclo della Forward con quello per gli stati e la likelihood
 % - Considerazioni sull'occupazione di memoria e sulla velocità in riferimento al Viterbi
 \subsection*{Max-Log-MAP}
 Using the maximum a posteriori probability (MAP) criterion, the decision upon a received symbol is performed according to the expression:
 \begin{equation}
 	\hat{\boldsymbol{a}} = \argmax_{\boldsymbol{\alpha}} P[\boldsymbol{a} = \boldsymbol{\alpha} | \boldsymbol{z} = \boldsymbol{\rho}]
 \end{equation}
-If we introduce the \emph{likelihood function}:
+If we introduce the \emph{likelihood function}
 \begin{equation}
 	\mathtt{L}_k(\beta) = P[a_{k+L_1} = \beta | \mathbf{z}_0^{K-1} = \boldsymbol{\rho}_0^{K-1}]
 \end{equation}
@@ -329,10 +324,10 @@ the criterion becomes:
 \end{equation}
 In order to solve the problem of the likelihood function maximization, the FBA algorithm can be used. The algorithm performs the computation of four metrics, namely:
 \begin{itemize}
-	\item Forward metric, $F_k(j)$
-	\item Backward metric, $B_k(j)$
-	\item State metric, $V_k(j)$
-	\item Likelihood function of the generic symbol,
+	\item The Forward metric, $F_k(j)$
+	\item The Backward metric, $B_k(j)$
+	\item The State metric, $V_k(j)$
+	\item The Likelihood function of the generic symbol,
 	\begin{equation}
 	 	\mathtt{L}_k(j) = \sum_{\substack{i = 1 \\ [\boldsymbol{\sigma}_i]_1 = \beta}}^{N_S} V_k(i) \quad \beta \in \mathcal{A}
 	 \end{equation} 
@@ -348,15 +343,35 @@ where $v_k(i) = \ln V_k(i)$ is the logarithm of the state metric.
 Using the logarithm the difference between the state metrics is enhanced, and as a result one term usually dominates within each time index $k$ in the sum above. Therefore, we can introduce the Max-Log-MAP criterion:
 \begin{equation}
 	\hat{a}_{k+L1} = \argmax_{\beta \in \mathcal{A}} \tilde{\ell}_k(\beta)
+	\label{eq:decision}
 \end{equation}
-where we use the approximation 
+where the following approximation holds:
 \begin{equation}
 	\tilde{\ell}_k(\beta) = \max_{\substack{i \in [1, \dots, N_S] \\ [\boldsymbol{\sigma}_i]_1 = \beta}} v_k(i)
+	\label{eq:likelihood}
 \end{equation}
 
-% Implementation details
+In our implementation we perform three main cycles in order to get all the metrics needed to compute $\tilde{\ell}$. 
 
+The first cycle computes the channel transition metrics, storing them in a $M \times N_S \times K$ matrix where for a fixed time $k = 1, \dots, K$ the $M$ elements in the j-th column represent the transitions metrics from the state j. The metrics are computed using the following expression: 
+\begin{equation}
+	c_k(j|i) = - |\rho_k - u_k|^2
+\end{equation}
+Since the desired signal $u_k$ is just a function of the current and next state, its values are precomputed like in the Viterbi implementation (Eq.~\ref{eq:ukdefinition}) and stored in a lookup table. $\rho_k$ represents the k-th sample of the received signal. For each time $k$, the $j$ index refers to the destination state, while the $i$ index refers to the starting state. Using matrix operations in MATLAB, we can fill the $c$ matrix by only cycling over time. For $k = K$ all values are set to 0.
 
+The second cycle computes the Backward metric. A matrix of size $N_S \times K+1$ is created and initialized to zero. This also initializes the final, K-th state to the 0 value, since the final symbol that will be received is unknown (performance of the algorithm may be enhanced by transmitting a previously decided symbol, also known to the receiver). The algorithm cycles the symbol indices from $K-1$ to $0$, iterating over the states and updating their backward metric according to the following expression:
+\begin{equation}
+	\tilde{b}_k(i) = \max_{m \in [1, \dots, N_S]}[\tilde{b}_{k+1}(m) + c_{k+1}(m|i)] \quad i = 1, \dots, N_S
+\end{equation}
+At each time $k$, the indices $m$ of the states which are reachable from the current one are needed. These indices are computed using the expression $m = (i-1 \mod M^{L1+L2-1}) * M + j$, where $i$ is the current state and $j = 0, \dots, M-1$ is the index of the transition. On the other hand, the $c_{k+1}(m|i)$ coeffients are readily available as the i-th column of the channel transition metrics at time $k+1$.
+
+The final cycle is used to compute the $\tilde{f}_k(j)$ metric for each state at each symbol index $k$. Since the State metric is $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k(i)$ for $i = 1, \dots, N_S$, there is no need to memorize $\tilde{f}_k(i)$ for every time index. A single iteration is performed in order to cover all the symbol indices from $0$ to $K-1$. For each $k$, another iteration over the $N_S$ states fills the vector of the forward metrics for all the states of the current $k$ index using the equation
+\begin{equation}
+	\tilde{f}_k(j) = \max_{\ell \in {1, \dots, N_S}} [\tilde{f}_{k-1}(\ell) + c_k{j|\ell}] \quad j = 1, \dots, N_S
+\end{equation}
+and the state metric is computed by adding this vector to the one memorized during the previous cycle, containing the backward metric. After getting the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ for $i = 1, \dots, N_S$, the likelihood function is obtained using Eq.~\ref{eq:likelihood}: in order to decide which state metrics should be compared, we make use of a precomputed matrix of size $N_S \times M$, which contains the symbols of each state and pick only those states whose initial symbol is $\beta$. Finally, the decision is performed inside the same cycle according to Eq.~\ref{eq:decision}.
+
+Memory occupation for the Max-Log-MAP criterion is a concern. Since the Backward and channel transition matrices are memorized, their total memory occupation is of $M \times N_S \times K + N_S \times K$ memory cells. Computation times for the Max-Log-MAP have been more or less twice those of the Viterbi algorithm for sequences of the same length.
 
 % Grafici del BER, sia per canale stimato che per canale vero, riportando il numero di bit per le simulazioni
 
