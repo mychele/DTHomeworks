@@ -69,6 +69,7 @@ basicstyle=\footnotesize\ttfamily
 \newcommand{\M} {\mathtt{M}}
 \newcommand{\dB} {\mathrm{dB}}
 \newcommand{\tr} {\mathrm{tr}}
+\newcommand{\lmod}[1] {_{\,\mathrm{mod}\,#1}}
 
 
 
@@ -241,22 +242,47 @@ As for the signal-to-estimation error ratio, it is possible to procede as in \ci
 
 % Considerazioni su Viterbi, Kd, grafico della distribuzione
 \subsection*{Viterbi algorithm}
-The Viterbi algorithm was implemented as a MATLAB function that performs the maximum likelihood detection using the whole message, including the PN preamble for channel estimation. Therefore, the initial conditions are given by the final symbols of the training sequence, that is hence used for the training of the Viterbi algorithm. The parameters $L_1 = 0$ and $L_2 = 4$ are set equal to $N_1$ and $N_2$ from problem 1.
+The Viterbi algorithm was implemented as a MATLAB function that performs the maximum likelihood detection using the whole message, including the known PN preamble for channel estimation, with initial conditions set to zero. Therefore, the initial conditions for the detection of the actual data (i.e. without the preamble) are given by the final symbols of the training sequence, which also has the function of training the Viterbi algorithm. The parameters $L_1 = 0$ and $L_2 = 4$ are set equal to $N_1$ and $N_2$ from problem 1.
 
 The state of the FSM associated with the algorithm at time $k$ is as in \cite{bc}:
 \begin{equation}
-\mathbf{s}_k = (a_{k+L1}, \ldots, a_{k-L_2+1}) = (a_k, \ldots, a_k-3), \quad k=0...K-1,
+\mathbf{s}_k = (a_{k+L1}, \ldots, a_{k-L_2+1}) = (a_k, \ldots, a_{k-3}), \quad k=0...K-1,
 \end{equation}
 where $K$ is the length of the input sequence, therefore the number of states is $N_S = M ^ {L_1 + L_2} = 4^4 = 256$. We associate each symbol of the QPSK constellation to an index $\alpha = 0,\ldots,3$ (the rule is arbitrary and it does not affect the result), so that a symbol $a_k$ at time $k$ is mapped to the corresponding index $\alpha_k$. The internal representation of the state is an integer in base $M$, with the most recent symbol in the least significant position, such that the state $\mathbf{s}_k$ is mapped to the integer
 \begin{equation}
-s_k = 1 + \sum_{i=0}^{L_1+L_2-1} M^i \alpha_{k+L_1-i} = 1 + \sum_{i=0}^{3} M^i \alpha_{k-i},
+s_k = \sum_{i=0}^{L_1+L_2-1} M^i \alpha_{k+L_1-i} = \sum_{i=0}^{3} M^i \alpha_{k-i}.
 \end{equation}
-where 1 was added in order to have $s_k \in \{1, \ldots, N_S\}$.
-At time $k+1$, given the state $\mathbf{s}_k$ represented by $s_k$, and assuming the new symbol is $a_{k+1}$, the new state index is obtained by setting to 0 the two most significant bits (corresponding to the oldest symbol), shifting left by 2 bits and then adding the index of the new symbol in the two least significant bits:
+At time $k$, given the state $\mathbf{s}_{k-1}$ represented by $s_{k-1}$, and assuming the new symbol is $a_k$, the new state index is obtained by setting to 0 the two most significant bits (corresponding to the oldest symbol), shifting left by 2 bits and then adding the index of the new symbol in the two least significant bits:
 \begin{equation}
-s_{k+1} = \left[ (s_k - 1)_{\mathrm{mod} M^{L1+L2-1}} \right] M + \alpha_{k+1} + 1 = \left[ (s_k - 1)_{\mathrm{mod} \frac{N_S}{M}} \right] M + \alpha_{k+1} + 1.
+s_k = \left[ (s_{k-1}) \lmod{M^{L_1+L_2-1}} \right] M + \alpha_k = 4 \, \left[ (s_{k-1})\lmod{64} \right] + \alpha_k.
 \end{equation}
-In our implementation, we check all possible transitions by cycling through all state indices $s_k$, and for each of them considering the $M=4$ new possible symbols. Performing this iteration, the resulting new state index
+In our implementation, we check all possible transitions by cycling through all state indices $s_{k-1}$ and considering for each of them the $M=4$ new possible symbols. Let the sequence of new state indices $s_k$ defined with this double iteration be $\{ s_k^{(i)} \}_{i=0,\ldots,MN_S-1}$, that has length $MN_S = M^{L_1+L_2+1} = 1024$.  Then, we have
+\begin{equation}
+s_k^{(i)} = i \mod N_S,
+\end{equation}
+hence a simple way of defining the new state indices is initializing a counter to 0 and incrementing it at every iteration of the inner loop. In fact \ldots %TODO
+
+Using the notation of \cite{bc}, we define $u_k$ as the desired received signal that carries information, that is the convolution of the sent symbol with the impulse response of the channel:
+\begin{equation}
+u_k = \sum_{n=-L_1}^{L_2} h_n a_{k-n} = \sum_{n=0}^{4} h_n a_{k-n}.
+\label{eq:ukdefinition}\end{equation}
+We observe that, given a fixed impulse response of the channel, $u_k$ only depends on the symbols $a_{k-4},\ldots, a_k$, which equivalent to say that it is a function of the current and the previous state, or of the current symbol and the previous state, i.e.
+\begin{equation}
+u_k = f_1(\mathbf{s}_{k-1}, \mathbf{s}_k) = f_2(\mathbf{s}_{k-1}, a_k) = f(s_{k-1}, \alpha_k),
+\end{equation}
+where $f$ has support $\{0,\ldots,N_S-1\} \times \{0,\ldots,M-1\}$. In the initialization phase of the algorithm, we build a $N_S \times M$ matrix, according to \eqref{eq:ukdefinition}, to be used during execution as a lookup table to determine the value of $u_k$ given the previous state and the current assumed received symbol. Note that in the first iterations $u_k$ depends on the initial conditions on $a$, that in our case were set to zero, therefore the lookup table is formally inaccurate. However, this transient error disappears completely before the end of the training sequence, thus the detection of the actual data is formally and practically correct.
+
+At time $k$, for each possible previous state $\mathbf{s}_{k-1}$, the cost metric
+\begin{equation}
+\Gamma_k = \sum_{i=0}^k |\rho_i - u_i|^2
+\end{equation}
+is computed recursively as
+\begin{equation}
+\Gamma_k = \Gamma_{k-1} + |\rho_k - u_k|^2,
+\end{equation}
+where $\rho_k$ is the observed sample at time $k$ and $\Gamma_{k-1}$ is the cost metric of the assumed state $\mathbf{s}_{k-1}$. The 4 possible values of $u_k$ are given by row $s_{k-1}$ of the lookup table, yielding 4 different values of $\Gamma_k$ according to the new symbol $a_k$. These 4 values of $\Gamma_k$ are always associated to different states $\mathbf{s}_k$, and each of the new states $\mathbf{s}_k$ has 4 values of $\Gamma_k$ depending on the transition the system used to get to this state. Instead of storing all $MN_S$ values of $\Gamma_k$, we only keep track of the lowest $\Gamma_k$ for each new state $\mathbf{s}_k$, and we record the predecessor $\mathbf{s}_{k-1}$ (by means of its index $s_{k-1}$) that yielded the lowest cost. Finally, we make the decision on the oldest symbol of the survivor sequences according to the cost metric $\Gamma$, and we store the new survivor sequences with the respective costs.
+
+As mentioned above, at each iteration $k$ we make the decision on the oldest symbol, so that the Viterbi algorithm has a finite memory, that is the length $K_d$ of the trellis diagram. The decision is made according to the survivor sequence with the lowest cost $\Gamma_k$, 
 
 % Considerazioni su FBA, implementazioni ecc
 
