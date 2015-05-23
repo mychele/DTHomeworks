@@ -238,6 +238,23 @@ At the same time $\vartheta(n) = 2Lr_{dp}(n)$ with $\boldsymbol{\vartheta} = [\v
 % Considerazioni sull'implementazione di LE e DFE, riportare i grafici di Jmin (qualche grafico), considerazioni su M1, M2, D, riportare i grafici di \hat{h}, c, psi, b per \Gamma = 10 dB
 
 % Considerazioni su Viterbi, Kd, grafico della distribuzione
+\subsection*{Viterbi algorithm}
+The Viterbi algorithm was implemented as a MATLAB function that performs the maximum likelihood detection using the whole message, including the PN preamble for channel estimation. Therefore, the initial conditions are given by the final symbols of the training sequence, that is hence used for the training of the Viterbi algorithm. The parameters $L_1 = 0$ and $L_2 = 4$ are set equal to $N_1$ and $N_2$ from problem 1.
+
+The state of the FSM associated with the algorithm at time $k$ is as in \cite{bc}:
+\begin{equation}
+\mathbf{s}_k = (a_{k+L1}, \ldots, a_{k-L_2+1}) = (a_k, \ldots, a_k-3), \quad k=0...K-1,
+\end{equation}
+where $K$ is the length of the input sequence, therefore the number of states is $N_S = M ^ {L_1 + L_2} = 4^4 = 256$. We associate each symbol of the QPSK constellation to an index $\alpha = 0,\ldots,3$ (the rule is arbitrary and it does not affect the result), so that a symbol $a_k$ at time $k$ is mapped to the corresponding index $\alpha_k$. The internal representation of the state is an integer in base $M$, with the most recent symbol in the least significant position, such that the state $\mathbf{s}_k$ is mapped to the integer
+\begin{equation}
+s_k = 1 + \sum_{i=0}^{L_1+L_2-1} M^i \alpha_{k+L_1-i} = 1 + \sum_{i=0}^{3} M^i \alpha_{k-i},
+\end{equation}
+where 1 was added in order to have $s_k \in \{1, \ldots, N_S\}$.
+At time $k+1$, given the state $\mathbf{s}_k$ represented by $s_k$, and assuming the new symbol is $a_{k+1}$, the new state index is obtained by setting to 0 the two most significant bits (corresponding to the oldest symbol), shifting left by 2 bits and then adding the index of the new symbol in the two least significant bits:
+\begin{equation}
+s_{k+1} = \left[ (s_k - 1)_{\mathrm{mod} M^{L1+L2-1}} \right] M + \alpha_{k+1} + 1 = \left[ (s_k - 1)_{\mathrm{mod} \frac{N_S}{M}} \right] M + \alpha_{k+1} + 1.
+\end{equation}
+In our implementation, we check all possible transitions by cycling through all state indices $s_k$, and for each of them considering the $M=4$ new possible symbols. Performing this iteration, the resulting new state index
 
 % Considerazioni su FBA, implementazioni ecc
 
