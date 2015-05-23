@@ -39,7 +39,7 @@ semilogy(snr_vec_fba_real_channel, pbit_fba_real_channel), hold on,
 semilogy(snr_vec, BER_awgn(snr_vec)), hold on,
 semilogy(snr_vec, pbit_AWGN_sim)
 xlabel('snr [dB]'), ylabel('BER')
-legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'FBA', 'AWGN', 'AWGN with simulation')
+legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'Viterbi', 'FBA', 'AWGN', 'AWGN with simulation')
 ylim([10^-7, 10^-1]), xlim([5, 15]), grid on
 
 %% Statistics for same estimate
