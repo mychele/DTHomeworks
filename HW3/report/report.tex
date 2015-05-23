@@ -151,9 +151,9 @@ Therefore we can solve the LS problem as
 	\hat{\mathbf{h}}= \mathbf{\Phi}^{-1} \boldsymbol{\vartheta}, \quad\mathrm{ with } \quad \mathbf{\Phi}=\boldsymbol{\mathcal{I}}^H \boldsymbol{\mathcal{I}} \quad \mathrm{ and }\quad \boldsymbol{\vartheta} = \boldsymbol{\mathcal{I}}^H \mathbf{o}.
 \end{equation}
 
-In particular, in order to estimate as first the length of the impulse response and $N_1, N_2$, we operate as follows. Let $N_{max} = N_{seq} = 10$ the maximum possible length of the impulse response. As first, we set $N_1 = 0$ and compute the functional of the error 
-\begin{equation} %% TODO define N
-	\mathcal{E} = \frac{1}{L}\sum_{k = N - 1}^{(L-1)+(N-1)}|d(k)-\hat{d}(k)|^2
+In particular, in order to estimate as first the length $\hat{N} = N_1 + N_2 + 1$ of the impulse response and $N_1, N_2$, we operate as follows. Let $N_{max} = N_{seq} = 10$ the maximum possible length $\hat{N}$ of the impulse response. As first, we set $N_1 = 0$ and compute the functional of the error 
+\begin{equation} 
+	\mathcal{E} = \frac{1}{L}\sum_{k = \hat{N} - 1}^{(L-1)+(\hat{N}-1)}|d(k)-\hat{d}(k)|^2
 	\label{eq:functional}
 \end{equation}
 for $N_2 = 0, 1, \dots, N_{max} - N_1 - 1$. This procedure is repeated for $N_1 = 1$ and $2$. The functionals $\mathcal{E}$ for different $N_1$ are then plotted together, against $N_2$, in Fig.~\ref{fig:functional}.
@@ -199,11 +199,29 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
  \label{fig:h1p1}
 \end{figure}
 
-% 1 - Considerations sulla modification della formulation per il metodo ls visto che la sequenza ha simboli che distano 2sqrt(2)
-
 % !!! Determinare la stima della varianza del rumore, sigma_w_hat_squared, compararla con sigma_w_squared in dB.
 The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the estimate $\hat{\sigma}_w^2 = something = -20.5327$ dB is lower (for the choice $N_1 = 0$, or $\hat{\sigma}_w^2 = -20.851$ for $N_1 = -2$). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
+
 % !!! Comparare la stima di Lambda_n_hat con il valore "vero" di Lambda_n_hat, fare le considerazioni su LS per cui il Lambda_n teorico raddoppia quando si usano i simboli ±1±j al posto di ±1.
+At last, some considerations on the fact that the sequence used in this problem is a binary mapping in a QPSK constellation with $\sigma_a^2 = 2$ of a PN sequence. In particular let $a_l = (1+j) p_l$ with $p_l = \pm 1$ a symbol of the PN sequence. Then the autocorrelation of the sequence, of periodicity L, is
+\begin{equation}
+	r_a(n) = \frac{1}{L}\sum_{l = 0}^{L-1} a_l a^*_{l-n} = \\
+	\frac{1}{L}\sum_{l = 0}^{L-1} (1+j)p_l (1-j)p^*_{l-n} = 
+	\frac{2}{L} \sum_{l= 0}^{L-1} p_l p^*_{l-n} = 2 r_p(n)
+\end{equation}
+with 
+\begin{equation}
+	r_p(n) = 
+  	\begin{cases}
+    1       & \quad \text{if } n =0 \\
+    -\frac{1}{L}  & \quad \text{if } n \neq 0 \\
+  \end{cases}
+\end{equation}
+Therefore let $\Phi(i, n) = [\mathbf{\Phi}]_{i, n}$. Then
+\begin{equation}
+	\Phi(i, n) = (L -1 + N - N + 1)r_a(i-n) = 2Lr_p(i-n)
+\end{equation}
+At the same time $\vartheta(n) = 2Lr_{dp}(n)$ with $\boldsymbol{\vartheta} = [\vartheta(0), \dots, \vartheta(N-1)]$.
 
 \clearpage
 
