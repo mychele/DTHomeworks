@@ -314,13 +314,14 @@ Using the maximum a posteriori probability (MAP) criterion, the decision upon a 
 \begin{equation}
 	\hat{\boldsymbol{a}} = \argmax_{\boldsymbol{\alpha}} P[\boldsymbol{a} = \boldsymbol{\alpha} | \boldsymbol{z} = \boldsymbol{\rho}]
 \end{equation}
+where $\hat{\boldsymbol{a}}$ is the sequence of the detected symbols, $\boldsymbol{a}$ is that of the sent symbols, $\boldsymbol{\alpha}$ are the values of the sent symbols, $z$ is the sequence of the received symbols and $\boldsymbol{\rho}$ are the values of the received symbols.
 If we introduce the \emph{likelihood function}
 \begin{equation}
 	\mathtt{L}_k(\beta) = P[a_{k+L_1} = \beta | \mathbf{z}_0^{K-1} = \boldsymbol{\rho}_0^{K-1}]
 \end{equation}
 the criterion becomes:
 \begin{equation}
-	\hat{a}_{k+L1} = \argmax_{\beta \in \mathcal{A}} \mathtt{L}_k(\beta)
+	\hat{a}_{k+L_1} = \argmax_{\beta \in \mathcal{A}} \mathtt{L}_k(\beta)
 \end{equation}
 In order to solve the problem of the likelihood function maximization, the FBA algorithm can be used. The algorithm performs the computation of four metrics, namely:
 \begin{itemize}
@@ -367,11 +368,13 @@ At each time $k$, the indices $m$ of the states which are reachable from the cur
 
 The final cycle is used to compute the $\tilde{f}_k(j)$ metric for each state at each symbol index $k$. Since the State metric is $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k(i)$ for $i = 1, \dots, N_S$, there is no need to memorize $\tilde{f}_k(i)$ for every time index. A single iteration is performed in order to cover all the symbol indices from $0$ to $K-1$. For each $k$, another iteration over the $N_S$ states fills the vector of the forward metrics for all the states of the current $k$ index using the equation
 \begin{equation}
-	\tilde{f}_k(j) = \max_{\ell \in {1, \dots, N_S}} [\tilde{f}_{k-1}(\ell) + c_k{j|\ell}] \quad j = 1, \dots, N_S
+	\tilde{f}_k(j) = \max_{\ell \in [1, \dots, N_S]} [\tilde{f}_{k-1}(\ell) + c_k(j|\ell)] \quad j = 1, \dots, N_S
 \end{equation}
-and the state metric is computed by adding this vector to the one memorized during the previous cycle, containing the backward metric. After getting the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ for $i = 1, \dots, N_S$, the likelihood function is obtained using Eq.~\ref{eq:likelihood}: in order to decide which state metrics should be compared, we make use of a precomputed matrix of size $N_S \times M$, which contains the symbols of each state and pick only those states whose initial symbol is $\beta$. Finally, the decision is performed inside the same cycle according to Eq.~\ref{eq:decision}.
+and the state metric is computed by adding this vector to the one memorized during the previous cycle, containing the backward metric. To get the channel transition metrics $c_k(j|\ell)$, the indices $\ell$ of the states that can reach the current one are necessary. These indices are computed according to the following expression: $\ell = \ceil{\frac{j}{M}} + r*M^{L1+L2-1}$, where $r = 0, \dots, M-1$. 
+After computing the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ for $i = 1, \dots, N_S$, the likelihood function is obtained using Eq.~\ref{eq:likelihood}: in order to decide which state metrics should be compared, we make use of a precomputed matrix of size $N_S \times M$ which contains the symbols associated to each state and pick only those states whose initial symbol is $\beta$. Finally, the decision is performed inside the same cycle according to Eq.~\ref{eq:decision}, and the result is memorized in a vector.
 
 Memory occupation for the Max-Log-MAP criterion is a concern. Since the Backward and channel transition matrices are memorized, their total memory occupation is of $M \times N_S \times K + N_S \times K$ memory cells. Computation times for the Max-Log-MAP have been more or less twice those of the Viterbi algorithm for sequences of the same length.
+% TODO Refine this stuff above here
 
 % Grafici del BER, sia per canale stimato che per canale vero, riportando il numero di bit per le simulazioni
 
