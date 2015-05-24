@@ -124,15 +124,13 @@ for $ 0 < m < 40$ and finds that
 	t_{0} = m_{opt}T_c = 10 T_c
 \end{equation}
 
-% Spiegare differenza tra m_opt (in T/4, che è t0), init_offs (in T/4) e delay (in T)
-% Is it really useful? Michele
-Remeber that $t_0 = 10$ in $T_c$ and the corresponding $D_{ch} = (t_0 \% 4)T = 2T$ represent the number of samples after which the receiver receives the first sample of the training sequence multiplied by $h_0$, which is the coefficient of the channel impulse response with the gratest amplitude. In other words, if the receiver and the transmitter use the same time index $k$ and if $x_k$ is the output at time $T$ of the receiver then
+Remember that $t_0 = 10$ in $T_c$ and the corresponding $D_{ch} = ({t_0}\lmod{4})T = 2T$ represents the number of samples after which the receiver receives the first sample of the training sequence multiplied by $h_0$, which is the coefficient of the channel impulse response with the greatest amplitude, plus some ISI in the case in which there are some precursors. In other words, if the receiver and the transmitter use the same time index $k$ and if $x_k$ is the output at time $T$ of the receiver then
 \begin{equation}
 x_{k} = h_0a_{k-D_{ch}} + i_k, \quad i_k = \sum_{\substack{i = -N_1 \\ i \neq 0}}^{N_2} h_i a_{k-D_{ch}-i}
 \end{equation}
 where $i_k$ is the inter-symbol interference. Therefore, if $t_0 = 10T_c$ and $D_{ch} = 2T$ there could be at most 2 precursors (i.e. the coefficients of $h_i$ for $i = -N_1, \dots, -1$), and they can be equal to 0 (they don't introduce ISI but just the delay $D_{ch}$) or different from 0 but with an amplitude lower than $h_0$. 
 
-The receiver can now the estimate of the channel impulse response at time $T$. The output of the channel $r_n$ is sampled at $n = t_0 + kT$ to get $x_k = r_{t_0 + kT}$. Then the LS estimate is computed using the symbols of the known ML sequence $a_k$ sent and a suitable section of the output. Note that the training sequence sent of lenght $L + N_{seq} = 25$ has $N_{seq} = 10$ which is enough to avoid the transient of the channel which is $N - 1$, with $N = N_1 + N_2 + 1$ which is the real length of the impulse response.
+The receiver can now perform the estimate of the channel impulse response at time $T$. The output of the channel $r_n$ is sampled at $n = t_0 + kT$ to get $x_k = r_{t_0 + kT}$. The LS estimate is computed using the symbols of the known sent ML sequence $a_k$ and a suitable section of the output. Note that the training sequence sent of length $L + N_{seq} = 25$ has $N_{seq} = 10$ which is enough to avoid the transient of the channel which is $N - 1$, with $N = N_1 + N_2 + 1$ the real length of the impulse response.
 Note also that the LS method can estimate a causal impulse response, $\tilde{h}_j, j = 0, \dots, N$, while the channel impulse response could have some precursors which are different from 0, and therefore an anticausal component. In order to correctly estimate $h_i, i = -N_1, \dots, N_2$, given a supposed length $\hat{N} = \hat{N}_1 + \hat{N}_2 + 1$, LS considers $a_k, k = 0, \dots, L+\hat{N}-1$ and the output $x_k, k = D_{ch} - N_1, \dots, D_{ch} - N_1 + L + \hat{N} - 1$ and it performs the estimation in the standard way. This is the same as considering a causal impulse response, with $\hat{N}$ coefficients, but since we suppose that $N_1$ assumes a given value in $0, D_{ch}$, then it is possible to shift the estimate left of $N_1$ samples and obtain the estimate for $\hat{h}_i, i = -N_1, N_2$. 
 The actual estimation is performed as in~\cite[p.~246]{bc}, i.e. using a $L \times \hat{N}$ observation matrix
 
@@ -178,7 +176,7 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
 		$|h_i|$ 		& 0.7140  &  0.2463  &  0.1553  &  0.5778  &  0.4001 \\
 		$\angle(h_i)$ 	& -2.5815  &  1.3137  & -2.5666  & -1.5096  & -1.6715 \\
 	\end{tabular}
-	\caption{Amplitue and phase of $h_i, i \in [-N_1, N_2]$, for the choice $N_1 = 0$}
+	\caption{Amplitude and phase of $h_i, i \in [-N_1, N_2]$, for the choice $N_1 = 0$}
 	\label{table:h0}
 \end{table}
 
@@ -202,10 +200,10 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
 \end{figure}
 
 % !!! Determinare la stima della varianza del rumore, sigma_w_hat_squared, compararla con sigma_w_squared in dB.
-The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the estimate $\hat{\sigma}_w^2 = something = -20.5327$ dB is lower (for the choice $N_1 = 0$, or $\hat{\sigma}_w^2 = -20.851$ for $N_1 = -2$). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
+The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the noise estimate is lower: $\hat{\sigma}_w^2 = -20.5327$ dB for the choice $N_1 = 0$, and $\hat{\sigma}_w^2 = -20.851$ for the choice $N_1 = -2$ (see Eq.~\ref{eq:functional}). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
 
 % !!! Comparare la stima di Lambda_n_hat con il valore "vero" di Lambda_n_hat, fare le considerazioni su LS per cui il Lambda_n teorico raddoppia quando si usano i simboli ±1±j al posto di ±1.
-At last, some considerations on the fact that the sequence used in this problem is a binary mapping in a QPSK constellation with $\sigma_a^2 = 2$ of a PN sequence. In particular let $a_l = (1+j) p_l$ with $p_l = \pm 1$ a symbol of the PN sequence. Then the autocorrelation of the sequence, of periodicity L, is
+At last, it is necessary to make some considerations on the fact that the sequence used in this problem is a binary mapping in a QPSK constellation with $\sigma_a^2 = 2$ of a PN sequence. In particular let $a_l = (1+j) p_l$ with $p_l = \pm 1$ a symbol of the PN sequence. Then the autocorrelation of the sequence, of periodicity L, is
 \begin{equation}
 	r_a(n) = \frac{1}{L}\sum_{l = 0}^{L-1} a_l a^*_{l-n} = \\
 	\frac{1}{L}\sum_{l = 0}^{L-1} (1+j)p_l (1-j)p^*_{l-n} = 
@@ -267,7 +265,7 @@ The first column of Table~\ref{table:lambda} contains the estimated value comput
 	\Lambda_n = \frac{\hat{\sigma}_w^2}{\M_a E[||\mathbf{\Delta h}||^2]}
 	\label{eq:lambdareal}
 \end{equation}
-Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the real $h_i$ known and that the value of Equation~\eqref{eq:lambdareal} is affected by the bad estimate of $\sigma_w^2$ given by the choice of a value of $L$ which doesn't provide a long enough training sequence.
+Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the real $h_i$ is known and that the value of Equation~\eqref{eq:lambdareal} is affected by the bad estimate of $\sigma_w^2$ given by the choice of a value of $L$ which doesn't provide a long enough training sequence.
 
 \begin{table}[h!]
 	\centering
@@ -386,7 +384,7 @@ In order to solve the problem of the likelihood function maximization, the FBA a
 	 	\mathtt{L}_k(j) = \sum_{\substack{i = 1 \\ [\boldsymbol{\sigma}_i]_1 = \beta}}^{N_S} V_k(i) \quad \beta \in \mathcal{A}
 	 \end{equation} 
 \end{itemize}
-where k is the variable associated with the symbol index and j is the state index, as defined in the Viterbi algorithm (Eq.~\ref{eq:state}).
+where k is the variable associated with the symbol index and j is the state index, as defined in the Viterbi algorithm~\eqref{eq:state}.
 
 Applying the logarithm to the above metrics yields the \emph{log-likelihood} function, whose expression is 
 \begin{equation}
@@ -411,20 +409,20 @@ The first cycle computes the channel transition metrics, storing them in a $M \t
 \begin{equation}
 	c_k(j|i) = - |\rho_k - u_k|^2
 \end{equation}
-Since the desired signal $u_k$ is just a function of the current and next state, its values are precomputed like in the Viterbi implementation (Eq.~\ref{eq:ukdefinition}) and stored in a lookup table. $\rho_k$ represents the k-th sample of the received signal. For each time $k$, the $j$ index refers to the destination state, while the $i$ index refers to the starting state. Using matrix operations in MATLAB, we can fill the $c$ matrix by only cycling over time. For $k = K$ all values are set to 0.
+Since the desired signal $u_k$ is just a function of the current and next state, its values are precomputed like in the Viterbi implementation~\eqref{eq:ukdefinition} and stored in a lookup table. $\rho_k$ represents the k-th sample of the received signal. For each time $k$, the $j$ index refers to the destination state, while the $i$ index refers to the starting state. Using matrix operations in MATLAB, we can fill the $c$ matrix by only cycling over time. For $k = K$ all values are set to 0.
 
 The second cycle computes the Backward metric. A matrix of size $N_S \times K+1$ is created and initialized to zero. This also initializes the final, K-th state to the 0 value, since the final symbol that will be received is unknown (performance of the algorithm may be enhanced by transmitting a previously decided symbol, also known to the receiver). The algorithm cycles the symbol indices from $K-1$ to $0$, iterating over the states and updating their backward metric according to the following expression:
 \begin{equation}
 	\tilde{b}_k(i) = \max_{m \in [1, \dots, N_S]}[\tilde{b}_{k+1}(m) + c_{k+1}(m|i)] \quad i = 1, \dots, N_S
 \end{equation}
-At each time $k$, the indices $m$ of the states which are reachable from the current one are needed. These indices are computed using the expression $m = (i-1 \mod M^{L1+L2-1}) * M + j$, where $i$ is the current state and $j = 0, \dots, M-1$ is the index of the transition. On the other hand, the $c_{k+1}(m|i)$ coeffients are readily available as the i-th column of the channel transition metrics at time $k+1$.
+At each time $k$, the indices $m$ of the states which are reachable from the current one are needed. These indices are computed using the expression $m = ((i-1) \lmod{M^{L1+L2-1}}) * M + j$, where $i$ is the current state and $j = 0, \dots, M-1$ is the index of the transition. On the other hand, the $c_{k+1}(m|i)$ coefficients are readily available as the i-th column of the channel transition metrics at time $k+1$.
 
 The final cycle is used to compute the $\tilde{f}_k(j)$ metric for each state at each symbol index $k$. Since the State metric is $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k(i)$ for $i = 1, \dots, N_S$, there is no need to memorize $\tilde{f}_k(i)$ for every time index. A single iteration is performed in order to cover all the symbol indices from $0$ to $K-1$. For each $k$, another iteration over the $N_S$ states fills the vector of the forward metrics for all the states of the current $k$ index using the equation
 \begin{equation}
 	\tilde{f}_k(j) = \max_{\ell \in [1, \dots, N_S]} [\tilde{f}_{k-1}(\ell) + c_k(j|\ell)] \quad j = 1, \dots, N_S
 \end{equation}
 and the state metric is computed by adding this vector to the one memorized during the previous cycle, containing the backward metric. To get the channel transition metrics $c_k(j|\ell)$, the indices $\ell$ of the states that can reach the current one are necessary. These indices are computed according to the following expression: $\ell = \ceil{\frac{j}{M}} + r*M^{L1+L2-1}$, where $r = 0, \dots, M-1$. 
-After computing the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ for $i = 1, \dots, N_S$, the likelihood function is obtained using Eq.~\ref{eq:likelihood}: in order to decide which state metrics should be compared, we make use of a precomputed matrix of size $N_S \times M$ which contains the symbols associated to each state and pick only those states whose initial symbol is $\beta$. Finally, the decision is performed inside the same cycle according to Eq.~\ref{eq:decision}, and the result is memorized in a vector.
+After computing the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ for $i = 1, \dots, N_S$, the likelihood function is obtained using~\eqref{eq:likelihood}: in order to decide which state metrics should be compared, we make use of a precomputed matrix of size $N_S \times M$ which contains the symbols associated to each state and pick only those states whose initial symbol is $\beta$. Finally, the decision is performed inside the same cycle according to~\eqref{eq:decision}, and the result is memorized in a vector.
 
 Memory occupation for the Max-Log-MAP criterion is a concern. Since the Backward and channel transition matrices are memorized, their total memory occupation is of $M \times N_S \times K + N_S \times K$ memory cells. Computation times for the Max-Log-MAP have been more or less twice those of the Viterbi algorithm for sequences of the same length.
 % TODO Refine this stuff above here
