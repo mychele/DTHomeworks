@@ -51,7 +51,7 @@ snr_vec = 5:13;
 
 load('pbit_LE_same_channel.mat');
 load('pbit_DFE_same_channel.mat');
-load('pbit_viterbi_same_ch513.mat');
+load('pbit_viterbi_same_channel.mat');
 load('pbit_fba_same_channel.mat');
 
 figure
