@@ -195,12 +195,12 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
 \begin{figure}[h!]
  \centering
  \includegraphics[width = 0.9\textwidth]{hi_p1}
- \caption{$|h_i|, i \in [-N_1, N_2]$ for $N_1 = 0$ and $N_1 = -2$}
+ \caption{$|h_i|, i \in [-N_1, N_2]$ for $N_1 = 0$ and $N_1 = 2$}
  \label{fig:hi_p1}
 \end{figure}
 
 % !!! Determinare la stima della varianza del rumore, sigma_w_hat_squared, compararla con sigma_w_squared in dB.
-The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the noise estimate is lower: $\hat{\sigma}_w^2 = -20.5327$ dB for the choice $N_1 = 0$, and $\hat{\sigma}_w^2 = -20.851$ for the choice $N_1 = -2$ (see Eq.~\ref{eq:functional}). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
+The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the noise estimate is lower: $\hat{\sigma}_w^2 = -20.5327$ dB for the choice $N_1 = 0$, and $\hat{\sigma}_w^2 = -20.851$ for the choice $N_1 = 2$ (see Eq.~\ref{eq:functional}). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
 
 % !!! Comparare la stima di Lambda_n_hat con il valore "vero" di Lambda_n_hat, fare le considerazioni su LS per cui il Lambda_n teorico raddoppia quando si usano i simboli ±1±j al posto di ±1.
 At last, it is necessary to make some considerations on the fact that the sequence used in this problem is a binary mapping in a QPSK constellation with $\sigma_a^2 = 2$ of a PN sequence. In particular let $a_l = (1+j) p_l$ with $p_l = \pm 1$ a symbol of the PN sequence. Then the autocorrelation of the sequence, of periodicity L, is
@@ -287,6 +287,22 @@ Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the real $h_i$ is
 \section*{Problem 2}
 
 % Breve descrizione del sistema in T
+In this second problem the system works in T, as in Figure~\ref{fig:channelt}, and as SNR we consider $\Gamma = \frac{\sigma_a^2 E_h}{\sigma_w^2}$. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.7\textwidth]{channel_t}
+	\caption{System description for the second problem}
+	\label{fig:channelt}
+\end{figure}
+
+The output is computed using a sampled version of the provided impulse response $q(nT_c)$ that matches the response estimated in the previous problem, i.e. $h_i = q(iT + m_{opt}), \quad i \in [-N1, N2]$. Note that we will consider in the following analysis always the same parameters for the channel, with $N_1 = 0, N_2 = 4$ accordingly to the considerations of Problem 1. However the estimate must be repeated for each different SNR, since the channel noise varies. Moreover, in order to design the system, we consider only the estimated impulse response and not the real one, and since the estimate done with a ML sequence of $L = 15$ is lousy, then also the design will not drive the performance of the receivers as close as possible to the theoretical bound. 
+
+This is computed as in \cite{bc} for the matched filter case (i.e. no ISI) and a QPSK constellation ($M=4$), resulting in 
+\begin{equation}
+	BER_{MF} = \frac{1}{\log_2 (M)} 4 (1- \frac{1}{M}) Q(\sqrt{\frac{3}{M-1} \Gamma}) = Q(\sqrt{\Gamma})
+	\label{eq:BERmf}
+\end{equation}
 
 % Se non fatto nel problema 1 riportare le considerazioni su N_1
 
