@@ -77,8 +77,10 @@ d_no_trans = x_for_ls(N : N+L-1);
 est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 
 h_true = q(1+init_offs + T*(delay-N1) : T : end);
-lambdan_0_estim = est_sigmaw / (sigma_a * sum(abs(hi_0 - h_true).^2));
-lambdan_0_true = (L+1) * (L+1-N) / (N * (L+2-N));
+Ma = sigma_a + (abs(mean(trainingsymbols)))^2;
+
+lambdan_0_estim = 10*log10(est_sigmaw / (Ma *  sum(abs(hi_0 - h_true).^2)));
+lambdan_0_true = 10*log10((L+1) * (L+1-N) / (Ma *  N * (L+2-N)));
 
 
 % --- N1 = 2
@@ -93,8 +95,9 @@ d_no_trans = x_for_ls(N : N+L-1);
 est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
 
 h_true = q(1+init_offs + T*(delay-N1) : T : end);
-lambdan_2_estim = est_sigmaw / (sigma_a * sum(abs(hi_2 - h_true).^2));
-lambdan_2_true = (L+1) * (L+1-N) / (N * (L+2-N));
+Ma = sigma_a + (abs(mean(trainingsymbols)))^2;
+lambdan_2_estim = 10*log10(est_sigmaw / (Ma * sum(abs(hi_2 - h_true).^2)));
+lambdan_2_true = 10*log10(2*(L+1) * (L+1-N) / (Ma * N * (L+2-N)));
 
 
 % --- Output Lambda_n
