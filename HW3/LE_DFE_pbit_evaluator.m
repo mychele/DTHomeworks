@@ -63,7 +63,7 @@ N2 = 4;
 
 %% DFE pbit evaluation
 sim_each = 1;
-L_data = 2.^[12 13 13 13 15 16 18 20 20 22 24] - 1;
+L_data = 2.^[13 15 15 15 18 18 20 22 22 24 26] - 1;
 if length(L_data) ~= length(snr_vec), disp('Check L_data'), return, end
 M1_vec = [3, 10, 25];
 pbitDFE = zeros(length(snr_vec), sim_each, length(M1_vec));
@@ -101,8 +101,8 @@ for snr_i = 1:length(snr_vec)
             % Compute
             [~, pbit, num_err, ~] = DFE_filter(packet, x(1+assumed_dly : assumed_dly+length(packet)), ...
                 hi, N1, N2, est_sigmaw, assumed_dly, D_dfe, M1_dfe, M2_dfe, 0);
-            pbitDFE(snr_i, sim) = pbit;
-            num_bit_errorDFE(snr_i, sim) = num_err;
+            pbitDFE(snr_i, sim, m_ind) = pbit;
+            num_bit_errorDFE(snr_i, sim, m_ind) = num_err;
             fprintf('done!\n');
         end
     end
