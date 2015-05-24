@@ -6,8 +6,8 @@ rng default
 
 Tc = 1;
 T = 4 * Tc;
-L_data = 2.^[22 23] - 1;
-snr_vec = 13:14;
+L_data = 2.^[23] - 1;
+snr_vec = 14;
 if length(L_data) ~= length(snr_vec), disp('Check L_data'), return, end
 
 
