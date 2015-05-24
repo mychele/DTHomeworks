@@ -159,7 +159,7 @@ In particular, in order to estimate as first the length $\hat{N} = N_1 + N_2 + 1
 	\label{eq:functional}
 \end{equation}
 for $N_2 = 0, 1, \dots, N_{max} - N_1 - 1$. This procedure is repeated for $N_1 = 1$ and $2$. The functionals $\mathcal{E}$ for different $N_1$ are then plotted together, against $N_2$, in Fig.~\ref{fig:functional}.
-\begin{figure}
+\begin{figure}[h!]
 	\centering
 	\includegraphics[width = 0.8\textwidth]{error_func_p1}
 	\caption{$\mathcal{E}$ vs $N_2$ for different $N_1$}
@@ -171,7 +171,7 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
 
 
 % !!! Riportare valori di {h_i_hat} in una tabella, ampiezza e fase
-\begin{table}
+\begin{table}[h!]
 	\centering
 	\begin{tabular}{c|c|c|c|c|c}
 		$i \in [-N_1, N_2]$ & 0 & 1 & 2 & 3 & 4 \\ \hline
@@ -182,7 +182,7 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
 	\label{table:h0}
 \end{table}
 
-\begin{table}
+\begin{table}[h!]
 	\centering
 	\begin{tabular}{c|c|c|c|c|c|c|c}
 		$i \in [-N_1, N_2]$ & -2 & -1 & 0 & 1 & 2 & 3 & 4 \\ \hline
@@ -194,7 +194,7 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
 \end{table}
 
 % !!! Plottare {h_i_hat} per i = -N_1, ..., N_2
-\begin{figure}
+\begin{figure}[h!]
  \centering
  \includegraphics[width = 0.9\textwidth]{hi_p1}
  \caption{$|h_i|, i \in [-N_1, N_2]$ for $N_1 = 0$ and $N_1 = -2$}
@@ -209,7 +209,7 @@ At last, some considerations on the fact that the sequence used in this problem 
 \begin{equation}
 	r_a(n) = \frac{1}{L}\sum_{l = 0}^{L-1} a_l a^*_{l-n} = \\
 	\frac{1}{L}\sum_{l = 0}^{L-1} (1+j)p_l (1-j)p^*_{l-n} = 
-	\frac{2}{L} \sum_{l= 0}^{L-1} p_l p^*_{l-n} = 2 r_p(n)
+	\frac{2}{L} \sum_{l= 0}^{L-1} p_l p^*_{l-n} = 2 r_p(n) = \sigma_a^2 r_p(n)
 \end{equation}
 with 
 \begin{equation}
@@ -221,11 +221,64 @@ with
 \end{equation}
 Therefore let $\Phi(i, n) = [\mathbf{\Phi}]_{i, n}$. Then
 \begin{equation}
-	\Phi(i, n) = (L -1 + N - N + 1)r_a(i-n) = 2Lr_p(i-n)
+	\Phi(i, n) = (L -1 + N - N + 1)r_a(i-n) = \sigma_a^2 Lr_p(i-n)
 \end{equation}
-At the same time $\vartheta(n) = 2Lr_{dp}(n)$ with $\boldsymbol{\vartheta} = [\vartheta(0), \dots, \vartheta(N-1)]$.
+At the same time $\vartheta(n) = \sigma_a^2 Lr_{dp}(n)$ with $\boldsymbol{\vartheta} = [\vartheta(0), \dots, \vartheta(N-1)]$.
 Therefore the LS can be solved in the usual way, as previously mentioned, with the equation $\hat{\mathbf{h}}= \mathbf{\Phi}^{-1} \boldsymbol{\vartheta}$ and provides the same soultion that a PN sequence would give. 
-As for the signal-to-estimation error ratio, it is possible to procede as in \cite{bc}. Let $\boldsymbol{\vartheta} = \sum_{N-1}^{N-1+L-1} x(k) \mathbf{a}^*(k)$ and $\boldsymbol{\xi} = \sum_{N-1}^{N-1+L-1} w(k) \mathbf{x}*(k)$ we obtain $\boldsymbol{\vartheta} = \boldsymbol{\Phi}\mathbf{h} + \boldsymbol{\xi}$ and finally $\boldsymbol{\Delta h} = \boldsymbol{\Phi}^{-1} \boldsymbol{\xi}$. 
+
+As for the signal-to-estimation error ratio, it is possible to procede as in \cite{bc}. Let $\boldsymbol{\vartheta} = \sum_{N-1}^{N-1+L-1} x(k) \mathbf{a}^*(k)$ and $\boldsymbol{\xi} = \sum_{N-1}^{N-1+L-1} w(k) \mathbf{x}^*(k)$ we obtain $\boldsymbol{\vartheta} = \boldsymbol{\Phi}\mathbf{h} + \boldsymbol{\xi}$ and finally $\boldsymbol{\Delta h} = \boldsymbol{\Phi}^{-1} \boldsymbol{\xi}$. 
+Let's now consider the energy of this vector. Since $w$ is zero mean, with variance $\sigma_w^2$, then
+\begin{equation}
+	\mathbf{R}_{\boldsymbol{\xi}} = E[\boldsymbol{\xi}^*\boldsymbol{\xi}^T] = \sigma_w^2 \mathbf{\Phi}^*
+\end{equation}
+and
+\begin{equation}
+	\mathbf{R}_{\boldsymbol{\Delta h}} = \sigma_w^2 (\mathbf{\Phi}^*)^{-1}
+\end{equation}
+Then we need $E[||\mathbf{\Delta h}||^2]$ which is
+\begin{equation}
+	E[||\mathbf{\Delta h}||^2] = \sigma_w^2 \mbox{tr}[(\mathbf{\Phi}^*)^{-1}]
+\end{equation}
+Finally, since the definition of signal-to-estimation error ratio is 
+\begin{equation}
+	\Lambda_n = \frac{\sigma_w^2}{\M_a E[||\mathbf{\Delta h}||^2]}
+\end{equation}
+with $M_a = \sigma_a^2 + (E[a])^2 \approx \sigma_a^2 = 2$ for $L >> 1$. Then in this specific case
+\begin{equation}
+	\Lambda_n = \frac{\mbox{tr}[(\mathbf{\Phi})^{-1}]}{\sigma_a^2}
+\end{equation}
+Since $\mathbf{\Phi}$ has the same form of the $\mathbf{\Phi}$ matrix for a PN sequence, with the exception of a multiplicative factor $\sigma_a^2 = 2$, it is possible to use the same derivation of \cite{bc} in order to compute $\Lambda_n$. Let $\mathbf{1}_{N\times N}$ a matrix with all ones, then
+\begin{equation}
+	\mathbf{\Phi} = \sigma_a^2 ((L+1)\mathbf{I} - \mathbf{1}_{N\times N})
+\end{equation}
+and
+\begin{equation}
+	\mathbf{\Phi}^{-1} = \frac{\sigma_a^2}{L+1} \bigg( \mathbf{I} + \frac{\mathbf{1}_{N\times N}}{L+1-N} \bigg)
+\end{equation}
+Finally, following \cite{bc}, we obtain
+\begin{equation}
+	\Lambda_n = \frac{\sigma_a^2}{\sigma_a^2}\frac{(L+1)(L+1-N)}{N(L+2-N)}
+	\label{eq:lambdateo}
+\end{equation}
+getting the same result as for a PN sequence.
+Finally, some numerical results are reported in Table~\ref{table:lambda}, both for the choice $N_1 = 2$ given by the minimum of the functional and for $N_1 = 0$ given by the practical considerations mentioned above. 
+The first column of Table~\ref{table:lambda} contains the estimated value computed as
+\begin{equation}
+	\Lambda_n = \frac{\hat{\sigma}_w^2}{\M_a E[||\mathbf{\Delta h}||^2]}
+	\label{eq:lambdareal}
+\end{equation}
+Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the real $h_i$ known and that the value of Equation~\eqref{eq:lambdareal} is affected by the bad estimate of $\sigma_w^2$ given by the choice of a value of $L$ which doesn't provide a long enough training sequence.
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{c|c|c}
+				&	As in Eq.~\eqref{eq:lambdareal} [dB]	& As in Eq.~\eqref{eq:lambdateo} [dB]  \\ \hline
+	$N_1 = 2$	&	1.82							& 3.13 \\
+	$N_1 = 0$	&	1.87							& 1.66 \\
+	\end{tabular}
+	\caption{$\Lambda_n$ for $N_1 = 0$ and $N_1 = 2$}
+	\label{table:lambda}
+\end{table}
 
 \clearpage
 
@@ -314,13 +367,14 @@ Using the maximum a posteriori probability (MAP) criterion, the decision upon a 
 \begin{equation}
 	\hat{\boldsymbol{a}} = \argmax_{\boldsymbol{\alpha}} P[\boldsymbol{a} = \boldsymbol{\alpha} | \boldsymbol{z} = \boldsymbol{\rho}]
 \end{equation}
+where $\hat{\boldsymbol{a}}$ is the sequence of the detected symbols, $\boldsymbol{a}$ is that of the sent symbols, $\boldsymbol{\alpha}$ are the values of the sent symbols, $z$ is the sequence of the received symbols and $\boldsymbol{\rho}$ are the values of the received symbols.
 If we introduce the \emph{likelihood function}
 \begin{equation}
 	\mathtt{L}_k(\beta) = P[a_{k+L_1} = \beta | \mathbf{z}_0^{K-1} = \boldsymbol{\rho}_0^{K-1}]
 \end{equation}
 the criterion becomes:
 \begin{equation}
-	\hat{a}_{k+L1} = \argmax_{\beta \in \mathcal{A}} \mathtt{L}_k(\beta)
+	\hat{a}_{k+L_1} = \argmax_{\beta \in \mathcal{A}} \mathtt{L}_k(\beta)
 \end{equation}
 In order to solve the problem of the likelihood function maximization, the FBA algorithm can be used. The algorithm performs the computation of four metrics, namely:
 \begin{itemize}
@@ -367,11 +421,13 @@ At each time $k$, the indices $m$ of the states which are reachable from the cur
 
 The final cycle is used to compute the $\tilde{f}_k(j)$ metric for each state at each symbol index $k$. Since the State metric is $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k(i)$ for $i = 1, \dots, N_S$, there is no need to memorize $\tilde{f}_k(i)$ for every time index. A single iteration is performed in order to cover all the symbol indices from $0$ to $K-1$. For each $k$, another iteration over the $N_S$ states fills the vector of the forward metrics for all the states of the current $k$ index using the equation
 \begin{equation}
-	\tilde{f}_k(j) = \max_{\ell \in {1, \dots, N_S}} [\tilde{f}_{k-1}(\ell) + c_k{j|\ell}] \quad j = 1, \dots, N_S
+	\tilde{f}_k(j) = \max_{\ell \in [1, \dots, N_S]} [\tilde{f}_{k-1}(\ell) + c_k(j|\ell)] \quad j = 1, \dots, N_S
 \end{equation}
-and the state metric is computed by adding this vector to the one memorized during the previous cycle, containing the backward metric. After getting the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ for $i = 1, \dots, N_S$, the likelihood function is obtained using Eq.~\ref{eq:likelihood}: in order to decide which state metrics should be compared, we make use of a precomputed matrix of size $N_S \times M$, which contains the symbols of each state and pick only those states whose initial symbol is $\beta$. Finally, the decision is performed inside the same cycle according to Eq.~\ref{eq:decision}.
+and the state metric is computed by adding this vector to the one memorized during the previous cycle, containing the backward metric. To get the channel transition metrics $c_k(j|\ell)$, the indices $\ell$ of the states that can reach the current one are necessary. These indices are computed according to the following expression: $\ell = \ceil{\frac{j}{M}} + r*M^{L1+L2-1}$, where $r = 0, \dots, M-1$. 
+After computing the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ for $i = 1, \dots, N_S$, the likelihood function is obtained using Eq.~\ref{eq:likelihood}: in order to decide which state metrics should be compared, we make use of a precomputed matrix of size $N_S \times M$ which contains the symbols associated to each state and pick only those states whose initial symbol is $\beta$. Finally, the decision is performed inside the same cycle according to Eq.~\ref{eq:decision}, and the result is memorized in a vector.
 
 Memory occupation for the Max-Log-MAP criterion is a concern. Since the Backward and channel transition matrices are memorized, their total memory occupation is of $M \times N_S \times K + N_S \times K$ memory cells. Computation times for the Max-Log-MAP have been more or less twice those of the Viterbi algorithm for sequences of the same length.
+% TODO Refine this stuff above here
 
 % Grafici del BER, sia per canale stimato che per canale vero, riportando il numero di bit per le simulazioni
 
