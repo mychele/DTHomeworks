@@ -291,22 +291,45 @@ In this second problem the system works in T, as in Figure~\ref{fig:channelt}, a
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.7\textwidth]{channel_t}
+	\includegraphics[width=0.6\textwidth]{channel_t}
 	\caption{System description for the second problem}
 	\label{fig:channelt}
 \end{figure}
 
-The output is computed using a sampled version of the provided impulse response $q(nT_c)$ that matches the response estimated in the previous problem, i.e. $h_i = q(iT + m_{opt}), \quad i \in [-N1, N2]$. Note that we will consider in the following analysis always the same parameters for the channel, with $N_1 = 0, N_2 = 4$ accordingly to the considerations of Problem 1. However the estimate must be repeated for each different SNR, since the channel noise varies. Moreover, in order to design the system, we consider only the estimated impulse response and not the real one, and since the estimate done with a ML sequence of $L = 15$ is lousy, then also the design will not drive the performance of the receivers as close as possible to the theoretical bound. 
+The output is computed using a sampled version of the provided impulse response $q(nT_c)$ that matches the response estimated in the previous problem, i.e. $h_i = q(iT + m_{opt}), \quad i \in [-N1, N2]$. 
+
+The sequence $a_k$ which is transmitted is composed of a ML binary sequence of 25 symbols, as in Problem 1, which is necessary to perform the channel estimate, and of a QPSK stream of symbols that maps a ML sequence composed of 0s and 1s in order to mimic random transmission of bits. In case more than $2^{20}-1$ bits are needed we partially or completely repeat the longest ML sequence of $2^{20}-1$ bits.
+
+Note that in the following analysis we will consider always the same parameters for the channel, with $N_1 = 0, N_2 = 4$ accordingly to the considerations of Problem 1. However the estimate must be repeated for each different SNR, since the channel noise varies. Moreover, in order to design the system, we consider only the estimated impulse response and not the real one, and since the estimate done with a ML sequence of $L = 15$ is lousy, then also the design will not drive the performance of the receivers as close as possible to the theoretical bound. 
 
 This is computed as in \cite{bc} for the matched filter case (i.e. no ISI) and a QPSK constellation ($M=4$), resulting in 
 \begin{equation}
-	BER_{MF} = \frac{1}{\log_2 (M)} 4 (1- \frac{1}{M}) Q(\sqrt{\frac{3}{M-1} \Gamma}) = Q(\sqrt{\Gamma})
+	BER_{MF} = \frac{1}{\log_2 (M)} 4 \bigg(1- \frac{1}{M} \bigg) Q\bigg(\sqrt{\frac{3}{M-1} \Gamma}\bigg) = Q(\sqrt{\Gamma})
 	\label{eq:BERmf}
 \end{equation}
+where $\Gamma$ is the SNR at receiver input, which in the case of a matched filter is equal to $\Gamma = 0.5 M_a \gamma_{MF}= \gamma_{MF}$, with $\gamma_{MF}$ the SNR at detection point for a MF, $M_a = \sigma_a^2$ since the transmitted sequence has 0 mean.
 
-% Se non fatto nel problema 1 riportare le considerazioni su N_1
+We also computed this bound with a simulation, where the receiver performed a decision over received data with no ISI, $x_k = a_k + w_k$, with $a_k$ a sent symbol, $w_k$ AWGN noise of power $\sigma_w^2 = \sigma_a^2 \ \Gamma$ in order to match the SNR $\Gamma$ of the real channel (which has the $E_h$ factor since the data stream is convolved with the $h_i$ filter). Decision is taken with a threshold detector.
 
 % Considerazioni sull'implementazione di LE e DFE, riportare i grafici di Jmin (qualche grafico), considerazioni su M1, M2, D, riportare i grafici di \hat{h}, c, psi, b per \Gamma = 10 dB
+\subsection*{Linear equalizer and Decision Feedback Equalizer}
+The simpliest receivers implemented are a linear equalizer (LE) and a decision feedback equalizer (DFE) which try to remove the ISI component from the received samples $x_k$. The decision is then taken with a threshold detector. 
+
+They both use the information known about the channel in order to perform equalization. In particular the LE tries to equalize both the precursors and the postcursors out of the received signal $x_k$, while DFE uses the detected symbols to perform cancellation of the postcursors from a signal already filtered with a feed-forward filter that removes the precursors. Figures~\ref{fig:LE} and~\ref{fig:DFE} contain the block scheme for both of them. 
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.7\textwidth]{LE}
+	\caption{LE filter}
+	\label{fig:LE}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\textwidth]{DFE}
+	\caption{DFE filter}
+	\label{fig:DFE}
+\end{figure}
+
 
 % Considerazioni su Viterbi, Kd, grafico della distribuzione
 \subsection*{Viterbi algorithm}
