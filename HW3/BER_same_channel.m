@@ -3,7 +3,7 @@
 clear
 close all
 clc
-rng default
+% rng default
 
 snr_vec = 5 : 15; % dB
 L_data = 2.^[15 15 15 15 18 18 20 20 22 23 23] - 1;
@@ -77,7 +77,7 @@ for snr_i = 1:length(snr_vec)
     n_biterr_LE_same_ch(snr_i, 1) = num_err;
     fprintf('done!\n');
     
-    if (snr_ch <= 13) % the BER for snr = 13 dB is already below 10^-5
+    if (snr_ch <= 14) % the BER for snr = 14 dB is already below 10^-5
         % VA
         % Use the whole sequence
         fprintf('Viterbi, snr = %d ', snr_ch);
