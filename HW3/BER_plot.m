@@ -8,23 +8,6 @@ load('pbit_viterbi.mat');
 load('BER_awgn_sim.mat');
 load('pbit_fba_513.mat');
 load('pbit_fba_1415.mat');
-pbit_fba = [pbit_fba_513(1:5, 1);pbit_fba_513(6:end, 2); pbit_fba_1415];
-
-%% Statistics for estimated channel, with only one realization
-snr_vec = 5:15;
-
-figure
-semilogy(snr_vec, pbitLE(:, 3), '-o'), hold on,
-semilogy(snr_vec, pbitDFE(:, 2), '-s')
-semilogy(snr_vec_viterbi, pbit_viterbi(:, 3), '-x')
-semilogy(snr_vec, pbit_fba, '-d')
-semilogy(snr_vec, BER_awgn(snr_vec), '-^')
-semilogy(snr_vec, pbit_AWGN_sim, '-h')
-xlabel('snr [dB]'), ylabel('BER')
-legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'Viterbi', 'FBA', 'AWGN', 'AWGN with simulation')
-ylim([10^-5, 10^-1]), grid on
-title('BER for one realization, estimated channel');
-
 
 %% Statistics for real channel
 

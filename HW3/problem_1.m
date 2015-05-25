@@ -43,10 +43,8 @@ rT = r(init_offs+1 : T : end);
 for N1 = 0:maxN1
     for N2 = 0:maxN-N1-1
         N = N1+N2+1;
-        a_for_ls = trainingsymbols(1 : L+N); %TODO think about this
+        a_for_ls = trainingsymbols(1 : L+N); 
         x_for_ls = rT(1+delay-N1 : (delay-N1)+(L+N));
-        %d_for_ls = r(end - T*(L+N-1) + 1 - (length(q)-4) + init_offs + T*(delay-N1): T :end - (length(q)-4) + T*(delay-N1) + init_offs);
-        % Now d_for_ls is delayed by N1 samples wrt x_for_ls.
         [~, r_hat] = h_estimation_onebranch(a_for_ls, x_for_ls, L, N);
         % We discarded the first t0-N1 samples, so the "perceived delay" is N1 < t0.
         % We estimated the channel with N coefficients disregarding the first t0-N1,
@@ -71,7 +69,6 @@ N1 = 0; N2 = 4;
 N = N1+N2+1;
 a_for_ls = trainingsymbols(1 : L+N-1);
 x_for_ls = rT(1+delay-N1 : (delay-N1)+(L+N-1));
-% Now d_for_ls is delayed by N1 samples wrt x_for_ls.
 [hi_0, r_hat] = h_estimation_onebranch(a_for_ls, x_for_ls, L, N);
 d_no_trans = x_for_ls(N : N+L-1);
 est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
@@ -89,7 +86,6 @@ N1 = 2; N2 = 4;
 N = N1+N2+1;
 a_for_ls = trainingsymbols(1 : L+N-1);
 x_for_ls = rT(1+delay-N1 : (delay-N1)+(L+N-1));
-% Now d_for_ls is delayed by N1 samples wrt x_for_ls.
 [hi_2, r_hat] = h_estimation_onebranch(a_for_ls, x_for_ls, L, N);
 d_no_trans = x_for_ls(N : N+L-1);
 est_sigmaw = sum(abs(r_hat - d_no_trans).^2)/length(r_hat);
