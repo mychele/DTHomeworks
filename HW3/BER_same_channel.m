@@ -6,9 +6,9 @@ clc
 rng default
 
 snr_vec = 5 : 15; % dB
-L_data = 2.^[15 15 15 15 18 18 20 20 22 23 24] - 1;
+L_data = 2.^[15 15 15 15 18 18 20 20 22 23 23] - 1;
 L_data_LE = 2.^[13 13 13 13 14 15 15 18 18 22 22] - 1;
-L_data_DFE = 2.^[13 13 13 13 15 16 18 20 22 23 24] - 1;
+L_data_DFE = 2.^[13 13 13 13 15 16 18 20 22 23 23] - 1;
 if length(L_data) < length(snr_vec), disp('Check L_data'), return, end
 
 pbit_LE_same_ch = zeros(length(snr_vec), 1);
@@ -77,18 +77,18 @@ for snr_i = 1:length(snr_vec)
     n_biterr_LE_same_ch(snr_i, 1) = num_err;
     fprintf('done!\n');
     
-    % VA
-    % Use the whole sequence
-    fprintf('Viterbi, snr = %d ', snr_ch);
-    [~, pbit, n_biterr] = viterbi(packet, x(1+assumed_dly-N1:end), hi, ...
-        N1, N2, 0, N2, 25); % 25 is the length of the training sequence, that is only used
-    % to train Viterbi and is not considered for pbit evaluation.
-    pbit_viterbi_same_ch(snr_i) = pbit;
-    n_biterr_viterbi_same_ch(snr_i) = n_biterr;
-    fprintf('done!\n');
-    
-    % FBA
     if (snr_ch <= 13) % the BER for snr = 13 dB is already below 10^-5
+        % VA
+        % Use the whole sequence
+        fprintf('Viterbi, snr = %d ', snr_ch);
+        [~, pbit, n_biterr] = viterbi(packet, x(1+assumed_dly-N1:end), hi, ...
+            N1, N2, 0, N2, 25); % 25 is the length of the training sequence, that is only used
+        % to train Viterbi and is not considered for pbit evaluation.
+        pbit_viterbi_same_ch(snr_i) = pbit;
+        n_biterr_viterbi_same_ch(snr_i) = n_biterr;
+        fprintf('done!\n');
+        
+        % FBA
         fprintf('FBA, snr = %d ', snr_ch);
         [~, pbit, n_biterr] = fba(packet, ...
             x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2);

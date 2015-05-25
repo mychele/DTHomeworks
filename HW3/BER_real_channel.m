@@ -17,7 +17,8 @@ E_h = sum(abs(h).^2);
 sigma_a_2 = 2;
 
 snr_vec = 5 : 15; % dB
-L_data = 2.^[15 15 15 15 18 18 20 20 22 23 23] - 1;
+L_data = 2.^[15 15 15 15 18 18 22 23 23 23 23] - 1;
+
 if length(L_data) < length(snr_vec), disp('Check L_data'), return, end
 
 pbit_LE_real_ch = zeros(length(snr_vec), 1);
