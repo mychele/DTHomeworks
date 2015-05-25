@@ -297,7 +297,7 @@ Note that in the following analysis we will consider always the same parameters 
 
 This is computed as in \cite{bc} for the matched filter case (i.e. no ISI) and a QPSK constellation ($M=4$), resulting in 
 \begin{equation}
-	BER_{MF} = \frac{1}{\log_2 (M)} 4 \left(1- \frac{1}{M} \right) Q\right(\sqrt{\frac{3}{M-1} \Gamma}\right) = Q(\sqrt{\Gamma})
+	BER_{MF} = \frac{1}{\log_2 (M)} 4 \left(1- \frac{1}{M} \right) Q\left(\sqrt{\frac{3}{M-1} \Gamma}\right) = Q(\sqrt{\Gamma})
 	\label{eq:BERmf}
 \end{equation}
 where $\Gamma$ is the SNR at receiver input, which in the case of a matched filter is equal to $\Gamma = 0.5 M_a \gamma_{MF}= \gamma_{MF}$, with $\gamma_{MF}$ the SNR at detection point for a MF, $M_a = \sigma_a^2 = 2$ since the transmitted sequence has 0 mean.
