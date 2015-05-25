@@ -330,6 +330,83 @@ They both use the information known about the channel in order to perform equali
 	\label{fig:DFE}
 \end{figure}
 
+Let the filter $c$ have length $M_1$ and an added delay equal to $D$, and the feedback filter $b$ have length $M_2$. Then the LE can be seen as a DFE with $M_2 = 0$. The filter coefficients are indeed computed in the same way, using the Wiener-Hopf theory and the MSE criterion applied to $J = E[|a{k-D} - y_k|^2]$. Note that we compare $a_{k-D}$ with $y_k$ because of the delay D introduced, therefore at the time $k$ at detection point the filter decides on $a_{k-D}$. The final equations that are implemented in the \texttt{DFE\_filter} function are the ones that solve the Wiener-Hopf equation, in particular
+\begin{equation}
+	[\mathbf{p}]_p = \sigma_a^2 \hat{h}^*_{D-p}, \quad \quad p = 0, 1, \dots, M_1 - 1
+\end{equation}
+and
+\begin{equation}
+	[\mathbf{R}]_{p, q} = \sigma_a^2 \bigg(\sum_{j = -N_1}^{N_2}\hat{h}_j \hat{h}^*_{j-(p-q)} - \sum_{j = 1}^{M_2} \hat{h}_{j+D-q}\hat{h}^*_{j+D-p} \bigg) + r_{w}(p-q), \quad \quad p,q = 0, 1, \dots, M_1 - 1
+\end{equation}
+with $r_w(p-q)$ the autocorrelation of the noise imposed by the receiver front-end filter. Since in this case the receiver filter is not present, it can be seen as a $\delta_n$ that does not change the shape of the noise. Therefore $r_w(p-q) = \hat{\sigma}_w^2 \delta_{p-q}$ since $w_k$ is white gaussian of estimated power $\hat{\sigma}_w^2$. Then the optimum feed-forward filter is given by
+\begin{equation}
+	\mathbf{c}_{opt} = \mathbf{R}^{-1}\mathbf{p}
+\end{equation}
+and for the DFE the feedback filter is given by 
+\begin{equation}
+	b_i = -\sum_{l=0}^{M_1-1} c_{opt, l} \hat{h}_{i+D-l}, \quad \quad i = 1, 2, \dots, M_2
+\end{equation}
+
+Finally, it is possible to compute in a close form the functional of the error, 
+\begin{equation}
+	J_{min} = \sigma_a^2 - \sum_{l=0}^{M_1-1} c_{opt, l}[\mathbf{p}]^*_l = \sigma_a^2\bigg( 1 - \sum_{l=0}^{M_1-1}c_{opt, l}\hat{h}_{D-l} \bigg)
+\end{equation}
+This is what drove us in the design of the filter and in the choice of the coefficients $M_1, M_2, D$. In particular we considered the parameters which minimize the functional for the lowest SNR $\Gamma$ considered, and observed that they do the same also for the functional at different $\Gamma$. In Figures~\ref{fig:jminle} and~\ref{fig:jmindfe} two of these functionals for LE and DFE can be seen. Note that the choice of the couple $M_1, D$ is given by the couple of minimum values for which the functional presents a minimum or a knee. For example, in Figure~\ref{fig:jminle}[b], the couple $M_1 = 20, D = 15$ guarantees a low $J_min$, which is not the minimum, but by increasing the value of the two parameters there is not a considerable gain in the performances. At the same time, in Figure~\ref{fig:jmindfe}, it can be seen that by choosing a $D > M_1 - 1$ doesn't bring any gain, therefore we set $D = M_1 - 1$ for the DFE. Note that $M_2 = 0$ for LE, while for the DFE is given by the other parameters, i.e. $M_2 = N_2 + M_1 - 1 - D$ in order to be sure to cancel out all the postcursors (at least the ones accounted by the estimate of $N_2$). The choice of the parameters is reported in Table~\ref{table:ledfe}. 
+
+% We also run some simulations in which we changed the parameters 
+
+\begin{figure}
+	\centering
+	\subfigure[$\Gamma = 5$]{\includegraphics[width= 0.42\textwidth]{jmin_LE_5}}
+	\subfigure[$\Gamma = 15$]{\includegraphics[width= 0.42\textwidth]{jmin_LE_15}}
+	\caption{$J_{min}$ for LE}
+	\label{fig:jminle}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\subfigure[$\Gamma = 5$]{\includegraphics[width= 0.42\textwidth]{jmin_DFE_5}}
+	\subfigure[$\Gamma = 15$]{\includegraphics[width= 0.42\textwidth]{jmin_DFE_15}}
+	\caption{$J_{min}$ for DFE}
+	\label{fig:jmindfe}
+\end{figure}
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{c|c|c|c}
+	Filter 	& 	$M_1$	& 	$D$		&		$M_2$		\\ \hline
+	LE 		&	20		&	15		&		0			\\
+	DFE 	&	25		&	24		&		4			\\
+	\end{tabular}
+	\caption{Filter parameters}
+	\label{table:ledfe}
+\end{table}
+
+In order to visualize the equalization brought by these filter in Figures~\ref{fig:hledfe},~\ref{fig:LEcoeff} and~\ref{fig:DFEcoeff} there is the plot of the estimated impulse response $h_i$, both for LE and DFE, the plot of the feed-forward filter $c$ in the two cases, of the convolution between $h_i$ and $c$, which is $\psi_i = (h*c)_i$, and only for the DFE the plot if the coefficients of the feedback filter $b$. Note that the LE should try to equalize both postcursors and precursors, but in this case only the first are present. 
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\textwidth]{h_LEDFE}
+	\caption{Estimated $|h|$ for LE and DFE coefficients computation}
+	\label{fig:hledfe}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.7\textwidth]{cphiLE}
+	\caption{$|c|$ and $|\psi|$ for LE}
+	\label{fig:LEcoeff}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\subfigure{\includegraphics[width = 0.7\textwidth]{cphiDFE}}
+	\subfigure{\includegraphics[width = 0.7\textwidth]{bDFE}}
+	\caption{$|c|$, $|\psi|$, $|b|$ for DFE}
+	\label{fig:DFEcoeff}
+\end{figure}
+
+\clearpage
 
 % Considerazioni su Viterbi, Kd, grafico della distribuzione
 \subsection*{Viterbi algorithm}
