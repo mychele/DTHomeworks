@@ -1,6 +1,5 @@
 function [ pbit, num_bit_error ] = BER( sent, detected )
 % Computes the BER, it accepts symbols
-%
 
 if (length(sent) ~= length(detected))
     disp('Error in IBMAP, the sequences do not have the same length')

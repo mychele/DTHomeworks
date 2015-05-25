@@ -73,13 +73,6 @@ l = zeros(M, 1);
 decisions = zeros(K, 1);
 row_step = (0:M-1)*M^(L1+L2-1);
 %fprintf('fwd...')
-% Initialize f_old here with the initial conditions (the end of the ML
-% training sequence)
-% for j = 1:Ns
-%     % Only keep the maximum among the fwd metrics
-%     f_old(j) = 0; %max(0 + c(j, 1:Ns, 1)); % 0 until we don't have smth better
-%     
-% end
 for k = 1:K   % F_(-1) is the initial condition!
     for j = 1:Ns       
         % Only keep the maximum among the fwd metrics
