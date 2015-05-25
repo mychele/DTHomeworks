@@ -100,7 +100,7 @@ The conversion between a bit stream and QPSK is carried out by the \texttt{bitma
 
 \begin{figure}
 	\centering
-	\includegraphics[width = 0.8\textwidth]{channel_T4}
+	\includegraphics[width = 0.6\textwidth]{channel_T4}
 	\caption{System setting for problem 1}
 	\label{fig:channel_T4}
 \end{figure}
@@ -289,9 +289,9 @@ Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the real $h_i$ is
 % Breve descrizione del sistema in T
 In this second problem the system works in T, as in Figure~\ref{fig:channelt}, and as SNR we consider $\Gamma = \frac{\sigma_a^2 E_h}{\sigma_w^2}$. 
 
-\begin{figure}
+\begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.6\textwidth]{channel_t}
+	\includegraphics[width=0.5\textwidth]{channel_t}
 	\caption{System description for the second problem}
 	\label{fig:channelt}
 \end{figure}
@@ -312,7 +312,7 @@ where $\Gamma$ is the SNR at receiver input, which in the case of a matched filt
 We also computed this bound with a simulation, where the receiver performed a decision over received data with no ISI, $x_k = a_k + w_k$, with $a_k$ a sent symbol, $w_k$ AWGN noise of power $\sigma_w^2 = \sigma_a^2 \ \Gamma$ in order to match the SNR $\Gamma$ of the real channel (which has the $E_h$ factor since the data stream is convolved with the $h_i$ filter). Decision is taken with a threshold detector.
 
 % Considerazioni sull'implementazione di LE e DFE, riportare i grafici di Jmin (qualche grafico), considerazioni su M1, M2, D, riportare i grafici di \hat{h}, c, psi, b per \Gamma = 10 dB
-\subsection*{Linear equalizer and Decision Feedback Equalizer}
+\subsection*{Linear Equalizer and Decision Feedback Equalizer}
 The simpliest receivers implemented are a linear equalizer (LE) and a decision feedback equalizer (DFE) which try to remove the ISI component from the received samples $x_k$. The decision is then taken with a threshold detector. 
 
 They both use the information known about the channel in order to perform equalization. In particular the LE tries to equalize both the precursors and the postcursors out of the received signal $x_k$, while DFE uses the detected symbols to perform cancellation of the postcursors from a signal already filtered with a feed-forward filter that removes the precursors. Figures~\ref{fig:LE} and~\ref{fig:DFE} contain the block scheme for both of them. 
@@ -338,7 +338,7 @@ and
 \begin{equation}
 	[\mathbf{R}]_{p, q} = \sigma_a^2 \bigg(\sum_{j = -N_1}^{N_2}\hat{h}_j \hat{h}^*_{j-(p-q)} - \sum_{j = 1}^{M_2} \hat{h}_{j+D-q}\hat{h}^*_{j+D-p} \bigg) + r_{w}(p-q), \quad \quad p,q = 0, 1, \dots, M_1 - 1
 \end{equation}
-with $r_w(p-q)$ the autocorrelation of the noise imposed by the receiver front-end filter. Since in this case the receiver filter is not present, it can be seen as a $\delta_n$ that does not change the shape of the noise. Therefore $r_w(p-q) = \hat{\sigma}_w^2 \delta_{p-q}$ since $w_k$ is white gaussian of estimated power $\hat{\sigma}_w^2$. Then the optimum feed-forward filter is given by
+with $r_w(p-q)$ the autocorrelation of the noise imposed by the receiver front-end filter. Since in this case the receiver filter is not present, i.e. $g_{RC}(t) = \delta(t)$, and it does not change the shape of the noise. Therefore $r_w(p-q) = \hat{\sigma}_w^2 \delta_{p-q}$ since $w_k$ is white gaussian of estimated power $\hat{\sigma}_w^2$. Then the optimum feed-forward filter is given by
 \begin{equation}
 	\mathbf{c}_{opt} = \mathbf{R}^{-1}\mathbf{p}
 \end{equation}
@@ -351,7 +351,7 @@ Finally, it is possible to compute in a close form the functional of the error,
 \begin{equation}
 	J_{min} = \sigma_a^2 - \sum_{l=0}^{M_1-1} c_{opt, l}[\mathbf{p}]^*_l = \sigma_a^2\bigg( 1 - \sum_{l=0}^{M_1-1}c_{opt, l}\hat{h}_{D-l} \bigg)
 \end{equation}
-This is what drove us in the design of the filter and in the choice of the coefficients $M_1, M_2, D$. In particular we considered the parameters which minimize the functional for the lowest SNR $\Gamma$ considered, and observed that they do the same also for the functional at different $\Gamma$. In Figures~\ref{fig:jminle} and~\ref{fig:jmindfe} two of these functionals for LE and DFE can be seen. Note that the choice of the couple $M_1, D$ is given by the couple of minimum values for which the functional presents a minimum or a knee. For example, in Figure~\ref{fig:jminle}[b], the couple $M_1 = 20, D = 15$ guarantees a low $J_{min}$, and by increasing the value of the two parameters there is not a considerable gain in the performances. At the same time, in Figure~\ref{fig:jmindfe}, it can be seen that by choosing a $D > M_1 - 1$ doesn't bring any gain, therefore we set $D = M_1 - 1$ for the DFE. Note that $M_2 = 0$ for LE, while for the DFE is given by the other parameters, i.e. $M_2 = N_2 + M_1 - 1 - D$ in order to be sure to cancel out all the postcursors (at least the ones accounted by the estimate of $N_2$). The choice of the parameters is reported in Table~\ref{table:ledfe}. 
+This is what drove us in the design of the filter and in the choice of the coefficients $M_1, M_2, D$. In particular we consider the parameters which minimize the functional for the lowest SNR $\Gamma$ considered, and check that they do the same also for the functional at different $\Gamma$. If not, we update them accordingly in order to have filters that work in the best way for all the $\Gamma \in [5, 15]$ dB considered. In Figures~\ref{fig:jminle} and~\ref{fig:jmindfe} two of these functionals for LE and DFE can be seen. Note that the choice of the couple $M_1, D$ is given by the couple of minimum values for which the functional presents a minimum or a knee. For example, in Figure~\ref{fig:jminle}[b], the couple $M_1 = 20, D = 15$ guarantees a low $J_{min}$, and by increasing the value of the two parameters there is not a considerable gain in the performances. At the same time, in Figure~\ref{fig:jmindfe}, it can be seen that by choosing a $D > M_1 - 1$ doesn't bring any gain, therefore we set $D = M_1 - 1$ for the DFE. Note that $M_2 = 0$ for LE, while for the DFE is given by the other parameters, i.e. $M_2 = N_2 + M_1 - 1 - D$ in order to be sure to cancel out all the postcursors (at least the ones accounted by the estimate of $N_2$). The choice of the parameters is reported in Table~\ref{table:ledfe}. 
 
 % We also run some simulations in which we changed the parameters 
 
@@ -370,6 +370,7 @@ This is what drove us in the design of the filter and in the choice of the coeff
 	\caption{$J_{min}$ for DFE}
 	\label{fig:jmindfe}
 \end{figure}
+
 
 \begin{table}[h!]
 	\centering
