@@ -5,7 +5,7 @@ clear
 close all
 clc
 rng default
-snr_vec = [6, 8, 10, 12, 14]; % dB
+snr_vec = [5, 10, 15]; % dB
 
 % from ex 1
 assumed_m_opt = 10;
@@ -57,9 +57,9 @@ save('jmin_LE', 'JminLE')
 for i = 1:length(snr_vec)
     figure, mesh(1:D_max, 1:M1_max, 10*log10(reshape(abs(JminLE(i, :, :)), size(JminLE(i, :, :), 2), size(JminLE(i, :, :), 3))))
     title(strcat('Jmin for LE, snr= ', num2str(snr_vec(i))))
-    xlabel('D'), ylabel('M1'), zlabel('Jmin')
+    xlabel('D'), ylabel('M1'), zlabel('Jmin [dB]')
 end
-return
+
 %% DFE
 
 printmsg_delete = ''; % Just to display progress updates
@@ -103,5 +103,5 @@ save('jmin_DFE', 'JminDFE')
 for i = 1:length(snr_vec)
     figure, mesh(1:D_max, 1:M1_max, 10*log10(reshape(abs(JminDFE(i, :, :)), size(JminDFE(i, :, :), 2), size(JminDFE(i, :, :), 3))))
     title(strcat('Jmin for DFE, snr= ', num2str(snr_vec(i))))
-    xlabel('D'), ylabel('M1'), zlabel('Jmin')
+    xlabel('D'), ylabel('M1'), zlabel('Jmin [dB]')
 end
