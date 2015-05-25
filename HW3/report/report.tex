@@ -100,7 +100,7 @@ The conversion between a bit stream and QPSK is carried out by the \texttt{bitma
 
 \begin{figure}
 	\centering
-	\includegraphics[width = 0.6\textwidth]{channel_T4}
+	\includegraphics[width = 0.5\textwidth]{channel_T4}
 	\caption{System setting for problem 1}
 	\label{fig:channel_T4}
 \end{figure}
@@ -159,7 +159,7 @@ In particular, in order to estimate the length $\hat{N} = N_1 + N_2 + 1$ of the 
 for $N_2 = 0, 1, \dots, N_{max} - N_1 - 1$. This procedure is repeated for $N_1 = 1$ and $2$. The functionals $\mathcal{E}$ for different $N_1$ are then plotted together, against $N_2$, in Fig.~\ref{fig:functional}.
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width = 0.8\textwidth]{error_func_p1}
+	\includegraphics[width = 0.7\textwidth]{error_func_p1}
 	\caption{$\mathcal{E}$ vs $N_2$ for different $N_1$}
 	\label{fig:functional}
 \end{figure}
@@ -194,7 +194,7 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
 % !!! Plottare {h_i_hat} per i = -N_1, ..., N_2
 \begin{figure}[h!]
  \centering
- \includegraphics[width = 0.9\textwidth]{hi_p1}
+ \includegraphics[width = 0.7\textwidth]{hi_p1}
  \caption{$|h_i|, i \in [-N_1, N_2]$ for $N_1 = 0$ and $N_1 = 2$}
  \label{fig:hi_p1}
 \end{figure}
@@ -279,8 +279,6 @@ Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the true $h_i$ is
 	\label{table:lambda}
 \end{table}
 
-\clearpage
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%% PROBLEM 2 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -290,7 +288,7 @@ Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the true $h_i$ is
 % Breve descrizione del sistema in T
 In this second problem the system works in T, as in Figure~\ref{fig:channelt}, and as SNR we consider $\Gamma = \frac{\sigma_a^2 E_h}{\sigma_w^2}$. 
 
-\begin{figure}[h!]
+\begin{figure}[hb]
 	\centering
 	\includegraphics[width=0.5\textwidth]{channel_t}
 	\caption{System description for the second problem}
@@ -470,7 +468,7 @@ The complementary CDF we get is shown in Fig.~\ref{fig:Kd_min_estimation}, from 
 
 \begin{figure}
  \centering
- \includegraphics[width = 0.75\textwidth]{Kd_min_estimation}
+ \includegraphics[width = 0.6\textwidth]{Kd_min_estimation}
  \caption{Complementary empirical CDF of $K_{d,\mathrm{min}}$ for the choice of $K_d$, over 16 independent simulations.}
  \label{fig:Kd_min_estimation}
 \end{figure}
@@ -558,7 +556,6 @@ Note that LE and DFE tend to perform in the same way up to 10 dB, then the cance
 The gain in performances of the receivers by using the real channel, instead of the estimated one, is more than 1 dB for the same BER. This can be seen in Figure~\ref{fig:BER_real}. Note that in these simulations the VA and FBA are evaluated up to 13 dB. The lengths of the sequences of these simulation are in Table~\ref{table:BER_real_len}, and are greater or equal than the ones in Table~\ref{table:BER_same_len} because for the same SNR $\Gamma$ the BER is lower.  
 
 \begin{table}[h!]
-\centering
 	\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
 	SNR $\Gamma$	&	5	&	6	&	7	&	8	&	9	&	10	&	11	&	12	&	13	&	14	&	15 \\ \hline	
 	for LE 	(-2)	& $2^{13}$ & $2^{13}$ & $2^{13}$ & $2^{13}$ & $2^{14}$ & $2^{15}$ & $2^{15}$ & $2^{18}$ & $2^{18}$ & $2^{22}$ & $2^{22}$  \\
@@ -572,35 +569,32 @@ The gain in performances of the receivers by using the real channel, instead of 
 \begin{table}[h!]
 	\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
 	SNR $\Gamma$	&	5	&	6	&	7	&	8	&	9	&	10	&	11	&	12	&	13	&	14	&	15 \\ \hline	
-	for each receiver (-2) & $2^{15}$ & $2^{15}$ & $2^{15}$ & $2^{15}$ & $2^{18}$ & $2^{18}$ & $2^{22}$ & $2^{23}$ & $2^{23}$ & $2^{23}$ & $2^{23}$  \\
+	Every receiver (-2) & $2^{15}$ & $2^{15}$ & $2^{15}$ & $2^{15}$ & $2^{18}$ & $2^{18}$ & $2^{22}$ & $2^{23}$ & $2^{23}$ & $2^{23}$ & $2^{23}$  \\
 	\end{tabular}
 	\caption{Length of sequences used to evaluate the BER, assuming $\hat{h}_i = h_i$}
 	\label{table:BER_real_len}
 \end{table}
 
-
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.8\textwidth]{BER_same_channel}
+	\includegraphics[width=0.75\textwidth]{BER_same_channel}
 	\caption{Bit error rates for different methods, same realization and estimate}
 	\label{fig:BER_same}
 \end{figure}
-
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.8\textwidth]{BER_average}
+	\includegraphics[width=0.75\textwidth]{BER_average}
 	\caption{Bit error rates for different methods, averaged over different realizations}
 	\label{fig:BER_avg}
 \end{figure}
-
-
-
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth]{BER_real_channel}
+	\includegraphics[width=0.75\textwidth]{BER_real_channel}
 	\caption{Bit error rates for various methods, assuming $\hat{h}_i = h_i$}
 	\label{fig:BER_real}
 \end{figure}
+
+\clearpage
 
 \begin{thebibliography}{10}
 
