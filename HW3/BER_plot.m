@@ -8,7 +8,7 @@ load('pbit_viterbi.mat');
 load('BER_awgn_sim.mat');
 load('pbit_fba_513.mat');
 load('pbit_fba_1415.mat');
-pbit_fba = [pbit_fba_513(:, 2); pbit_fba_1415];
+pbit_fba = [mean(pbit_fba_513, 2); pbit_fba_1415];
 
 %% Statistics for estimated channel, with only one realization
 snr_vec = 5:15;
