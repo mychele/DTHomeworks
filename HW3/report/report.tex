@@ -286,18 +286,14 @@ Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the true $h_i$ is
 \section*{Problem 2}
 
 % Breve descrizione del sistema in T
-In this second problem the system works in T, as in Figure~\ref{fig:channelt}, and as SNR we consider $\Gamma = \frac{\sigma_a^2 E_h}{\sigma_w^2}$. 
-
+In this second problem the system works in T, as in Figure~\ref{fig:channelt}, and as SNR we consider $\Gamma = \frac{\sigma_a^2 E_h}{\sigma_w^2}$, where $E_h = 1.0665$.
 \begin{figure}[hb]
 	\centering
 	\includegraphics[width=0.5\textwidth]{channel_t}
 	\caption{System description for the second problem}
 	\label{fig:channelt}
 \end{figure}
-
-The output is computed using a sampled version of the provided impulse response $q(nT_c)$ that matches the response estimated in the previous problem, i.e. $h_i = q(iT + m_{opt}), \quad i \in [-N1, N2]$. 
-
-The sequence $a_k$ which is transmitted is composed of a ML binary sequence of 25 symbols, as in Problem 1, which is necessary to perform the channel estimate, and of a QPSK stream of symbols that maps a ML sequence composed of 0s and 1s in order to mimic random transmission of bits. In case more than $2^{20}-1$ bits are needed we partially or completely repeat the longest ML sequence of $2^{20}-1$ bits.
+The output is computed using a sampled version of the provided impulse response $q(nT_c)$ that matches the response estimated in the previous problem, i.e. $h_i = q(iT + m_{opt}), \quad i \in [-N1, N2]$. The sequence $a_k$ which is transmitted is composed of a ML binary sequence of 25 symbols, as in Problem 1, which is necessary to perform the channel estimate, and of a QPSK stream of symbols that maps a ML sequence composed of 0s and 1s in order to mimic random transmission of bits. In case more than $2^{20}-1$ bits are needed we partially or completely repeat the longest ML sequence of $2^{20}-1$ bits.
 
 Note that in the following analysis we will consider always the same parameters for the channel, with $N_1 = 0, N_2 = 4$ accordingly to the considerations of Problem 1. However the estimate must be repeated for each different SNR, since the channel noise varies. Moreover, in order to design the system, we consider only the estimated impulse response and not the real one, and since the estimate done with a ML sequence of $L = 15$ is lousy, then also the design will not drive the performance of the receivers as close as possible to the theoretical bound. 
 
@@ -313,9 +309,7 @@ We also computed this bound with a simulation, where the receiver performed a de
 
 % Considerazioni sull'implementazione di LE e DFE, riportare i grafici di Jmin (qualche grafico), considerazioni su M1, M2, D, riportare i grafici di \hat{h}, c, psi, b per \Gamma = 10 dB
 \subsection*{Linear Equalizer and Decision Feedback Equalizer}
-The simplest receivers implemented are a linear equalizer (LE) and a decision feedback equalizer (DFE) which try to remove the ISI component from the received samples $x_k$. The decision is then taken with a threshold detector. 
-
-They both use the information known about the channel in order to perform equalization. In particular the LE tries to equalize both the precursors and the postcursors out of the received signal $x_k$, while DFE uses the detected symbols to perform cancellation of the postcursors from a signal already filtered with a feed-forward filter that removes the precursors. Figures~\ref{fig:LE} and~\ref{fig:DFE} contain the block scheme for both of them. 
+The simplest receivers implemented are a linear equalizer (LE) and a decision feedback equalizer (DFE) which try to remove the ISI component from the received samples $x_k$. The decision is then taken with a threshold detector.  They both use the information known about the channel in order to perform equalization. In particular the LE tries to equalize both the precursors and the postcursors out of the received signal $x_k$, while DFE uses the detected symbols to perform cancellation of the postcursors from a signal already filtered with a feed-forward filter that removes the precursors. Figures~\ref{fig:LE} and~\ref{fig:DFE} contain the block scheme for both of them. 
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width = 0.7\textwidth]{LE}
@@ -547,13 +541,13 @@ Computation times for the Max-Log-MAP have been more or less twice those of the 
 % Grafici del BER, sia per canale stimato che per canale vero, riportando il numero di bit per le simulazioni
 
 \subsection*{Bit Error Rate plots}
-The BER for different scenarios is finally simulated. In Figure~\ref{fig:BER_same} there's the comparison between the BER of the four different receivers given the same estimate for the channel impulse response at each value of the SNR $\Gamma$. The bit sequences used are ML sequences mapped into a QPSK constellation, whose length is in Table~\ref{table:BER_same_len}. They are chosen long enough to get at least 30 errors for each simulation but so long as to avoid unnecessary computations. Actually, since the ML sequences have an odd length and a QPSK symbol is composed of two bits, then if the ML sequence has length $2^r - 1$ the transmitted bits will be $2^r - 2$.
+The BER for different scenarios is finally simulated. In Figure~\ref{fig:BER_same} a comparison is shown among the BER's of the four different receivers given the same estimate for the channel impulse response, for each value of the SNR $\Gamma$. The bit sequences used are ML sequences mapped into a QPSK constellation, whose length is in Table~\ref{table:BER_same_len}. They are chosen long enough to get at least 30 errors for each simulation, but not so long as to produce unnecessary computations. Actually, since the ML sequences have an odd length and a QPSK symbol is composed of two bits, then if the ML sequence has length $2^r - 1$ the transmitted bits will be $2^r - 2$.
 
 Note that for a single estimate of the channel the results are not too close to the theoretical bound. Indeed, as previously mentioned, the estimate performed with a short training sequence is lousy and this affects the performances of the receivers. The same behavior can be seen in Figure~\ref{fig:BER_avg} where we average the BER for different realizations and estimates of the channel, by calling multiple times with different RNG seeds the \texttt{BER\_same\_channel} script. This can be done only because the impulse response doesn't change over time, otherwise it would not be meaningful. The idea behind this kind of simulation is to study the effect of the bad channel estimate on BER without considering just one realization.
 
-Note that LE and DFE tend to perform in the same way up to 10 dB, then the cancellation of the DFE becomes more accurate and its BER becomes lower than the one of LE. At the same time, Viterbi algorithm and FBA perform in the same way because they take the decision using the same criterion. The simulations for VA and FBA are run only up to 14 dB, with a length of $2^{23} - 2$, since the BER is below the required $10^{-5}$.
+Note that LE and DFE tend to perform in the same way up to 10 dB, then the cancellation of the DFE becomes more accurate and its BER becomes lower than the one of LE. At the same time, the Viterbi algorithm and FBA perform in the same way because they take the decision using the same criterion. The simulations for VA and FBA are run only up to 14 dB, with a length of $2^{23} - 2$, since the BER is below the required value of $10^{-5}$.
 
-The gain in performances of the receivers by using the real channel, instead of the estimated one, is more than 1 dB for the same BER. This can be seen in Figure~\ref{fig:BER_real}. Note that in these simulations the VA and FBA are evaluated up to 13 dB. The lengths of the sequences of these simulation are in Table~\ref{table:BER_real_len}, and are greater or equal than the ones in Table~\ref{table:BER_same_len} because for the same SNR $\Gamma$ the BER is lower.  
+The gain in performance of the receivers by using the real channel, instead of the estimated one, is more than 1 dB for the same BER. This can be seen in Figure~\ref{fig:BER_real}. Note that in these simulations the VA and FBA are evaluated up to 13 dB. The lengths of the sequences of these simulation are in Table~\ref{table:BER_real_len}, and are greater than or equal to the ones in Table~\ref{table:BER_same_len} because for the same SNR $\Gamma$ the BER is lower.  
 
 \begin{table}[h!]
 	\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
