@@ -14,12 +14,12 @@ pbit_fba = [pbit_fba_513(:, 2); pbit_fba_1415];
 snr_vec = 5:15;
 
 figure
-semilogy(snr_vec, pbitLE(:, 3)), hold on,
-semilogy(snr_vec, pbitDFE(:, 2))
-semilogy(snr_vec_viterbi, pbit_viterbi(:, 3))
-semilogy(snr_vec, pbit_fba)
-semilogy(snr_vec, BER_awgn(snr_vec))
-semilogy(snr_vec, pbit_AWGN_sim)
+semilogy(snr_vec, pbitLE(:, 3), '-o'), hold on,
+semilogy(snr_vec, pbitDFE(:, 2), '-s')
+semilogy(snr_vec_viterbi, pbit_viterbi(:, 3), '-x')
+semilogy(snr_vec, pbit_fba, '-d')
+semilogy(snr_vec, BER_awgn(snr_vec), '-^')
+semilogy(snr_vec, pbit_AWGN_sim, '-h')
 xlabel('snr [dB]'), ylabel('BER')
 legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'Viterbi', 'FBA', 'AWGN', 'AWGN with simulation')
 ylim([10^-5, 10^-1]), grid on
@@ -34,12 +34,12 @@ load('pbit_fba_real_channel.mat');
 load('pbit_viterbi_realch.mat')
 
 figure
-semilogy(snr_vec, pbitLE_real_channel), hold on
-semilogy(snr_vec, pbitDFE_real_channel)
-semilogy(snr_vec_viterbi, pbit_viterbi)
-semilogy(snr_vec_fba_real_channel, pbit_fba_real_channel)
-semilogy(snr_vec, BER_awgn(snr_vec))
-semilogy(snr_vec, pbit_AWGN_sim)
+semilogy(snr_vec, pbitLE_real_channel, '-o'), hold on
+semilogy(snr_vec, pbitDFE_real_channel, '-s')
+semilogy(snr_vec_viterbi, pbit_viterbi, '-x')
+semilogy(snr_vec_fba_real_channel, pbit_fba_real_channel, '-d')
+semilogy(snr_vec, BER_awgn(snr_vec), '-^')
+semilogy(snr_vec, pbit_AWGN_sim, '-h')
 xlabel('snr [dB]'), ylabel('BER')
 legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'Viterbi', 'FBA', 'AWGN', 'AWGN with simulation')
 ylim([10^-5, 10^-1]), xlim([5, 15]), grid on
@@ -55,12 +55,12 @@ load('pbit_viterbi_same_channel.mat');
 load('pbit_fba_same_channel.mat');
 
 figure
-semilogy(snr_vec_515, pbitLE_same_channel), hold on,
-semilogy(snr_vec_515, pbitDFE_same_channel)
-semilogy(snr_vec_viterbi, pbit_viterbi_same_ch)
-semilogy(snr_vec_fba_same_channel, pbit_fba_same_channel)
-semilogy(snr_vec, BER_awgn(snr_vec))
-semilogy(snr_vec, pbit_AWGN_sim(1:9))
+semilogy(snr_vec_515, pbitLE_same_channel, '-o'), hold on,
+semilogy(snr_vec_515, pbitDFE_same_channel, '-s')
+semilogy(snr_vec_viterbi, pbit_viterbi_same_ch, '-x')
+semilogy(snr_vec_fba_same_channel, pbit_fba_same_channel, '-d')
+semilogy(snr_vec, BER_awgn(snr_vec), '-^')
+semilogy(snr_vec, pbit_AWGN_sim(1:9), '-h')
 xlabel('snr [dB]'), ylabel('BER')
 legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'Viterbi', 'FBA', 'AWGN', 'AWGN with simulation')
 ylim([10^-5, 10^-1]), xlim([5, 15]), grid on
@@ -72,12 +72,12 @@ snr_vec = 5:15;
 load('pbit_viterbi')
 
 figure
-semilogy(snr_vec, mean(pbitLE, 2)), hold on,
-semilogy(snr_vec, median(pbitDFE, 2))
-semilogy(snr_vec_viterbi, mean(pbit_viterbi, 2))
-semilogy(snr_vec, pbit_fba)
-semilogy(snr_vec, BER_awgn(snr_vec))
-semilogy(snr_vec, pbit_AWGN_sim)
+semilogy(snr_vec, mean(pbitLE, 2), '-o'), hold on,
+semilogy(snr_vec, median(pbitDFE, 2), '-s')
+semilogy(snr_vec_viterbi, mean(pbit_viterbi, 2), '-x')
+semilogy(snr_vec, pbit_fba, '-d')
+semilogy(snr_vec, BER_awgn(snr_vec), '-^')
+semilogy(snr_vec, pbit_AWGN_sim, '-h')
 xlabel('snr [dB]'), ylabel('BER')
 legend('LE, M1 = 20, D = 15', 'DFE, M1 = 25, D = 24, M2 = 4', 'Viterbi', 'FBA', 'AWGN', 'AWGN with simulation')
 ylim([10^-5, 10^-1]), grid on
