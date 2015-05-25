@@ -307,7 +307,7 @@ This is computed as in \cite{bc} for the matched filter case (i.e. no ISI) and a
 	BER_{MF} = \frac{1}{\log_2 (M)} 4 \bigg(1- \frac{1}{M} \bigg) Q\bigg(\sqrt{\frac{3}{M-1} \Gamma}\bigg) = Q(\sqrt{\Gamma})
 	\label{eq:BERmf}
 \end{equation}
-where $\Gamma$ is the SNR at receiver input, which in the case of a matched filter is equal to $\Gamma = 0.5 M_a \gamma_{MF}= \gamma_{MF}$, with $\gamma_{MF}$ the SNR at detection point for a MF, $M_a = \sigma_a^2$ since the transmitted sequence has 0 mean.
+where $\Gamma$ is the SNR at receiver input, which in the case of a matched filter is equal to $\Gamma = 0.5 M_a \gamma_{MF}= \gamma_{MF}$, with $\gamma_{MF}$ the SNR at detection point for a MF, $M_a = \sigma_a^2 = 2$ since the transmitted sequence has 0 mean.
 
 We also computed this bound with a simulation, where the receiver performed a decision over received data with no ISI, $x_k = a_k + w_k$, with $a_k$ a sent symbol, $w_k$ AWGN noise of power $\sigma_w^2 = \sigma_a^2 \ \Gamma$ in order to match the SNR $\Gamma$ of the real channel (which has the $E_h$ factor since the data stream is convolved with the $h_i$ filter). Decision is taken with a threshold detector.
 
