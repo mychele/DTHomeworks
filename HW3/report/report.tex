@@ -96,7 +96,7 @@ basicstyle=\footnotesize\ttfamily
 In this problem the channel $q(n\frac{T}{4})$ is given at $T_c = \frac{T}{4}$. The goal is to estimate at the receiver the timing phase $t_0$ and the equivalent channel impulse response in $T$ with LS method.
 The setting of the system is as in Fig.~\ref{fig:channel_T4}. In order to perform LS estimation the first $L + N_{seq} = 15 + 10$ symbols of the sequence $a_k$ are binary symbols out of a QPSK constellation with $\sigma_a^2 = 2$. 
 In particular they are $1+j$ and $-1-j$ and map the $+1$ and $-1$ values of a ML sequence of length $L = 15$, partially repeated by $N_{seq}=10$. Then QPSK data follows. 
-The conversion between a bit stream and QPSK is carried out by the \texttt{bitmap} function. %% TODO some more on this?? Give a better formulation
+The conversion between a bit stream and QPSK is carried out by the \texttt{bitmap} function.
 
 \begin{figure}
 	\centering
@@ -104,8 +104,6 @@ The conversion between a bit stream and QPSK is carried out by the \texttt{bitma
 	\caption{System setting for problem 1}
 	\label{fig:channel_T4}
 \end{figure}
-
-%%TODO Does Eq go in dB???? 
 
 % Spiegare che channel_output funziona da polifase
 The noisy output $r_n$ of the channel is computed with a polyphase version of the channel impulse response $q(nT_c)$. Each branch is $q^{i}(mT) = q(mT + i)$ with $i \in [0, 3]$ , and since it is not time-varying it is possible to directly compute the convolution of each branch and the $a_k$ sequence. At the output of each convolution white noise $w_n$ is added, with variance $\sigma_w^2 = \frac{\sigma_a^2 E_q}{4 \Gamma} = -19.2411$ dB, where $\sigma_a^2 = 2$, $E_q = 2.3819$ and $\Gamma = 20$ dB is the given SNR at receiver input. Then a parallel to series converter generates the output at time $T_c$.
@@ -299,7 +297,7 @@ Note that in the following analysis we will consider always the same parameters 
 
 This is computed as in \cite{bc} for the matched filter case (i.e. no ISI) and a QPSK constellation ($M=4$), resulting in 
 \begin{equation}
-	BER_{MF} = \frac{1}{\log_2 (M)} 4 \bigg(1- \frac{1}{M} \bigg) Q\bigg(\sqrt{\frac{3}{M-1} \Gamma}\bigg) = Q(\sqrt{\Gamma})
+	BER_{MF} = \frac{1}{\log_2 (M)} 4 \left(1- \frac{1}{M} \right) Q\right(\sqrt{\frac{3}{M-1} \Gamma}\right) = Q(\sqrt{\Gamma})
 	\label{eq:BERmf}
 \end{equation}
 where $\Gamma$ is the SNR at receiver input, which in the case of a matched filter is equal to $\Gamma = 0.5 M_a \gamma_{MF}= \gamma_{MF}$, with $\gamma_{MF}$ the SNR at detection point for a MF, $M_a = \sigma_a^2 = 2$ since the transmitted sequence has 0 mean.
@@ -330,7 +328,7 @@ Let the filter $c$ have length $M_1$ and an added delay equal to $D$, and the fe
 \end{equation}
 and
 \begin{equation}
-	[\mathbf{R}]_{p, q} = \sigma_a^2 \bigg(\sum_{j = -N_1}^{N_2}\hat{h}_j \hat{h}^*_{j-(p-q)} - \sum_{j = 1}^{M_2} \hat{h}_{j+D-q}\hat{h}^*_{j+D-p} \bigg) + r_{w}(p-q), \quad \quad p,q = 0, 1, \dots, M_1 - 1
+	[\mathbf{R}]_{p, q} = \sigma_a^2 \left(\sum_{j = -N_1}^{N_2}\hat{h}_j \hat{h}^*_{j-(p-q)} - \sum_{j = 1}^{M_2} \hat{h}_{j+D-q}\hat{h}^*_{j+D-p} \right) + r_{w}(p-q), \quad \quad p,q = 0, 1, \dots, M_1 - 1
 \end{equation}
 with $r_w(p-q)$ the autocorrelation of the noise imposed by the receiver front-end filter. Since in this case the receiver filter is not present, i.e. $g_{RC}(t) = \delta(t)$, and it does not change the shape of the noise. Therefore $r_w(p-q) = \hat{\sigma}_w^2 \delta_{p-q}$ since $w_k$ is white Gaussian of estimated power $\hat{\sigma}_w^2$. Then the optimum feed-forward filter is given by
 \begin{equation}
@@ -338,7 +336,7 @@ with $r_w(p-q)$ the autocorrelation of the noise imposed by the receiver front-e
 \end{equation}
 and for the DFE the feedback filter is given by 
 \begin{equation}
-	b_i = -\sum_{l=0}^{M_1-1} c_{opt, l} \hat{h}_{i+D-l}, \quad \quad i = 1, 2, \dots, M_2
+	b_i = -\sum_{l=0}^{M_1-1} c_{opt, l} \hat{h}_{i+D-l}, \quad \quad i = 1, 2, \dots, M_2.
 \end{equation}
 
 Finally, it is possible to compute in a close form the functional of the error, 
@@ -482,7 +480,7 @@ If we introduce the \emph{likelihood function}
 \end{equation}
 the criterion becomes:
 \begin{equation}
-	\hat{a}_{k+L_1} = \argmax_{\beta \in \mathcal{A}} \mathtt{L}_k(\beta)
+	\hat{a}_{k+L_1} = \argmax_{\beta \in \mathcal{A}} \mathtt{L}_k(\beta).
 \end{equation}
 In order to solve the problem of the likelihood function maximization, the FBA algorithm can be used. The algorithm performs the computation of four metrics, namely:
 \begin{itemize}
@@ -509,7 +507,7 @@ Using the logarithm the difference between the state metrics is enhanced, and as
 \end{equation}
 where the following approximation holds:
 \begin{equation}
-	\tilde{\ell}_k(\beta) = \max_{\substack{i \in [1, \dots, N_S] \\ [\boldsymbol{\sigma}_i]_1 = \beta}} v_k(i)
+	\tilde{\ell}_k(\beta) = \max_{\substack{i \in [1, \dots, N_S] \\ [\boldsymbol{\sigma}_i]_1 = \beta}} v_k(i).
 	\label{eq:likelihood}
 \end{equation}
 
@@ -517,13 +515,13 @@ In our implementation we perform three main cycles in order to get all the metri
 
 The first cycle computes the channel transition metrics, storing them in a $M \times N_S \times K$ matrix where for a fixed time $k = 1, \dots, K$ the $M$ elements in the j-th column represent the transitions metrics from the state j. The metrics are computed using the following expression: 
 \begin{equation}
-	c_k(j|i) = - |\rho_k - u_k|^2
+	c_k(j|i) = - |\rho_k - u_k|^2.
 \end{equation}
 Since the desired signal $u_k$ is just a function of the current and next state, its values are precomputed like in the Viterbi implementation~\eqref{eq:ukdefinition} and stored in a lookup table. $\rho_k$ represents the k-th sample of the received signal. For each time $k$, the $j$ index refers to the destination state, while the $i$ index refers to the starting state. Using matrix operations in MATLAB, we can fill the $c$ matrix by only iterating over time. For $k = K$ all values are set to 0.
 
 The second cycle computes the Backward metric. A matrix of size $N_S \times K+1$ is created and initialized to zero. This also initializes the final, K-th state to the 0 value, since the final symbol that will be received is unknown (performance of the algorithm may be enhanced by transmitting a previously decided symbol, also known to the receiver). The algorithm cycles the symbol indices from $K-1$ to $0$, iterating over the states and updating their backward metric according to the following expression:
 \begin{equation}
-	\tilde{b}_k(i) = \max_{m \in [1, \dots, N_S]}[\tilde{b}_{k+1}(m) + c_{k+1}(m|i)] \quad i = 1, \dots, N_S
+	\tilde{b}_k(i) = \max_{m \in [1, \dots, N_S]}[\tilde{b}_{k+1}(m) + c_{k+1}(m|i)] \quad i = 1, \dots, N_S.
 \end{equation}
 At each time $k$, the indices $m$ of the states which are reachable from the current one are needed. These indices are computed using the expression $m = ((i-1) \lmod{M^{L_1+L_2-1}}) * M + j$, where $i$ is the current state and $j = 0, \dots, M-1$ is the index of the transition. On the other hand, the $c_{k+1}(m|i)$ coefficients are readily available as the i-th column of the channel transition metrics at time $k+1$.
 
@@ -536,7 +534,6 @@ After computing the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ fo
 
 Memory occupation for the Max-Log-MAP criterion is a concern. Since the Backward and channel transition matrices are memorized, their total memory occupation would be of $N_S \times N_S \times K + N_S \times K$ memory cells, however our implementation only represents the transitions that are actually possible, thus reducing the memory occupation to $M \times N_S \times K$ cells for the channel transition metric. It could have been possible to perform the computation of the channel transition metrics in a sliding window fashion, only computing the needed metrics once in a while instead of computing them all together, in the beginning of the algorithm. However, memory occupation issues were mainly solved by only memorizing the actual transitions, so computational speed was preferred. 
 Computation times for the Max-Log-MAP have been more or less twice those of the Viterbi algorithm for sequences of the same length.
-% TODO Refine this stuff above here
 
 % Grafici del BER, sia per canale stimato che per canale vero, riportando il numero di bit per le simulazioni
 
