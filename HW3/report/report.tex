@@ -114,7 +114,7 @@ The noisy output $r_n$ of the channel is computed with a polyphase version of th
 The first operation which the receiver does is estimating $t_0$ as optimal timing phase in $T_c$. In particular, given the stream of symbols $r_n$, and the knowledge of the ML sequence $a_l, l\in [0, L-1]$, the receiver computes
 
 \begin{equation}
-	m_{opt} = \argmax_{m} | x_{ra}(mT_c) | = \argmax_{m} | \frac{1}{L} \sum_{l = 0}^{L - 1} x(lT + mT_c)a^* (l) |
+	m_{opt} = \argmax_{m} | x_{ra}(mT_c) | = \argmax_{m} | \frac{1}{L} \sum_{l = 0}^{L - 1} r_{(lT + mT_c)}a^*_l |
 \end{equation}
 for $ 0 < m < 40$ and finds that
 \begin{equation}
@@ -131,7 +131,7 @@ x_{k} = h_0a_{k-D_{ch}} + i_k, \quad i_k = \sum_{\substack{i = -N_1 \\ i \neq 0}
 where $i_k$ is the inter-symbol interference. Therefore, if $t_0 = 10T_c$ and $D_{ch} = 2T$ there could be at most 2 precursors (i.e. the coefficients of $h_i$ for $i = -N_1, \dots, -1$), and they can be equal to 0 (they don't introduce ISI but just the delay $D_{ch}$) or different from 0 but with an amplitude lower than $h_0$. 
 
 The receiver can now perform the estimate of the channel impulse response at time $T$. The output of the channel $r_n$ is sampled at $n = t_0 + kT$ to get $x_k = r_{t_0 + kT}$. The LS estimate is computed using the symbols of the known sent ML sequence $a_k$ and a suitable section of the output. Note that the training sequence sent of length $L + N_{seq} = 25$ has $N_{seq} = 10$ which is enough to avoid the transient of the channel which is $N - 1$, with $N = N_1 + N_2 + 1$ the real length of the impulse response.
-Note also that the LS method can estimate a causal impulse response, $\tilde{h}_j, j = 0, \dots, N$, while the channel impulse response could have some precursors which are different from 0, and therefore an anticausal component. In order to correctly estimate $h_i, i = -N_1, \dots, N_2$, given a supposed length $\hat{N} = \hat{N}_1 + \hat{N}_2 + 1$, LS considers $a_k, k = 0, \dots, L+\hat{N}-1$ and the output $x_k, k = D_{ch} - N_1, \dots, D_{ch} - N_1 + L + \hat{N} - 1$ and it performs the estimation in the standard way. This is the same as considering a causal impulse response, with $\hat{N}$ coefficients, but since we suppose that $N_1$ assumes a given value in $0, D_{ch}$, then it is possible to shift the estimate left of $N_1$ samples and obtain the estimate for $\hat{h}_i, i = -N_1, N_2$. 
+Note also that the LS method can estimate a causal impulse response, $\tilde{h}_j, j = 0, \dots, N$, while the channel impulse response could have some precursors which are different from 0, and therefore an anticausal component. In order to correctly estimate $h_i, \; i = -N_1, \dots, N_2$, given a supposed length $\hat{N} = \hat{N}_1 + \hat{N}_2 + 1$, LS considers $a_k, \; k = 0, \dots, L+\hat{N}-1$ and the output $x_k, \; k = D_{ch} - \hat{N}_1, \dots, D_{ch} - \hat{N}_1 + L + \hat{N} - 1$ and it performs the estimation in the standard way. This is the same as considering a causal impulse response, with $\hat{N}$ coefficients, but since we suppose that $N_1$ assumes a given value in $[0, D_{ch}]$, then it is possible to shift the estimate left of $N_1$ samples and obtain the estimate for $\hat{h}_i, \; i = -N_1, \dots, N_2$. 
 The actual estimation is performed as in~\cite[p.~246]{bc}, i.e. using a $L \times \hat{N}$ observation matrix
 
 \begin{equation}
@@ -153,7 +153,7 @@ Therefore we can solve the LS problem as
 
 In particular, in order to estimate as first the length $\hat{N} = N_1 + N_2 + 1$ of the impulse response and $N_1, N_2$, we operate as follows. Let $N_{max} = N_{seq} = 10$ the maximum possible length $\hat{N}$ of the impulse response. As first, we set $N_1 = 0$ and compute the functional of the error 
 \begin{equation} 
-	\mathcal{E} = \frac{1}{L}\sum_{k = \hat{N} - 1}^{(L-1)+(\hat{N}-1)}|d(k)-\hat{d}(k)|^2
+	\mathcal{E} = \frac{1}{L}\sum_{k = \hat{N} - 1}^{(L-1)+(\hat{N}-1)}|x_k-\hat{x}_k|^2
 	\label{eq:functional}
 \end{equation}
 for $N_2 = 0, 1, \dots, N_{max} - N_1 - 1$. This procedure is repeated for $N_1 = 1$ and $2$. The functionals $\mathcal{E}$ for different $N_1$ are then plotted together, against $N_2$, in Fig.~\ref{fig:functional}.
@@ -203,7 +203,7 @@ In Tables~\ref{table:h0} and~\ref{table:h2} are reported the amplitude and phase
 The noise that the channel introduces is $\sigma_w^2 = -19.2411$ dB, while the noise estimate is lower: $\hat{\sigma}_w^2 = -20.5327$ dB for the choice $N_1 = 0$, and $\hat{\sigma}_w^2 = -20.851$ for the choice $N_1 = 2$ (see Eq.~\ref{eq:functional}). Note that this is the value given by a single estimate and not an expectation. However, this shows that a sequence of the given length $L = 15$ is too short to correctly estimate the real noise of the channel, since it averages on a number of noise samples which is close to the length of the impulse response we are trying to estimate. Indeed, by using a longer ML sequence (say 127) the estimate obtained is much closer to the real value also in each single realization. 
 
 % !!! Comparare la stima di Lambda_n_hat con il valore "vero" di Lambda_n_hat, fare le considerazioni su LS per cui il Lambda_n teorico raddoppia quando si usano i simboli ±1±j al posto di ±1.
-At last, it is necessary to make some considerations on the fact that the sequence used in this problem is a binary mapping in a QPSK constellation with $\sigma_a^2 = 2$ of a PN sequence. In particular let $a_l = (1+j) p_l$ with $p_l = \pm 1$ a symbol of the PN sequence. Then the autocorrelation of the sequence, of periodicity L, is
+At last, it is necessary to make some considerations on the fact that the sequence used in this problem is a binary mapping of a PN sequence in a QPSK constellation with $\sigma_a^2 = 2$. In particular let $a_l = (1+j) p_l$ with $p_l = \pm 1$ a symbol of the PN sequence. Then the autocorrelation of the sequence, of periodicity L, is
 \begin{equation}
 	r_a(n) = \frac{1}{L}\sum_{l = 0}^{L-1} a_l a^*_{l-n} = \\
 	\frac{1}{L}\sum_{l = 0}^{L-1} (1+j)p_l (1-j)p^*_{l-n} = 
@@ -219,12 +219,12 @@ with
 \end{equation}
 Therefore let $\Phi(i, n) = [\mathbf{\Phi}]_{i, n}$. Then
 \begin{equation}
-	\Phi(i, n) = (L -1 + N - N + 1)r_a(i-n) = \sigma_a^2 Lr_p(i-n)
+	\Phi(i, n) = (L -1 + N - N + 1)r_a(i-n) = L \, \sigma_a^2 \, r_p(i-n)
 \end{equation}
-At the same time $\vartheta(n) = \sigma_a^2 Lr_{dp}(n)$ with $\boldsymbol{\vartheta} = [\vartheta(0), \dots, \vartheta(N-1)]$.
+At the same time $\vartheta(n) = L \, \sigma_a^2 \, r_{xp}(n)$ with $\boldsymbol{\vartheta} = [\vartheta(0), \dots, \vartheta(N-1)]$.
 Therefore the LS can be solved in the usual way, as previously mentioned, with the equation $\hat{\mathbf{h}}= \mathbf{\Phi}^{-1} \boldsymbol{\vartheta}$ and provides the same solution that a PN sequence would give. 
 
-As for the signal-to-estimation error ratio, it is possible to proceed as in \cite{bc}. Let $\boldsymbol{\vartheta} = \sum_{N-1}^{N-1+L-1} x(k) \mathbf{a}^*(k)$ and $\boldsymbol{\xi} = \sum_{N-1}^{N-1+L-1} w(k) \mathbf{x}^*(k)$ we obtain $\boldsymbol{\vartheta} = \boldsymbol{\Phi}\mathbf{h} + \boldsymbol{\xi}$ and finally $\boldsymbol{\Delta h} = \boldsymbol{\Phi}^{-1} \boldsymbol{\xi}$. 
+As for the signal-to-estimation error ratio, it is possible to proceed as in \cite{bc}. Let $\boldsymbol{\vartheta} = \sum_{N-1}^{N-1+L-1} x(k) \mathbf{a}^*(k)$ and $\boldsymbol{\xi} = \sum_{N-1}^{N-1+L-1} w(k) \mathbf{x}^*(k)$. We obtain $\boldsymbol{\vartheta} = \boldsymbol{\Phi}\mathbf{h} + \boldsymbol{\xi}$ and finally $\boldsymbol{\Delta h} = \boldsymbol{\Phi}^{-1} \boldsymbol{\xi}$. 
 Let's now consider the energy of this vector. Since $w$ is zero mean, with variance $\sigma_w^2$, then
 \begin{equation}
 	\mathbf{R}_{\boldsymbol{\xi}} = E[\boldsymbol{\xi}^*\boldsymbol{\xi}^T] = \sigma_w^2 \mathbf{\Phi}^*
