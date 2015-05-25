@@ -548,6 +548,35 @@ Computation times for the Max-Log-MAP have been more or less twice those of the 
 % Grafici del BER, sia per canale stimato che per canale vero, riportando il numero di bit per le simulazioni
 
 \subsection*{Bit Error Rate plots}
+The BER for different scenarios is finally simulated. In Figure~\ref{fig:BER_same} there's the comparison between the BER of the 4 four different receivers given the same estimate for the channel impulse response at each value of the SNR $\Gamma$. The bit sequences used are ML sequences mapped into a QPSK constellation, whose length is in Table~\ref{table:BER_same_len}. They are chosen long enough to get at least 30 errors for each simulation but so long as to avoid unnecessary computations. Actually, since the ML sequences have an odd length and a QPSK symbol is composed of two bits, then if the ML sequence has length $2^r - 1$ the transmitted bits will be $2^r - 2$.
+
+Note that for a single estimate of the channel the results are not too close to the theoretical bound. Indeed, as previously mentioned, the estimate performed with a short training sequence is lousy and this affects the performances of the receivers. The same behavior can be seen in Figure~\ref{fig:BER_avg} where we average the BER for different realizations and estimate of the channel. This can be done only because the impulse response doesn't change over time, otherwise it would not be meaningful. 
+
+Note that LE and DFE tend to perform in the same way up to 10 dB, then the cancellation of the DFE becomes more accurate and its BER becomes lower than the one of LE. At the same time, Viterbi algorithm and FBA perform in the same way because they take the decision using the same criterion. The simulations for VA and FBA are run only up to 14 dB, with a length of $2^{23} - 2$, since the BER is below the required $10^{-5}$.
+
+The gain in performances of the receivers by using the real channel, instead of the estimated one, is more than 1 dB for the same BER. This can be seen in Figure~\ref{fig:BER_real}. Note that in these simulations the VA and FBA are evaluated up to 13 dB. The lengths of the sequences of these simulation are in Table~\ref{table:BER_real_len}, and are greater or equal than the ones in Table~\ref{table:BER_same_len} because for the same SNR $\Gamma$ the BER is lower.  
+
+\begin{table}[h!]
+\centering
+	\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+	SNR $\Gamma$	&	5	&	6	&	7	&	8	&	9	&	10	&	11	&	12	&	13	&	14	&	15 \\ \hline	
+	for LE 	(-2)	& $2^{13}$ & $2^{13}$ & $2^{13}$ & $2^{13}$ & $2^{14}$ & $2^{15}$ & $2^{15}$ & $2^{18}$ & $2^{18}$ & $2^{22}$ & $2^{22}$  \\
+	for DFE (-2)	& $2^{13}$ & $2^{13}$ & $2^{13}$ & $2^{13}$ & $2^{15}$ & $2^{16}$ & $2^{18}$ & $2^{20}$ & $2^{22}$ & $2^{23}$ & $2^{23}$  \\
+	for VA, FBA (-2)& $2^{15}$ & $2^{15}$ & $2^{15}$ & $2^{15}$ & $2^{18}$ & $2^{18}$ & $2^{20}$ & $2^{20}$ & $2^{22}$ & $2^{23}$ & $2^{23}$  \\
+	\end{tabular}
+	\caption{Length of sequences used to evaluate the BER, for same realization and estimate}
+	\label{table:BER_same_len}
+\end{table}
+
+\begin{table}[h!]
+	\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
+	SNR $\Gamma$	&	5	&	6	&	7	&	8	&	9	&	10	&	11	&	12	&	13	&	14	&	15 \\ \hline	
+	for each receiver (-2) & $2^{15}$ & $2^{15}$ & $2^{15}$ & $2^{15}$ & $2^{18}$ & $2^{18}$ & $2^{22}$ & $2^{23}$ & $2^{23}$ & $2^{23}$ & $2^{23}$  \\
+	\end{tabular}
+	\caption{Length of sequences used to evaluate the BER, assuming $\hat{h}_i = h_i$}
+	\label{table:BER_real_len}
+\end{table}
+
 
 \begin{figure}[h!]
 	\centering
@@ -562,6 +591,8 @@ Computation times for the Max-Log-MAP have been more or less twice those of the 
 	\caption{Bit error rates for different methods, averaged over different realizations}
 	\label{fig:BER_avg}
 \end{figure}
+
+
 
 \begin{figure}[h!]
 	\centering
