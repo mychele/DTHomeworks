@@ -330,6 +330,83 @@ They both use the information known about the channel in order to perform equali
 	\label{fig:DFE}
 \end{figure}
 
+Let the filter $c$ have length $M_1$ and an added delay equal to $D$, and the feedback filter $b$ have length $M_2$. Then the LE can be seen as a DFE with $M_2 = 0$. The filter coefficients are indeed computed in the same way, using the Wiener-Hopf theory and the MSE criterion applied to $J = E[|a{k-D} - y_k|^2]$. Note that we compare $a_{k-D}$ with $y_k$ because of the delay D introduced, therefore at the time $k$ at detection point the filter decides on $a_{k-D}$. The final equations that are implemented in the \texttt{DFE\_filter} function are the ones that solve the Wiener-Hopf equation, in particular
+\begin{equation}
+	[\mathbf{p}]_p = \sigma_a^2 \hat{h}^*_{D-p}, \quad \quad p = 0, 1, \dots, M_1 - 1
+\end{equation}
+and
+\begin{equation}
+	[\mathbf{R}]_{p, q} = \sigma_a^2 \bigg(\sum_{j = -N_1}^{N_2}\hat{h}_j \hat{h}^*_{j-(p-q)} - \sum_{j = 1}^{M_2} \hat{h}_{j+D-q}\hat{h}^*_{j+D-p} \bigg) + r_{w}(p-q), \quad \quad p,q = 0, 1, \dots, M_1 - 1
+\end{equation}
+with $r_w(p-q)$ the autocorrelation of the noise imposed by the receiver front-end filter. Since in this case the receiver filter is not present, it can be seen as a $\delta_n$ that does not change the shape of the noise. Therefore $r_w(p-q) = \hat{\sigma}_w^2 \delta_{p-q}$ since $w_k$ is white gaussian of estimated power $\hat{\sigma}_w^2$. Then the optimum feed-forward filter is given by
+\begin{equation}
+	\mathbf{c}_{opt} = \mathbf{R}^{-1}\mathbf{p}
+\end{equation}
+and for the DFE the feedback filter is given by 
+\begin{equation}
+	b_i = -\sum_{l=0}^{M_1-1} c_{opt, l} \hat{h}_{i+D-l}, \quad \quad i = 1, 2, \dots, M_2
+\end{equation}
+
+Finally, it is possible to compute in a close form the functional of the error, 
+\begin{equation}
+	J_{min} = \sigma_a^2 - \sum_{l=0}^{M_1-1} c_{opt, l}[\mathbf{p}]^*_l = \sigma_a^2\bigg( 1 - \sum_{l=0}^{M_1-1}c_{opt, l}\hat{h}_{D-l} \bigg)
+\end{equation}
+This is what drove us in the design of the filter and in the choice of the coefficients $M_1, M_2, D$. In particular we considered the parameters which minimize the functional for the lowest SNR $\Gamma$ considered, and observed that they do the same also for the functional at different $\Gamma$. In Figures~\ref{fig:jminle} and~\ref{fig:jmindfe} two of these functionals for LE and DFE can be seen. Note that the choice of the couple $M_1, D$ is given by the couple of minimum values for which the functional presents a minimum or a knee. For example, in Figure~\ref{fig:jminle}[b], the couple $M_1 = 20, D = 15$ guarantees a low $J_min$, and by increasing the value of the two parameters there is not a considerable gain in the performances. At the same time, in Figure~\ref{fig:jmindfe}, it can be seen that by choosing a $D > M_1 - 1$ doesn't bring any gain, therefore we set $D = M_1 - 1$ for the DFE. Note that $M_2 = 0$ for LE, while for the DFE is given by the other parameters, i.e. $M_2 = N_2 + M_1 - 1 - D$ in order to be sure to cancel out all the postcursors (at least the ones accounted by the estimate of $N_2$). The choice of the parameters is reported in Table~\ref{table:ledfe}. 
+
+% We also run some simulations in which we changed the parameters 
+
+\begin{figure}
+	\centering
+	\subfigure[$\Gamma = 5$]{\includegraphics[width= 0.42\textwidth]{jmin_LE_5}}
+	\subfigure[$\Gamma = 15$]{\includegraphics[width= 0.42\textwidth]{jmin_LE_15}}
+	\caption{$J_{min}$ for LE}
+	\label{fig:jminle}
+\end{figure}
+
+\begin{figure}
+	\centering
+	\subfigure[$\Gamma = 5$]{\includegraphics[width= 0.42\textwidth]{jmin_DFE_5}}
+	\subfigure[$\Gamma = 15$]{\includegraphics[width= 0.42\textwidth]{jmin_DFE_15}}
+	\caption{$J_{min}$ for DFE}
+	\label{fig:jmindfe}
+\end{figure}
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{c|c|c|c}
+	Filter 	& 	$M_1$	& 	$D$		&		$M_2$		\\ \hline
+	LE 		&	20		&	15		&		0			\\
+	DFE 	&	25		&	24		&		4			\\
+	\end{tabular}
+	\caption{Filter parameters}
+	\label{table:ledfe}
+\end{table}
+
+In order to visualize the equalization brought by these filter in Figures~\ref{fig:hledfe},~\ref{fig:LEcoeff} and~\ref{fig:DFEcoeff} there is the plot of the estimated impulse response $h_i$, both for LE and DFE, the plot of the feed-forward filter $c$ in the two cases, of the convolution between $h_i$ and $c$, which is $\psi_i = (h*c)_i$, and only for the DFE the plot if the coefficients of the feedback filter $b$. Note that the LE should try to equalize both postcursors and precursors, but in this case only the first are present. 
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.7\textwidth]{h_LEDFE}
+	\caption{Estimated $|h|$ for LE and DFE coefficients computation}
+	\label{fig:hledfe}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.7\textwidth]{cphiLE}
+	\caption{$|c|$ and $|\psi|$ for LE}
+	\label{fig:LEcoeff}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\subfigure{\includegraphics[width = 0.7\textwidth]{cphiDFE}}
+	\subfigure{\includegraphics[width = 0.7\textwidth]{bDFE}}
+	\caption{$|c|$, $|\psi|$, $|b|$ for DFE}
+	\label{fig:DFEcoeff}
+\end{figure}
+
+\clearpage
 
 % Considerazioni su Viterbi, Kd, grafico della distribuzione
 \subsection*{Viterbi algorithm}
@@ -433,7 +510,7 @@ where $v_k(i) = \ln V_k(i)$ is the logarithm of the state metric.
 
 Using the logarithm the difference between the state metrics is enhanced, and as a result one term usually dominates within each time index $k$ in the sum above. Therefore, we can introduce the Max-Log-MAP criterion:
 \begin{equation}
-	\hat{a}_{k+L1} = \argmax_{\beta \in \mathcal{A}} \tilde{\ell}_k(\beta)
+	\hat{a}_{k+L_1} = \argmax_{\beta \in \mathcal{A}} \tilde{\ell}_k(\beta)
 	\label{eq:decision}
 \end{equation}
 where the following approximation holds:
@@ -448,19 +525,19 @@ The first cycle computes the channel transition metrics, storing them in a $M \t
 \begin{equation}
 	c_k(j|i) = - |\rho_k - u_k|^2
 \end{equation}
-Since the desired signal $u_k$ is just a function of the current and next state, its values are precomputed like in the Viterbi implementation~\eqref{eq:ukdefinition} and stored in a lookup table. $\rho_k$ represents the k-th sample of the received signal. For each time $k$, the $j$ index refers to the destination state, while the $i$ index refers to the starting state. Using matrix operations in MATLAB, we can fill the $c$ matrix by only cycling over time. For $k = K$ all values are set to 0.
+Since the desired signal $u_k$ is just a function of the current and next state, its values are precomputed like in the Viterbi implementation~\eqref{eq:ukdefinition} and stored in a lookup table. $\rho_k$ represents the k-th sample of the received signal. For each time $k$, the $j$ index refers to the destination state, while the $i$ index refers to the starting state. Using matrix operations in MATLAB, we can fill the $c$ matrix by only iterating over time. For $k = K$ all values are set to 0.
 
 The second cycle computes the Backward metric. A matrix of size $N_S \times K+1$ is created and initialized to zero. This also initializes the final, K-th state to the 0 value, since the final symbol that will be received is unknown (performance of the algorithm may be enhanced by transmitting a previously decided symbol, also known to the receiver). The algorithm cycles the symbol indices from $K-1$ to $0$, iterating over the states and updating their backward metric according to the following expression:
 \begin{equation}
 	\tilde{b}_k(i) = \max_{m \in [1, \dots, N_S]}[\tilde{b}_{k+1}(m) + c_{k+1}(m|i)] \quad i = 1, \dots, N_S
 \end{equation}
-At each time $k$, the indices $m$ of the states which are reachable from the current one are needed. These indices are computed using the expression $m = ((i-1) \lmod{M^{L1+L2-1}}) * M + j$, where $i$ is the current state and $j = 0, \dots, M-1$ is the index of the transition. On the other hand, the $c_{k+1}(m|i)$ coefficients are readily available as the i-th column of the channel transition metrics at time $k+1$.
+At each time $k$, the indices $m$ of the states which are reachable from the current one are needed. These indices are computed using the expression $m = ((i-1) \lmod{M^{L_1+L_2-1}}) * M + j$, where $i$ is the current state and $j = 0, \dots, M-1$ is the index of the transition. On the other hand, the $c_{k+1}(m|i)$ coefficients are readily available as the i-th column of the channel transition metrics at time $k+1$.
 
 The final cycle is used to compute the $\tilde{f}_k(j)$ metric for each state at each symbol index $k$. Since the State metric is $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k(i)$ for $i = 1, \dots, N_S$, there is no need to memorize $\tilde{f}_k(i)$ for every time index. A single iteration is performed in order to cover all the symbol indices from $0$ to $K-1$. For each $k$, another iteration over the $N_S$ states fills the vector of the forward metrics for all the states of the current $k$ index using the equation
 \begin{equation}
 	\tilde{f}_k(j) = \max_{\ell \in [1, \dots, N_S]} [\tilde{f}_{k-1}(\ell) + c_k(j|\ell)] \quad j = 1, \dots, N_S
 \end{equation}
-and the state metric is computed by adding this vector to the one memorized during the previous cycle, containing the backward metric. To get the channel transition metrics $c_k(j|\ell)$, the indices $\ell$ of the states that can reach the current one are necessary. These indices are computed according to the following expression: $\ell = \ceil{\frac{j}{M}} + r*M^{L1+L2-1}$, where $r = 0, \dots, M-1$. 
+and the state metric is computed by adding this vector to the one memorized during the previous cycle, containing the backward metric. To get the channel transition metrics $c_k(j|\ell)$, the indices $\ell$ of the states that can reach the current one are necessary. These indices are computed according to the following expression: $\ell = \ceil{\frac{j}{M}} + r*M^{L_1+L_2-1}$, where $r = 0, \dots, M-1$. 
 After computing the State metric $\tilde{v}_k(i) = \tilde{f}_k + \tilde{b}_k$ for $i = 1, \dots, N_S$, the likelihood function is obtained using~\eqref{eq:likelihood}: in order to decide which state metrics should be compared, we make use of a precomputed matrix of size $N_S \times M$ which contains the symbols associated to each state and pick only those states whose initial symbol is $\beta$. Finally, the decision is performed inside the same cycle according to~\eqref{eq:decision}, and the result is memorized in a vector.
 
 Memory occupation for the Max-Log-MAP criterion is a concern. Since the Backward and channel transition matrices are memorized, their total memory occupation is of $M \times N_S \times K + N_S \times K$ memory cells. Computation times for the Max-Log-MAP have been more or less twice those of the Viterbi algorithm for sequences of the same length.
