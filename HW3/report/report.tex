@@ -207,7 +207,7 @@ At last, it is necessary to make some considerations on the fact that the sequen
 \begin{equation}
 	r_a(n) = \frac{1}{L}\sum_{l = 0}^{L-1} a_l a^*_{l-n} = \\
 	\frac{1}{L}\sum_{l = 0}^{L-1} (1+j)p_l (1-j)p^*_{l-n} = 
-	\frac{2}{L} \sum_{l= 0}^{L-1} p_l p^*_{l-n} = 2 r_p(n) = \sigma_a^2 r_p(n)
+	\frac{2}{L} \sum_{l= 0}^{L-1} p_l p^*_{l-n} = 2 r_p(n)
 \end{equation}
 with 
 \begin{equation}
@@ -219,9 +219,9 @@ with
 \end{equation}
 Therefore let $\Phi(i, n) = [\mathbf{\Phi}]_{i, n}$. Then
 \begin{equation}
-	\Phi(i, n) = (L -1 + N - N + 1)r_a(i-n) = L \, \sigma_a^2 \, r_p(i-n)
+	\Phi(i, n) = (L -1 + N - N + 1)r_a(i-n) = L \, 2 \, r_p(i-n)
 \end{equation}
-At the same time $\vartheta(n) = L \, \sigma_a^2 \, r_{xp}(n)$ with $\boldsymbol{\vartheta} = [\vartheta(0), \dots, \vartheta(N-1)]$.
+At the same time $\vartheta(n) = L \, 2 \, r_{xp}(n)$ with $\boldsymbol{\vartheta} = [\vartheta(0), \dots, \vartheta(N-1)]$.
 Therefore the LS can be solved in the usual way, as previously mentioned, with the equation $\hat{\mathbf{h}}= \mathbf{\Phi}^{-1} \boldsymbol{\vartheta}$ and provides the same solution that a PN sequence would give. 
 
 As for the signal-to-estimation error ratio, it is possible to proceed as in \cite{bc}. Let $\boldsymbol{\vartheta} = \sum_{N-1}^{N-1+L-1} x(k) \mathbf{a}^*(k)$ and $\boldsymbol{\xi} = \sum_{N-1}^{N-1+L-1} w(k) \mathbf{x}^*(k)$. We obtain $\boldsymbol{\vartheta} = \boldsymbol{\Phi}\mathbf{h} + \boldsymbol{\xi}$ and finally $\boldsymbol{\Delta h} = \boldsymbol{\Phi}^{-1} \boldsymbol{\xi}$. 
@@ -239,30 +239,30 @@ Then we need $E[||\mathbf{\Delta h}||^2]$ which is
 \end{equation}
 Finally, since the definition of signal-to-estimation error ratio is 
 \begin{equation}
-	\Lambda_n = \frac{\sigma_w^2}{\M_a E[||\mathbf{\Delta h}||^2]}
+	\Lambda_n = \frac{\sigma_w^2}{M_a E[||\mathbf{\Delta h}||^2]}
 \end{equation}
-with $M_a = \sigma_a^2 + (E[a])^2 \approx \sigma_a^2 = 2$ for $L >> 1$. Then in this specific case
+with $M_a = 2$ for a QPSK. Then in this specific case
 \begin{equation}
-	\Lambda_n = \frac{\mbox{tr}[(\mathbf{\Phi})^{-1}]}{\sigma_a^2}
+	\Lambda_n = \frac{\mbox{tr}[(\mathbf{\Phi})^{-1}]}{M_a^2}
 \end{equation}
-Since $\mathbf{\Phi}$ has the same form of the $\mathbf{\Phi}$ matrix for a PN sequence, with the exception of a multiplicative factor $\sigma_a^2 = 2$, it is possible to use the same derivation of \cite{bc} in order to compute $\Lambda_n$. Let $\mathbf{1}_{N\times N}$ a matrix with all ones, then
+Since $\mathbf{\Phi}$ has the same form of the $\mathbf{\Phi}$ matrix for a PN sequence, with the exception of a multiplicative factor $2$, it is possible to use the same derivation of \cite{bc} in order to compute $\Lambda_n$. Let $\mathbf{1}_{N\times N}$ a matrix with all ones, then
 \begin{equation}
-	\mathbf{\Phi} = \sigma_a^2 ((L+1)\mathbf{I} - \mathbf{1}_{N\times N})
+	\mathbf{\Phi} = 2 ((L+1)\mathbf{I} - \mathbf{1}_{N\times N})
 \end{equation}
 and
 \begin{equation}
-	\mathbf{\Phi}^{-1} = \frac{\sigma_a^2}{L+1} \bigg( \mathbf{I} + \frac{\mathbf{1}_{N\times N}}{L+1-N} \bigg)
+	\mathbf{\Phi}^{-1} = \frac{2}{L+1} \bigg( \mathbf{I} + \frac{\mathbf{1}_{N\times N}}{L+1-N} \bigg)
 \end{equation}
 Finally, following \cite{bc}, we obtain
 \begin{equation}
-	\Lambda_n = \frac{\sigma_a^2}{\sigma_a^2}\frac{(L+1)(L+1-N)}{N(L+2-N)}
+	\Lambda_n = \frac{2}{M_a}\frac{(L+1)(L+1-N)}{N(L+2-N)} = \frac{(L+1)(L+1-N)}{N(L+2-N)}
 	\label{eq:lambdateo}
 \end{equation}
 getting the same result as for a PN sequence.
 Finally, some numerical results are reported in Table~\ref{table:lambda}, both for the choice $N_1 = 2$ given by the minimum of the functional and for $N_1 = 0$ given by the practical considerations mentioned above. 
 The first column of Table~\ref{table:lambda} contains the estimated value computed as
 \begin{equation}
-	\Lambda_n = \frac{\hat{\sigma}_w^2}{\M_a E[||\mathbf{\Delta h}||^2]}
+	\Lambda_n = \frac{\hat{\sigma}_w^2}{M_a E[||\mathbf{\Delta h}||^2]}
 	\label{eq:lambdareal}
 \end{equation}
 Note that $E[||\mathbf{\Delta h}||^2]$ is computed by assuming the real $h_i$ is known and that the value of Equation~\eqref{eq:lambdareal} is affected by the bad estimate of $\sigma_w^2$ given by the choice of a value of $L$ which doesn't provide a long enough training sequence.
