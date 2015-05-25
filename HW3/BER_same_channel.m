@@ -88,14 +88,16 @@ for snr_i = 1:length(snr_vec)
     fprintf('done!\n');
     
     % FBA
-    fprintf('FBA, snr = %d ', snr_ch);
-    [~, pbit, n_biterr] = fba(packet, ...
-        x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2);
-    % 25 is the length of the training sequence, that is only used
-    % to train Viterbi and is not considered for pbit evaluation.
-    pbit_fba_same_ch(snr_i) = pbit;
-    n_biterr_fba_same_ch(snr_i) = n_biterr;
-    fprintf('done!\n');
+    if (snr_ch <= 13) % the BER for snr = 13 dB is already below 10^-5
+        fprintf('FBA, snr = %d ', snr_ch);
+        [~, pbit, n_biterr] = fba(packet, ...
+            x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2);
+        % 25 is the length of the training sequence, that is only used
+        % to train Viterbi and is not considered for pbit evaluation.
+        pbit_fba_same_ch(snr_i) = pbit;
+        n_biterr_fba_same_ch(snr_i) = n_biterr;
+        fprintf('done!\n');
+    end
     
 end
 

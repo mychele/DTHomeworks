@@ -75,26 +75,27 @@ for snr_i = 1:length(snr_vec)
     n_biterr_LE_real_ch(snr_i, 1) = num_err;
     fprintf('done!\n');
     
-    % VA
-    % Use the whole sequence
-    fprintf('Viterbi, snr = %d ', snr_ch);
-    [~, pbit, n_biterr] = viterbi(packet, x(1+assumed_dly-N1:end), hi, ...
-        N1, N2, 0, N2, 25); % 25 is the length of the training sequence, that is only used
-    % to train Viterbi and is not considered for pbit evaluation.
-    pbit_viterbi_real_ch(snr_i) = pbit;
-    n_biterr_viterbi_real_ch(snr_i) = n_biterr;
-    fprintf('done!\n');
-    
-    % FBA
-    fprintf('FBA, snr = %d ', snr_ch);
-    [~, pbit, n_biterr] = fba(packet, ...
-        x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2);
-    % 25 is the length of the training sequence, that is only used
-    % to train Viterbi and is not considered for pbit evaluation.
-    pbit_fba_real_ch(snr_i) = pbit;
-    n_biterr_fba_real_ch(snr_i) = n_biterr;
-    fprintf('done!\n');
-    
+    if(snr_ch <= 13) % the BER for snr = 13 dB is already below 10^-5
+        % VA
+        % Use the whole sequence
+        fprintf('Viterbi, snr = %d ', snr_ch);
+        [~, pbit, n_biterr] = viterbi(packet, x(1+assumed_dly-N1:end), hi, ...
+            N1, N2, 0, N2, 25); % 25 is the length of the training sequence, that is only used
+        % to train Viterbi and is not considered for pbit evaluation.
+        pbit_viterbi_real_ch(snr_i) = pbit;
+        n_biterr_viterbi_real_ch(snr_i) = n_biterr;
+        fprintf('done!\n');
+        
+        % FBA
+        fprintf('FBA, snr = %d ', snr_ch);
+        [~, pbit, n_biterr] = fba(packet, ...
+            x(1+assumed_dly : assumed_dly+length(packet)), hi, N1, N2);
+        % 25 is the length of the training sequence, that is only used
+        % to train Viterbi and is not considered for pbit evaluation.
+        pbit_fba_real_ch(snr_i) = pbit;
+        n_biterr_fba_real_ch(snr_i) = n_biterr;
+        fprintf('done!\n');
+    end
 end
 
 % Save the data computed, it will be processed by the BER_plot script
