@@ -114,7 +114,7 @@ The noisy output $r_n$ of the channel is computed with a polyphase version of th
 The first operation which the receiver does is estimating $t_0$ as optimal timing phase in $T_c$. In particular, given the stream of symbols $r_n$, and the knowledge of the ML sequence $a_l, l\in [0, L-1]$, the receiver computes
 
 \begin{equation}
-	m_{opt} = \argmax_m | x_{ra}(mT_c) | = \argmax_{m} | \frac{1}{L} \sum_{l = 0}^{L - 1} x(lT + mT_c)a^* (l) |
+	m_{opt} = \argmax_{m} | x_{ra}(mT_c) | = \argmax_{m} | \frac{1}{L} \sum_{l = 0}^{L - 1} x(lT + mT_c)a^* (l) |
 \end{equation}
 for $ 0 < m < 40$ and finds that
 \begin{equation}
@@ -222,9 +222,9 @@ Therefore let $\Phi(i, n) = [\mathbf{\Phi}]_{i, n}$. Then
 	\Phi(i, n) = (L -1 + N - N + 1)r_a(i-n) = \sigma_a^2 Lr_p(i-n)
 \end{equation}
 At the same time $\vartheta(n) = \sigma_a^2 Lr_{dp}(n)$ with $\boldsymbol{\vartheta} = [\vartheta(0), \dots, \vartheta(N-1)]$.
-Therefore the LS can be solved in the usual way, as previously mentioned, with the equation $\hat{\mathbf{h}}= \mathbf{\Phi}^{-1} \boldsymbol{\vartheta}$ and provides the same soultion that a PN sequence would give. 
+Therefore the LS can be solved in the usual way, as previously mentioned, with the equation $\hat{\mathbf{h}}= \mathbf{\Phi}^{-1} \boldsymbol{\vartheta}$ and provides the same solution that a PN sequence would give. 
 
-As for the signal-to-estimation error ratio, it is possible to procede as in \cite{bc}. Let $\boldsymbol{\vartheta} = \sum_{N-1}^{N-1+L-1} x(k) \mathbf{a}^*(k)$ and $\boldsymbol{\xi} = \sum_{N-1}^{N-1+L-1} w(k) \mathbf{x}^*(k)$ we obtain $\boldsymbol{\vartheta} = \boldsymbol{\Phi}\mathbf{h} + \boldsymbol{\xi}$ and finally $\boldsymbol{\Delta h} = \boldsymbol{\Phi}^{-1} \boldsymbol{\xi}$. 
+As for the signal-to-estimation error ratio, it is possible to proceed as in \cite{bc}. Let $\boldsymbol{\vartheta} = \sum_{N-1}^{N-1+L-1} x(k) \mathbf{a}^*(k)$ and $\boldsymbol{\xi} = \sum_{N-1}^{N-1+L-1} w(k) \mathbf{x}^*(k)$ we obtain $\boldsymbol{\vartheta} = \boldsymbol{\Phi}\mathbf{h} + \boldsymbol{\xi}$ and finally $\boldsymbol{\Delta h} = \boldsymbol{\Phi}^{-1} \boldsymbol{\xi}$. 
 Let's now consider the energy of this vector. Since $w$ is zero mean, with variance $\sigma_w^2$, then
 \begin{equation}
 	\mathbf{R}_{\boldsymbol{\xi}} = E[\boldsymbol{\xi}^*\boldsymbol{\xi}^T] = \sigma_w^2 \mathbf{\Phi}^*
@@ -313,7 +313,7 @@ We also computed this bound with a simulation, where the receiver performed a de
 
 % Considerazioni sull'implementazione di LE e DFE, riportare i grafici di Jmin (qualche grafico), considerazioni su M1, M2, D, riportare i grafici di \hat{h}, c, psi, b per \Gamma = 10 dB
 \subsection*{Linear Equalizer and Decision Feedback Equalizer}
-The simpliest receivers implemented are a linear equalizer (LE) and a decision feedback equalizer (DFE) which try to remove the ISI component from the received samples $x_k$. The decision is then taken with a threshold detector. 
+The simplest receivers implemented are a linear equalizer (LE) and a decision feedback equalizer (DFE) which try to remove the ISI component from the received samples $x_k$. The decision is then taken with a threshold detector. 
 
 They both use the information known about the channel in order to perform equalization. In particular the LE tries to equalize both the precursors and the postcursors out of the received signal $x_k$, while DFE uses the detected symbols to perform cancellation of the postcursors from a signal already filtered with a feed-forward filter that removes the precursors. Figures~\ref{fig:LE} and~\ref{fig:DFE} contain the block scheme for both of them. 
 \begin{figure}[h!]
@@ -338,7 +338,7 @@ and
 \begin{equation}
 	[\mathbf{R}]_{p, q} = \sigma_a^2 \bigg(\sum_{j = -N_1}^{N_2}\hat{h}_j \hat{h}^*_{j-(p-q)} - \sum_{j = 1}^{M_2} \hat{h}_{j+D-q}\hat{h}^*_{j+D-p} \bigg) + r_{w}(p-q), \quad \quad p,q = 0, 1, \dots, M_1 - 1
 \end{equation}
-with $r_w(p-q)$ the autocorrelation of the noise imposed by the receiver front-end filter. Since in this case the receiver filter is not present, i.e. $g_{RC}(t) = \delta(t)$, and it does not change the shape of the noise. Therefore $r_w(p-q) = \hat{\sigma}_w^2 \delta_{p-q}$ since $w_k$ is white gaussian of estimated power $\hat{\sigma}_w^2$. Then the optimum feed-forward filter is given by
+with $r_w(p-q)$ the autocorrelation of the noise imposed by the receiver front-end filter. Since in this case the receiver filter is not present, i.e. $g_{RC}(t) = \delta(t)$, and it does not change the shape of the noise. Therefore $r_w(p-q) = \hat{\sigma}_w^2 \delta_{p-q}$ since $w_k$ is white Gaussian of estimated power $\hat{\sigma}_w^2$. Then the optimum feed-forward filter is given by
 \begin{equation}
 	\mathbf{c}_{opt} = \mathbf{R}^{-1}\mathbf{p}
 \end{equation}
