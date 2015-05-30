@@ -52,7 +52,7 @@ a_matrix = reshape(a_pad, M, []); % it should mantain columnwise order
 % http://it.mathworks.com/matlabcentral/newsreader/view_thread/17104
 % it should be a columnwise operation!
 A_matrix = ifft(a_matrix); % TODO check if matlab downscales
-clear a_matrix % we care about memory consumption, don't we? 
+%clear a_matrix % we care about memory consumption, don't we? 
 
 % add the preamble to each column
 A_matrix = [A_matrix(M-Npx+1:M, :); A_matrix]; % very powerful operation
@@ -60,18 +60,18 @@ A_matrix = [A_matrix(M-Npx+1:M, :); A_matrix]; % very powerful operation
 % serialize in order to call channel output
 s = reshape(A_matrix, [], 1);
 % apply the correct gain too
-s = M*s;
+s = sqrt(M)*s;
 
 %% Send over the noisy channel
 % because of 9.35, 9.38 and 9.39
-snr = 14; % dB
+snr = 10; % dB
 snr_lin = 10^(snr/10);
-[r, sigma_w, g] = channel_output(s, snr, OFDM);
+[r, sigma_w, g] = channel_output(s, snr_lin, false);
 G = fft(g, 512);
 G = G(:);
 
 %% Process at the receiver
-r = r(t0:end); % consider the effect of the convolution at the end should be easy,
+%r = r(t0:end); % consider the effect of the convolution at the end should be easy,
 % since the resulting data should have a length which is a multiple of M +
 % Npx
 r = r(1:end - mod(length(r), M+Npx)); 
