@@ -100,7 +100,26 @@ basicstyle=\footnotesize\ttfamily
 
 \section*{Problem 2}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%% PROBLEM 2 %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Problem 3}
+As usual the SNR is defined as $\Gamma = \frac{\sigma_s^2 E_h}{\sigma_w^2}$. With an OFDM system, however, the meaning of $\sigma_s^2$ changes. In particular if the transmitter is implemented with an IFFT, which is
+\begin{equation}
+	A_k[\ell] = \frac{1}{\mathcal{M}} \sum_{i = 0}^{\mathcal{M} - 1} W_{\mathcal{M}}^{-i\ell} a_k[i], \quad \ell = 0, 1, \dots, \mathcal{M}-1
+\end{equation}
+as in the MATLAB implementation, followed by the polyphase compoment of a prototype filter, which in our case is a $\delta_n$ filter, with a gain $\mathcal{M}$ as specified in \cite{bc}, then we have 
+% see formula 9.35, 9.38, 9.39
+\begin{equation}
+	\sigma_s^2 = \mathcal{M} \sigma_a^2
+\end{equation}
+since data is IID. 
 
+Therefore, if the energy of the data symbols is considered, then
+\begin{equation}
+	\Gamma = \frac{\mathcal{M} \sigma_a^2 E_h}{\sigma_w^2}
+\end{equation}
+must be the SNR considered when computing the noise level introduced by the channel.
 
 \begin{thebibliography}{10}
 
