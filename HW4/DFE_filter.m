@@ -1,4 +1,4 @@
-function [ Jmin, r ] = DFE_filter(x, hi, N1, N2, est_sigmaw, D, M1, M2, verb)
+function [ Jmin, r ] = DFE_filter(x, hi, N1, N2, est_sigmaw, D, M1, M2, coding, verb)
 % Function that performs DFE filtering. It needs
 % packet is the sequence of sent symbols
 % x is the received samples vector in T, normalized by h0
@@ -90,7 +90,11 @@ for k = 0:length(x) - 1 + D
     
 end
 
-r = r(D+1:end);
+if (coding == true)
+   r = r(D+1:end);
+else % if coding is not used return the decisions
+   r = detected(D+1:end);
+end
 % decisions = detected(D+1:end);
 % 
 % if (verb == 1)

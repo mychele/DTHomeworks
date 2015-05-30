@@ -1,6 +1,6 @@
 % This script converts bits into symbols, using the encoder + interleaver +
 % bitmap setup.
-clear all
+clear
 close all
 clc
 
@@ -31,6 +31,7 @@ bits = randi([0 1], 1, bit_number);
 enc_bits = encodeBits(bits);
 
 int_enc_bits = interleaver(enc_bits);  % Interleave the encoded bits
+coding = true;
 
 symbols = bitmap(int_enc_bits.'); 
 
@@ -47,7 +48,7 @@ hi = h(t0-N1:t0+N2)/h(t0);
 M1_dfe = 15;
 D_dfe = M1_dfe - 1;
 M2_dfe = N2 + M1_dfe - 1 - D_dfe;
-[~, rcv_bits] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, false);
+[~, rcv_bits] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, coding, false);
 
 %% Compute Log Likelihood Ratio
 llr = zeros(2*length(symbols),1);

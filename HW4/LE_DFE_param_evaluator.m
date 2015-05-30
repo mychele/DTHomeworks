@@ -45,7 +45,7 @@ for snr_i = 1:length(snr_vec)
             printmsg_delete = repmat(sprintf('\b'), 1, length(printmsg));
             
             M2_dfe = N2 + M1_dfe - 1 - D_dfe;  % FB filter: one less than the FF filter
-            [JminDFE(snr_i, M1_dfe, D_dfe), ~] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, false);
+            [JminDFE(snr_i, M1_dfe, D_dfe), ~] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, false, false);
         end
     end
 end
