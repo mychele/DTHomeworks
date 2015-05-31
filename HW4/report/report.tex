@@ -104,22 +104,22 @@ basicstyle=\footnotesize\ttfamily
 %%%%%%%%%%%%%% PROBLEM 2 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Problem 3}
-As usual the SNR is defined as $\Gamma = \frac{\sigma_s^2 E_h}{\sigma_w^2}$. With an OFDM system, however, the meaning of $\sigma_s^2$ changes. In particular if the transmitter is implemented with an IFFT, which is
+As usual the SNR is defined as $\Gamma = \frac{\sigma_s^2 E_h}{\sigma_w^2}$. With an OFDM system, however, the meaning of $\sigma_s^2$ changes. In particular if the transmitter is implemented with an IDFT, which is
 \begin{equation}
 	A_k[\ell] = \frac{1}{\mathcal{M}} \sum_{i = 0}^{\mathcal{M} - 1} W_{\mathcal{M}}^{-i\ell} a_k[i], \quad \ell = 0, 1, \dots, \mathcal{M}-1
 \end{equation}
-as in the MATLAB implementation, followed by the polyphase compoment of a prototype filter, which in our case is a $\delta_n$ filter, with a gain $\mathcal{M}$ as specified in \cite{bc}, then we have 
+followed by the polyphase compoment of a prototype filter, which in our case is a $\delta_n$ filter, with a gain $\mathcal{M}$ as specified in \cite{bc}, then we have 
 % see formula 9.35, 9.38, 9.39
 \begin{equation}
-	\sigma_s^2 = \mathcal{M} \sigma_a^2
+	\sigma_s^2 = \sigma_a^2
 \end{equation}
 since data is IID. 
 
-Therefore, if the energy of the data symbols is considered, then
+However, since the gain factor would simply change the scaling of the data and should be removed at the receiver, we don't consider it in the actual implementation. MATLAB \texttt{ifft} performs the IDFT with the correct scaling factor of $1/\mathcal{M}$. Therefore, if the energy of the data symbols that are pushed into the channel is considered, then
 \begin{equation}
-	\Gamma = \frac{\mathcal{M} \sigma_a^2 E_h}{\sigma_w^2}
+	\Gamma = \frac{\sigma_a^2 E_h}{\mathcal{M} \sigma_w^2}
 \end{equation}
-must be the SNR considered when computing the noise level introduced by the channel.
+must be the SNR considered when computing the noise level introduced by the channel in our implementation.
 
 \begin{thebibliography}{10}
 
