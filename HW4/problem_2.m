@@ -29,7 +29,7 @@ parfor snr_idx = 1:length(snr_vec_knownch_uncoded)
     symbols = bitmap(bits.');
     
     % Send through the channel
-    [rcv_symb, sigma_w, h] = channel_output(symbols, 10^(curr_snr/10));
+    [rcv_symb, sigma_w, h] = channel_output(symbols, 10^(curr_snr/10), false);
     rcv_symb = rcv_symb(t0:end-7)/h(t0);
     hi = h(t0-N1:t0+N2)/h(t0);
     
@@ -89,7 +89,7 @@ parfor snr_idx = 1:length(snr_vec_knownch_coded)
     symbols = bitmap(int_enc_bits.');
     
     % Send through the channel
-    [rcv_symb, sigma_w, h] = channel_output(symbols, 10^(curr_snr/10));
+    [rcv_symb, sigma_w, h] = channel_output(symbols, 10^(curr_snr/10), false);
     rcv_symb = rcv_symb(t0:end-7)/h(t0);
     hi = h(t0-N1:t0+N2)/h(t0);
     
@@ -191,7 +191,7 @@ while(~found)
     end
 end
 
-snr_vec_estch_coded = 0:0.1:4.5;
+snr_vec_estch_coded = 0:0.5:4.5;
 seq_lengths_estch_coded = bit_number*ones(1, length(snr_vec_estch_coded));
 Pbit_estch_coded = zeros(length(snr_vec_estch_coded),1);
 
@@ -249,3 +249,6 @@ semilogy(snr_vec_estch_coded, Pbit_estch_coded, '--')
 semilogy(snr_vec_estch_coded, Pbit_estch_coded, '--')
 xlabel('snr [dB]'), ylabel('BER')
 ylim([10^-5, 10^-1])
+
+%% Clean parpool
+delete(gcp)
