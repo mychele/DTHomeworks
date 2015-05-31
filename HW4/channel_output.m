@@ -11,7 +11,7 @@ M = 512;
 
 E_h = sum(abs(h).^2);
 if (OFDM == true) % different definition of SNR Msigma_a E_h / sigma_w
-    sigma_a = 2*M;
+    sigma_a = 2/M;
 else
     sigma_a = 2; % for a QPSK
 end
