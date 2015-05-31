@@ -7,6 +7,9 @@ rng default
 
 %parpool(4);
 
+% data
+sigma_a = 2;
+
 %% Get optimal number of bits
 desired_bits = 2^22;
 % Compute the closest number of bits that the encoder will like
@@ -34,7 +37,7 @@ for curr_snr = 1:length(snr_vec)
    % Send stuff through
    snrlin = 10^(snrdb/10);
    Eh = 1;  % Energy of the ideal channel ir
-   sigma_w = 2*Eh/snrlin;
+   sigma_w = sigma_a*Eh/snrlin;
    w = wgn(length(symbols), 1, 10*log10(sigma_w), 'complex');
    rcv_bits = symbols + w;
    
@@ -68,7 +71,7 @@ for curr_snr = 1:length(snr_vec_enc)
    % Send stuff through
    snrlin = 10^(snrdb/10);
    Eh = 1;
-   sigma_w = 2*Eh/snrlin;
+   sigma_w = sigma_a*Eh/snrlin;
    w = wgn(length(symbols), 1, 10*log10(sigma_w), 'complex');
    rcv_bits = symbols + w;
    
