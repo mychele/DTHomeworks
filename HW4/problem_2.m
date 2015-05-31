@@ -71,7 +71,7 @@ while(~found)
     end
 end
 
-snr_vec_knownch_coded = 0:0.1:2;
+snr_vec_knownch_coded = 0:0.5:3;  % Pbit falls at 2.2 dBs
 seq_lengths_knownch_coded = bit_number*ones(1, length(snr_vec_knownch_coded));
 Pbit_knownch_coded = zeros(length(snr_vec_knownch_coded),1);
 
@@ -159,7 +159,7 @@ parfor snr_idx = 1:length(snr_vec_estch_uncoded)
     
 end
 
-Save current results
+% Save current results
 save('Problem2_estch_uncoded', 'snr_vec_estch_uncoded', ...
    'seq_lengths_estch_uncoded', 'Pbit_estch_uncoded');
 
@@ -178,7 +178,7 @@ L = 31;
 Nseq = 7;
 
 % Get optimal number of bits
-desired_bits = 2^22;
+desired_bits = 2^23;
 % Compute the closest number of bits that both interleaver and encoder will
 % like
 found = false;
@@ -191,7 +191,7 @@ while(~found)
     end
 end
 
-snr_vec_estch_coded = 0:0.5:4.5;
+snr_vec_estch_coded = 0:0.5:4;  % Pbit falls at 3.5 dB
 seq_lengths_estch_coded = bit_number*ones(1, length(snr_vec_estch_coded));
 Pbit_estch_coded = zeros(length(snr_vec_estch_coded),1);
 
@@ -243,12 +243,14 @@ save('Problem2_knownch_coded', 'snr_vec_knownch_coded', ...
 %% Plot BER graphs
 
 figure, semilogy(snr_vec_knownch_uncoded, Pbit_knownch_uncoded), hold on
-semilogy(snr_vec_knownch_coded, Pbit_knownch_coded)
-semilogy(snr_vec_estch_uncoded, Pbit_estch_uncoded)
-semilogy(snr_vec_estch_coded, Pbit_estch_coded, '--')
+semilogy(snr_vec_knownch_coded, Pbit_knownch_coded), hold on
+semilogy(snr_vec_estch_uncoded, Pbit_estch_uncoded, '--')
 semilogy(snr_vec_estch_coded, Pbit_estch_coded, '--')
 xlabel('snr [dB]'), ylabel('BER')
 ylim([10^-5, 10^-1])
+xlim([0, 14])
+legend('Known channel, uncoded', 'Known channel, coded', ...
+    'Estimated channel, uncoded', 'Estimated channel, coded');
 
 %% Clean parpool
 delete(gcp)
