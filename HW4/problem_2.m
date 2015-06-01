@@ -17,7 +17,7 @@ N1 = 0;
 N2 = 4;
 
 snr_vec_knownch_uncoded = 0:14;
-seq_lengths_knownch_uncoded = 2.^[13 13 13 13 13 13 13 13 13 14 15 15 18 18 18];
+seq_lengths_knownch_uncoded = 2.^[13 13 13 13 13 13 13 15 18 18 20 20 22 23 23];
 Pbit_knownch_uncoded = zeros(length(snr_vec_knownch_uncoded),1);
 
 parfor snr_idx = 1:length(snr_vec_knownch_uncoded)
@@ -71,7 +71,7 @@ while(~found)
     end
 end
 
-snr_vec_knownch_coded = 0:0.5:3;  % Pbit falls at 2.2 dBs
+snr_vec_knownch_coded = [1, 1.5, 2:0.1:2.5];  % Pbit falls at 2.2 dBs
 seq_lengths_knownch_coded = bit_number*ones(1, length(snr_vec_knownch_coded));
 Pbit_knownch_coded = zeros(length(snr_vec_knownch_coded),1);
 
@@ -178,20 +178,20 @@ L = 31;
 Nseq = 7;
 
 % Get optimal number of bits
-desired_bits = 2^23;
-% Compute the closest number of bits that both interleaver and encoder will
-% like
-found = false;
-bit_number = 0;
-while(~found)
-    search_step = 32400;
-    bit_number = bit_number + search_step;
-    if (bit_number > desired_bits)
-        found = true;
-    end
-end
+% desired_bits = 2^22;
+% % Compute the closest number of bits that both interleaver and encoder will
+% % like
+% found = false;
+% bit_number = 0;
+% while(~found)
+%     search_step = 32400;
+%     bit_number = bit_number + search_step;
+%     if (bit_number > desired_bits)
+%         found = true;
+%     end
+% end
 
-snr_vec_estch_coded = 0:0.5:4;  % Pbit falls at 3.5 dB
+snr_vec_estch_coded = [1, 2, 3, 3.2:0.05:3.6];  % Pbit falls at 3.5 dB
 seq_lengths_estch_coded = bit_number*ones(1, length(snr_vec_estch_coded));
 Pbit_estch_coded = zeros(length(snr_vec_estch_coded),1);
 
@@ -237,17 +237,22 @@ parfor snr_idx = 1:length(snr_vec_estch_coded)
 end
 
 % Save current results
-save('Problem2_knownch_coded', 'snr_vec_knownch_coded', ...
-   'seq_lengths_knownch_coded', 'Pbit_knownch_coded');
+save('Problem2_estch_coded', 'snr_vec_estch_coded', ...
+   'seq_lengths_estch_coded', 'Pbit_estch_coded');
 
 %% Plot BER graphs
+
+load('Problem2_estch_uncoded.mat');
+load('Problem2_estch_coded.mat');
+load('Problem2_knownch_uncoded.mat');
+load('Problem2_knownch_coded.mat');
 
 figure, semilogy(snr_vec_knownch_uncoded, Pbit_knownch_uncoded), hold on
 semilogy(snr_vec_knownch_coded, Pbit_knownch_coded), hold on
 semilogy(snr_vec_estch_uncoded, Pbit_estch_uncoded, '--')
 semilogy(snr_vec_estch_coded, Pbit_estch_coded, '--')
 xlabel('snr [dB]'), ylabel('BER')
-ylim([10^-5, 10^-1])
+ylim([10^-5, 10^-0.1])
 xlim([0, 14])
 legend('Known channel, uncoded', 'Known channel, coded', ...
     'Estimated channel, uncoded', 'Estimated channel, coded');
