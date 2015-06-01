@@ -27,7 +27,7 @@ snr_vec_nocoding = 0:15;
 BER_nocoding = zeros(length(snr_vec_nocoding), 1);
 parfor snr_i = 1:length(snr_vec_nocoding)
     snr_nc = snr_vec_nocoding(snr_i);
-    fprintf('Uncoded, snr = %d\n', snr_nc);
+    fprintf('Uncoded, snr = %.2f\n', snr_nc);
     [BER_nocoding(snr_i), ~] = OFDM_BER(M, Npx, desired_bits, snr_nc, coding);
 end
 

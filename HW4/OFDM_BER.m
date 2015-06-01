@@ -112,5 +112,10 @@ dec_bits = dec_bits(:);
 BER = sum(xor(dec_bits, bits))/length(bits);
 fprintf('End, the BER is %d \n', BER);
 
+% my_llr_linear = 10.^(llr(1:100)/10);
+% my_dec_bits = dec_bits(1:100);
+% my_p = 1 ./ (1 + my_llr_linear);
+% figure, stem(my_p), hold on, stem(my_dec_bits)
+
 end
 
