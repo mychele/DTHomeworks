@@ -18,17 +18,9 @@ OFDM = true;
 % Compute the optimal number of bits
 fprintf('Start transmission...\n');
 if (coding == true)
-    % Compute the closest number of bits that both interleaver and encoder will
-    % like
-    found = false;
-    bit_number = 0;
-    while(~found)
-        search_step = 32400;
-        bit_number = bit_number + search_step;
-        if (bit_number > desired_bits)
-            found = true;
-        end
-    end
+    % Compute the closest number of bits that both interleaver and encoder will like
+    search_step = 32400;
+    bit_number = ceil(desired_bits / search_step) * search_step;
 else
     bit_number = desired_bits;
 end
