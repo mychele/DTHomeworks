@@ -12,16 +12,9 @@ sigma_a = 2;
 
 %% Get optimal number of bits
 desired_bits = 2^22;
-% Compute the closest number of bits that the encoder will like
-found = false;
-bit_number = 0;
-while(~found)
-   search_step = 32400;
-   bit_number = bit_number + search_step;
-   if (bit_number > desired_bits)
-      found = true;
-   end
-end
+% Compute the closest number of bits that both interleaver and encoder will like
+search_step = 32400;
+bit_number = ceil(desired_bits / search_step) * search_step;
 
 %% Estimate Pbit for ideal channel without encoding
 snr_vec = 0:0.5:14;

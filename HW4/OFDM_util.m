@@ -17,7 +17,7 @@ snr_vec_coding = 1:0.05:2;
 BER_coding = zeros(length(snr_vec_coding), 1);
 parfor snr_i = 1:length(snr_vec_coding)
     snr_c = snr_vec_coding(snr_i);
-    fprintf('Coded, snr = %d\n', snr_c);
+    fprintf('Coded, snr = %.2f\n', snr_c);
     [BER_coding(snr_i), ~] = OFDM_BER(M, Npx, desired_bits, snr_c, coding);
 end
 

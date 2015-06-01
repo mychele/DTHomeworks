@@ -22,7 +22,7 @@ Pbit_knownch_uncoded = zeros(length(snr_vec_knownch_uncoded),1);
 
 parfor snr_idx = 1:length(snr_vec_knownch_uncoded)
     curr_snr = snr_vec_knownch_uncoded(snr_idx);
-    fprintf('Known channel, uncoded, snr = %d\n', curr_snr);
+    fprintf('Known channel, uncoded, snr = %.2f\n', curr_snr);
     
     % Generate the current needed sequence
     bits = randi([0 1], 1, seq_lengths_knownch_uncoded(snr_idx));
@@ -59,17 +59,9 @@ N2 = 4;
 
 % Get optimal number of bits
 desired_bits = 2^22;
-% Compute the closest number of bits that both interleaver and encoder will
-% like
-found = false;
-bit_number = 0;
-while(~found)
-    search_step = 32400;
-    bit_number = bit_number + search_step;
-    if (bit_number > desired_bits)
-        found = true;
-    end
-end
+% Compute the closest number of bits that both interleaver and encoder will like
+search_step = 32400;
+bit_number = ceil(desired_bits / search_step) * search_step;
 
 snr_vec_knownch_coded = [1, 1.5, 2:0.1:2.5];  % Pbit falls at 2.2 dBs
 seq_lengths_knownch_coded = bit_number*ones(1, length(snr_vec_knownch_coded));
@@ -77,7 +69,7 @@ Pbit_knownch_coded = zeros(length(snr_vec_knownch_coded),1);
 
 parfor snr_idx = 1:length(snr_vec_knownch_coded)
     curr_snr = snr_vec_knownch_coded(snr_idx);
-    fprintf('Known channel, coded, snr = %d\n', curr_snr);
+    fprintf('Known channel, coded, snr = %.2f\n', curr_snr);
     
     % Generate the current needed sequence
     bits = randi([0 1], 1, seq_lengths_knownch_coded(snr_idx));
@@ -135,7 +127,7 @@ Pbit_estch_uncoded = zeros(length(snr_vec_estch_uncoded),1);
 
 parfor snr_idx = 1:length(snr_vec_estch_uncoded)
     curr_snr = snr_vec_estch_uncoded(snr_idx);
-    fprintf('Estimated channel, uncoded, snr = %d\n', curr_snr);
+    fprintf('Estimated channel, uncoded, snr = %.2f\n', curr_snr);
     
     % Send through the channel
     [packet, rcv_symb, sigma_w] = txrc(seq_lengths_estch_uncoded(snr_idx), curr_snr);
@@ -178,18 +170,10 @@ L = 31;
 Nseq = 7;
 
 % Get optimal number of bits
-% desired_bits = 2^22;
-% % Compute the closest number of bits that both interleaver and encoder will
-% % like
-% found = false;
-% bit_number = 0;
-% while(~found)
-%     search_step = 32400;
-%     bit_number = bit_number + search_step;
-%     if (bit_number > desired_bits)
-%         found = true;
-%     end
-% end
+desired_bits = 2^22;
+% Compute the closest number of bits that both interleaver and encoder will like
+search_step = 32400;
+bit_number = ceil(desired_bits / search_step) * search_step;
 
 snr_vec_estch_coded = [1, 2, 3, 3.2:0.05:3.6];  % Pbit falls at 3.5 dB
 seq_lengths_estch_coded = bit_number*ones(1, length(snr_vec_estch_coded));
@@ -197,7 +181,7 @@ Pbit_estch_coded = zeros(length(snr_vec_estch_coded),1);
 
 parfor snr_idx = 1:length(snr_vec_estch_coded)
     curr_snr = snr_vec_estch_coded(snr_idx);
-    fprintf('Estimated channel, coded, snr = %d\n', curr_snr);
+    fprintf('Estimated channel, coded, snr = %.2f\n', curr_snr);
     
     % Generate the current needed sequence
     packet = randi([0 1], 1, seq_lengths_estch_coded(snr_idx));
