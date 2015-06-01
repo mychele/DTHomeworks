@@ -12,10 +12,6 @@ symbol = 1+1i;
 %%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%
 % NOT SURE IF IT'S OK TO SET TO ZERO THE OTHER SYMBOLS!!
 block = ones(M, 1)*(-1-1i);
-block(1:spacing:end) = symbol;
-
-A = ifft(block);
-A_pref = [A(end-Npx + 1:end); A];
 
 %%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%
 % NOT SURE IF IT'S OK TO SCALE IN THIS WAY
@@ -25,9 +21,12 @@ A_pref = [A(end-Npx + 1:end); A];
 % Note that the variance of the noise at the receiver, after the DFT, is
 % multplied by M, therefore it could be high
 % Scale in order to double the power of tx symbols
-A_pref(1:spacing:end) = A_pref(1:spacing:end)*sqrt(2);
+block(1:spacing:end) = symbol * sqrt(2);
 
-s = reshape(A, [], 1);
+A = ifft(block);
+A_pref = [A(end-Npx + 1:end); A];
+
+s = reshape(A_pref, [], 1);
 
 %% CHANNELIZATION
 snr = 10; %dB
@@ -60,7 +59,7 @@ G_est = phi \ theta;
 % InterpolaTION
 f = 1:spacing:M;
 f_fine = 1:1:M;
-G_est_complete = interp1(f, G_est, f_fine, 'pchip');
+G_est_complete = interp1(f, G_est, f_fine, 'spline');
 
 figure, hold on
 plot(20*log10(abs(G_est_complete))), 
