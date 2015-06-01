@@ -38,9 +38,9 @@ end
 
 % Create data blocks
 
-% perform a zero padding of the last symbols in order to have blocks of 512
-% symbols
-a_pad = [a; zeros(M - mod(length(a), M), 1)];
+% perform a padding of the last symbols in order to have blocks of 512 symbols: we use
+% -1-j to perform the padding
+a_pad = [a; ones(M - mod(length(a), M), 1) * (-1-1i)];
 a_matrix = reshape(a_pad, M, []); % it should mantain columnwise order
 
 % compute the ifft of blocks of 512 symbols
