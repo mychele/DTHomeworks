@@ -1,5 +1,6 @@
 function [encoded_bits] = encodeBits(bits)
     % Create the encoder
+    warning('off', 'all');
     enc = fec.ldpcenc;
     numInfoBits = enc.NumInfoBits; % Length of the info words
     

@@ -1,5 +1,7 @@
 function [decoded_bits] = decodeBits(bits)
     % Create the encoder
+    warning('off', 'all');
+
     dec = fec.ldpcdec;
     dec.DecisionType = 'Hard Decision';
     dec.OutputFormat = 'Information Part';
