@@ -21,7 +21,9 @@ block = ones(M, 1)*(-1-1i);
 % Note that the variance of the noise at the receiver, after the DFT, is
 % multplied by M, therefore it could be high
 % Scale in order to double the power of tx symbols
-block(1:spacing:end) = symbol * sqrt(2);
+
+init_step = 4; % < 16
+block(init_step:spacing:end) = symbol * sqrt(2);
 
 A = ifft(block);
 A_pref = [A(end-Npx + 1:end); A];
@@ -48,7 +50,7 @@ x_matrix = fft(r_matrix);
 
 % LS estimaTION
 % Select useful samples
-x_rcv = x_matrix(1:spacing:end, 1)/sqrt(2);
+x_rcv = x_matrix(init_step:spacing:end, 1)/sqrt(2);
 X_known = diag(symbol*ones(length(x_rcv), 1));
 
 phi = X_known'*X_known;
@@ -57,13 +59,13 @@ theta = X_known'*x_rcv;
 G_est = phi \ theta;
 
 % InterpolaTION
-f = 1:spacing:M;
+f = init_step:spacing:M;
 f_fine = 1:1:M;
 G_est_complete = interp1(f, G_est, f_fine, 'spline');
 
 figure, hold on
 plot(20*log10(abs(G_est_complete))), 
-plot(1:spacing:M, 20*log10(abs(G_est)), '-h'),
+plot(init_step:spacing:M, 20*log10(abs(G_est)), '-h'),
 plot(20*log10(abs(G))),
 title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
 legend('|G_{est}| iterpolated', '|G_{est}| not interpolated', '|G|'), xlabel('i - subchannels'), ylabel('|G| - dB'),
