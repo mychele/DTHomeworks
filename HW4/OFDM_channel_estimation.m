@@ -11,7 +11,7 @@ Npx = 7;
 symbol = 1+1i;
 %%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%
 % NOT SURE IF IT'S OK TO SET TO ZERO THE OTHER SYMBOLS!!
-block = zeros(M, 1);
+block = ones(M, 1)*(-1-1i);
 block(1:spacing:end) = symbol;
 
 A = ifft(block);
@@ -25,12 +25,12 @@ A_pref = [A(end-Npx + 1:end); A];
 % Note that the variance of the noise at the receiver, after the DFT, is
 % multplied by M, therefore it could be high
 % Scale in order to double the power of tx symbols
-A_pref = A_pref*sqrt(2);
+A_pref(1:spacing:end) = A_pref(1:spacing:end)*sqrt(2);
 
 s = reshape(A, [], 1);
 
 %% CHANNELIZATION
-snr = 100; %dB
+snr = 10; %dB
 snr_lin = 10^(snr/10);
 fprintf('Symbols are pushed into the channel...\n');
 % Send over the noisy channel
@@ -49,7 +49,7 @@ x_matrix = fft(r_matrix);
 
 % LS estimaTION
 % Select useful samples
-x_rcv = x_matrix(1:spacing:end, 1);
+x_rcv = x_matrix(1:spacing:end, 1)/sqrt(2);
 X_known = diag(symbol*ones(length(x_rcv), 1));
 
 phi = X_known'*X_known;
