@@ -38,7 +38,7 @@ symbols = bitmap(int_enc_bits.');
 %% Send stuff through
 snrdb = 2.15;
 snrlin = 10^(snrdb/10);
-[rcv_symb, sigma_w, h] = channel_output(symbols, snrlin);
+[rcv_symb, sigma_w, h] = channel_output(symbols, snrlin, false);
 
 % Normalization!
 rcv_symb = rcv_symb(t0:end-7)/h(t0);
