@@ -15,7 +15,7 @@ end
 
 
 % Using the data matrix (page 246), easier implementation
-h_hat = zeros(1,max(N));
+h_hat = zeros(1,N);
 I = zeros(L,N);
 for column = 1:N
     I(:,column) = x(N-column+1:(N+L-column));
