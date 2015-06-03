@@ -1,4 +1,4 @@
-function [ BER, G ] = OFDM_BER( M, Npx, desired_bits, snr, coding )
+function [ BER, G ] = OFDM_BER( M, Npx, desired_bits, snr, coding, chIsKnown )
 %This function performs the transmission and reception of bits with ODFM,
 %with or without encoding
 %   It needs
@@ -59,9 +59,13 @@ fprintf('Symbols are pushed into the channel...\n');
 % Send over the noisy channel
 snr_lin = 10^(snr/10);
 [r, sigma_w, g] = channel_output(s, snr_lin, OFDM);
-g = g(1+t0 : end);
-G = fft(g, 512);
-G = G(:);
+if (chIsKnown)
+   g = g(1+t0 : end);
+   G = fft(g, 512);
+   G = G(:);
+else
+   [G, sigma_w] = OFDM_channel_estimation();
+end
 
 % Process at the receiver
 % consider the effect of the convolution at the end should be easy,
@@ -74,15 +78,15 @@ r = r(1+t0 : end - mod(length(r), M+Npx) + t0);
 r_matrix = reshape(r, M+Npx, []);
 r_matrix = r_matrix(Npx + 1:end, :);
 
-G_i = G.^(-1);
+G_inv = G.^(-1);
 x_matrix = fft(r_matrix);
 
-y_matrix = bsxfun(@times, x_matrix, G_i);
+y_matrix = bsxfun(@times, x_matrix, G_inv);
 
 % Detect and compute BER
 if (coding == true)
     % sigma_i after the DFT and the scaling by G_i of each branch
-    sigma_i = 0.5*sigma_w*M*abs(G_i).^2;
+    sigma_i = 0.5*sigma_w*M*abs(G_inv).^2;
     % Compute Log Likelihood Ratio
     % It is different for each branch
     llr_real = -2*bsxfun(@times, real(y_matrix), sigma_i.^(-1));
