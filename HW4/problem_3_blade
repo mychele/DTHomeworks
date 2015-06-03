@@ -10,8 +10,8 @@
 #$ -m ea
 #
 # Specify parallel queue
-#$ -q parallel
+# -q parallel
 # and set the number of parallel jobs
-#$ -l par_cpu=8
+# -l par_cpu=8
 
 matlab -nodesktop -nosplash -r "OFDM_util"
