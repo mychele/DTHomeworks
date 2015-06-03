@@ -14,6 +14,7 @@ function [ BER, G ] = OFDM_BER( M, Npx, desired_bits, snr, coding )
 %   IFFT operation, therefore sigma_s^2 = sigma_a^/M
 warning('off', 'all');
 OFDM = true;
+t0 = 5;
 
 % Compute the optimal number of bits
 fprintf('Start transmission...\n');
@@ -58,6 +59,7 @@ fprintf('Symbols are pushed into the channel...\n');
 % Send over the noisy channel
 snr_lin = 10^(snr/10);
 [r, sigma_w, g] = channel_output(s, snr_lin, OFDM);
+g = g(1+t0 : end);
 G = fft(g, 512);
 G = G(:);
 
@@ -66,7 +68,7 @@ G = G(:);
 % since the resulting data should have a length which is a multiple of M +
 % Npx
 fprintf('Symbols received, processing begins...\n');
-r = r(1:end - mod(length(r), M+Npx));
+r = r(1+t0 : end - mod(length(r), M+Npx) + t0);
 
 % perform the DFT
 r_matrix = reshape(r, M+Npx, []);
@@ -118,4 +120,3 @@ fprintf('End, the BER is %d \n', BER);
 % figure, stem(my_p), hold on, stem(my_dec_bits)
 
 end
-
