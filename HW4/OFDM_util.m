@@ -4,7 +4,7 @@ close all
 clc
 rng default
 
-parpool(16);
+parpool(8);
 
 %% Data
 M = 512;
