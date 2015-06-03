@@ -16,12 +16,12 @@ block = ones(M, 1)*(-1-1i);
 % "estimation symbols" is doubled (-> better snr)
 % Note that the variance of the noise at the receiver, after the DFT, is
 % multplied by M, therefore it could be high
-ts = ts_generation(allowed_symb-1, 1);
+ts = ts_generation(allowed_symb-1, 1) * sqrt(2);
 init_step = 1; % < 16
 indices = init_step : spacing : init_step + spacing*(allowed_symb-1);
 % Scale in order to double the power of tx symbols
 % TODO What should we set the other symbols to?
-block(indices) = ts * sqrt(2);
+block(indices) = ts;
 
 % Compute IDFT, add prefix, P/S
 A = ifft(block);
@@ -52,25 +52,21 @@ x_matrix = fft(r_matrix);
 
 % Select useful samples
 x_rcv = x_matrix(indices, 1);
-X_known = diag(ts)*sqrt(2);
+x_known = diag(ts);
 
-% LS estimaTION
-phi = X_known'*X_known;
-theta = X_known'*x_rcv;
-G_est = phi \ theta;
+% Compute G_est by dividing the received symbol by the transmitted one
+G_est = x_rcv ./ ts;
 
-% LS
+% Solve LS for F*g=G_est where g is an 8x1 vector
 F = dftmtx(M);
 F = F(indices, 1:Npx+1);
-% Solve LS for F*g=G_est where g is an 8x1 vector
 g_hat = (F' * F) \ (F' * G_est);
-
 g_est = ifft(G_est);
 G_hat = fft(g_hat, M);
-
+%estimator_var = diag(F' * F) * sigma_w;
 
 % Noise estimation
-xhat = X_known * G_hat(indices);
+xhat = x_known * G_hat(indices);
 E = sum(abs(xhat - x_rcv).^2)/length(xhat);
 est_sigma_w = E/M;
 fprintf('Est sigma_w^2 = %d\n', est_sigma_w);
@@ -78,7 +74,7 @@ fprintf('Real sigma_w^2 = %d\n', sigma_w);
 
 
 
-% Plots
+%% Plots
 
 figure, hold on
 stem(0:Npx, abs(g))
