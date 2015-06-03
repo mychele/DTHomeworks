@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+#
+# Output in current folder
+#
+#$ -cwd
+#
+# Send me an email when job ends or it is aborted
+#
+#$ -m ea
+#
+# Specify parallel queue
+#$ -q parallel
+# and set the number of parallel jobs
+#$ -l par_cpu=15
+
+matlab -nodesktop -nosplash -r "problem_2"
