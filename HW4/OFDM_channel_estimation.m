@@ -1,5 +1,4 @@
 %% Channel ESTIMATION for OFDM
-% Very rough script
 % Send one block of data with symbols spaced of 16 channels
 
 clear, close all
@@ -8,91 +7,96 @@ M = 512;
 allowed_symb = 32;
 spacing = M/allowed_symb;
 Npx = 7;
+t0 = 5;
 
 symbol = 1+1i;
-%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%
-% NOT SURE IF IT'S OK TO SET TO ZERO THE OTHER SYMBOLS!!
 block = ones(M, 1)*(-1-1i);
 
-%%%%%%%%%%%%% TODO %%%%%%%%%%%%%%%%
-% NOT SURE IF IT'S OK TO SCALE IN THIS WAY
 % Remember: for the symbols on which the estimation is performed, for a
 % given snr (computed with the usual sigma_a^2 = 2), the power of the
 % "estimation symbols" is doubled (-> better snr)
 % Note that the variance of the noise at the receiver, after the DFT, is
 % multplied by M, therefore it could be high
-% Scale in order to double the power of tx symbols
-ts = ts_generation(31, 1);
+ts = ts_generation(allowed_symb-1, 1);
 init_step = 1; % < 16
+% Scale in order to double the power of tx symbols
+% TODO What should we set the other symbols to?
 block(init_step:spacing:end) = ts * sqrt(2);
 
+% Compute IDFT, add prefix, P/S
 A = ifft(block);
 A_pref = [A(end-Npx + 1:end); A];
-
 s = reshape(A_pref, [], 1);
 
 %% CHANNELIZATION
-snr = 6; %dB
+
+snr = 1; %dB
 snr_lin = 10^(snr/10);
-fprintf('Symbols are pushed into the channel...\n');
+%fprintf('Symbols are pushed into the channel...\n');
 % Send over the noisy channel
 [r, sigma_w, g] = channel_output(s, snr_lin, OFDM);
+g = g(1+t0 : end);   % Take t0 into account
 G = fft(g, 512);
 G = G(:);
 
+
 %% Process at the receiver
-fprintf('Symbols received, processing begins...\n');
-r = r(1:end - mod(length(r), M+Npx));
+
+%fprintf('Symbols received, processing begins...\n');
+r = r(1+t0 : end - mod(length(r), M+Npx) + t0);
 
 % perform the DFT
 r_matrix = reshape(r, M+Npx, []);
 r_matrix = r_matrix(Npx + 1:end, :);
 x_matrix = fft(r_matrix);
 
-% LS estimaTION
 % Select useful samples
-x_rcv = x_matrix(init_step:spacing:end, 1)/sqrt(2);
-x_rcv(length(x_rcv) + 1) = x_rcv(1);
-X_known = diag([ts;ts(1)]);
+x_rcv = x_matrix(init_step:spacing:end, 1);
+X_known = diag(ts)*sqrt(2);
 
+% LS estimaTION
 phi = X_known'*X_known;
 theta = X_known'*x_rcv;
-
 G_est = phi \ theta;
 
-% InterpolaTION
-f = init_step:spacing:M+init_step;
-f_fine = 1:1:M+init_step*spacing;
-G_est_plusone = interp1(f, G_est, f_fine, 'spline');
+% LS
+F = dftmtx(M);
+F = F(init_step : spacing : end, 1:Npx+1);
+% Solve LS for F*g=G_est where g is an 8x1 vector
+g_hat = (F' * F) \ (F' * G_est);
 
-% Drop the samples outside one period
-x_rcv = x_rcv(1:end-1);
-X_known = diag(ts);
-G_est = G_est(1:end-1);
-G_est_complete = G_est_plusone(1:end-init_step*spacing);
-f_support = 1:length(G_est_complete);
+g_est = ifft(G_est);
+G_hat = fft(g_hat, M);
+
+
+% Noise estimation
+xhat = X_known * G_hat(init_step : spacing : end);
+E = sum(abs(xhat - x_rcv).^2)/length(xhat);
+est_sigma_w = E/M;
+fprintf('Est sigma_w^2 = %d\n', est_sigma_w);
+fprintf('Real sigma_w^2 = %d\n', sigma_w);
+
+
+
+% Plots
+
+figure, hold on
+stem(0:Npx, abs(g))
+stem(0:Npx, abs(g_hat), 'x')
+stem(0:15, abs(g_est(1:16)), '^')
+legend('Actual g', 'g_hat', 'IDFT of G_est')
 
 figure, 
 subplot 211
-plot(real(G_est_complete)), hold on
-plot(init_step:spacing:M, real(G_est), '-h'), hold on
-plot(real(G)),
+plot(real(G)), hold on
+plot(real(G_hat))
 title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
-legend('real(G_{est}) interpolated', 'real(G_{est}) not interpolated', 'real(G)'), xlabel('i - subchannels'), ylabel('Real(G)'),
-grid on
+legend('real(G)', 'real(G_hat)'), xlabel('i - subchannels'), ylabel('Real(G)'),
+grid on, xlim([1, M])
+
 subplot 212
-plot(imag(G_est_complete)), hold on
-plot(init_step:spacing:M, imag(G_est), '-h'), hold on
-plot(imag(G)),
+plot(imag(G)), hold on
+plot(imag(G_hat))
 title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
-legend('imag(G_{est}) interpolated', 'imag(G_{est}) not interpolated', 'imag(G)'), xlabel('i - subchannels'), ylabel('imag(G)'),
-grid on
-
-
-% Estimation of the noise
-xhat = X_known * sqrt(2) * G_est;
-xideal = X_known * sqrt(2) * G(init_step:spacing:end);
-E = sum(abs(xhat - xideal).^2)/length(xhat);
-est_sigma_w = E/M;
-fprintf('Est sigma_w^2 (cheating) = %d\n', est_sigma_w);
-fprintf('Real sigma_w^2 = %d\n', sigma_w);
+legend('imag(G)', 'imag(G_hat)'), xlabel('i - subchannels'), ylabel('imag(G)'),
+grid on, xlim([1, M])
