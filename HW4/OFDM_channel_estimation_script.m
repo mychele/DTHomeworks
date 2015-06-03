@@ -1,8 +1,7 @@
-function [G_hat, est_sigma_w] = OFDM_channel_estimation()
-
 %% Channel ESTIMATION for OFDM
 % Send one block of data with symbols spaced of 16 channels
 
+clear, close all
 OFDM = true;
 M = 512;
 allowed_symb = 32;
@@ -34,7 +33,10 @@ snr = 1; %dB
 snr_lin = 10^(snr/10);
 %fprintf('Symbols are pushed into the channel...\n');
 % Send over the noisy channel
-[r, ~, ~] = channel_output(s, snr_lin, OFDM);
+[r, sigma_w, g] = channel_output(s, snr_lin, OFDM);
+g = g(1+t0 : end);   % Take t0 into account (just to plot stuff)
+G = fft(g, 512);
+G = G(:);
 
 
 %% Process at the receiver
@@ -62,6 +64,7 @@ F = F(init_step : spacing : end, 1:Npx+1);
 % Solve LS for F*g=G_est where g is an 8x1 vector
 g_hat = (F' * F) \ (F' * G_est);
 
+g_est = ifft(G_est);
 G_hat = fft(g_hat, M);
 
 
@@ -69,6 +72,30 @@ G_hat = fft(g_hat, M);
 xhat = X_known * G_hat(init_step : spacing : end);
 E = sum(abs(xhat - x_rcv).^2)/length(xhat);
 est_sigma_w = E/M;
+fprintf('Est sigma_w^2 = %d\n', est_sigma_w);
+fprintf('Real sigma_w^2 = %d\n', sigma_w);
 
 
-end
+
+% Plots
+
+figure, hold on
+stem(0:Npx, abs(g))
+stem(0:Npx, abs(g_hat), 'x')
+stem(0:15, abs(g_est(1:16)), '^')
+legend('Actual g', 'g_hat', 'IDFT of G_est')
+
+figure, 
+subplot 211
+plot(real(G)), hold on
+plot(real(G_hat))
+title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
+legend('real(G)', 'real(G_hat)'), xlabel('i - subchannels'), ylabel('Real(G)'),
+grid on, xlim([1, M])
+
+subplot 212
+plot(imag(G)), hold on
+plot(imag(G_hat))
+title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
+legend('imag(G)', 'imag(G_hat)'), xlabel('i - subchannels'), ylabel('imag(G)'),
+grid on, xlim([1, M])
