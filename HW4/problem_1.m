@@ -11,7 +11,7 @@ rng default
 sigma_a = 2;
 
 %% Get optimal number of bits
-desired_bits = 2^22;
+desired_bits = 2^24;
 % Compute the closest number of bits that both interleaver and encoder will like
 search_step = 32400;
 bit_number = ceil(desired_bits / search_step) * search_step;
@@ -20,7 +20,7 @@ bit_number = ceil(desired_bits / search_step) * search_step;
 snr_vec = 0:0.5:14;
 Pbit_noenc = zeros(1,length(snr_vec));
 
-for curr_snr = 1:length(snr_vec)
+parfor curr_snr = 1:length(snr_vec)
    disp(curr_snr);
    snrdb = snr_vec(curr_snr);
    % Simulate Pbit for the ideal channel, no encoding
@@ -48,10 +48,10 @@ for curr_snr = 1:length(snr_vec)
 end
    
 %% Estimate Pbit for ideal channel with encoding
-snr_vec_enc = 0:0.1:1;
+snr_vec_enc = 0:0.02:1;
 Pbit_enc = zeros(1,length(snr_vec_enc));
 
-for curr_snr = 1:length(snr_vec_enc)
+parfor curr_snr = 1:length(snr_vec_enc)
    disp(snr_vec_enc(curr_snr));
    snrdb = snr_vec_enc(curr_snr);
    bits = randi([0 1], 1, bit_number);
@@ -82,6 +82,6 @@ for curr_snr = 1:length(snr_vec_enc)
 end
 
 %% Plot results
-semilogy(snr_vec, Pbit_noenc), hold on,
-semilogy(snr_vec_enc, Pbit_enc)
-ylim([10^-5, 10^-1]), xlim([0, 14]), grid on
+% semilogy(snr_vec, Pbit_noenc), hold on,
+% semilogy(snr_vec_enc, Pbit_enc)
+% ylim([10^-5, 10^-1]), xlim([0, 14]), grid on
