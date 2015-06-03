@@ -5,7 +5,7 @@ clc
 
 rng default
 
-%parpool(4);
+parpool(15);
 
 % data
 sigma_a = 2;
@@ -85,3 +85,6 @@ end
 % semilogy(snr_vec, Pbit_noenc), hold on,
 % semilogy(snr_vec_enc, Pbit_enc)
 % ylim([10^-5, 10^-1]), xlim([0, 14]), grid on
+
+%% Save results
+save('Problem1', 'snr_vec', 'snr_vec_enc', 'bit_number', 'Pbit_noenc', 'Pbit_enc');
