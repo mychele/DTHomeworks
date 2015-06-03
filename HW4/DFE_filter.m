@@ -85,9 +85,8 @@ for k = 0:length(x) - 1 + D
     end
     
     y(k+1) = c_opt.'*xconv;
-    detected(k+1) = qpsk_td(y(k+1) + b.'*a_old);
     r(k+1) = y(k+1) + b.'*a_old;
-    
+    detected(k+1) = qpsk_td(r(k+1));
 end
 
 if (coding == true)
@@ -95,38 +94,5 @@ if (coding == true)
 else % if coding is not used return the decisions
    r = detected(D+1:end);
 end
-% decisions = detected(D+1:end);
-% 
-% if (verb == 1)
-%     figure
-%     subplot(4,1,1)
-%     stem(0:length(packet)-1, real(packet)), xlim([0,length(packet)]), title('Sent Symbols (real part)')
-%     subplot(4,1,2)
-%     stem(0:length(packet)-1, real(x(1:length(packet)))), xlim([0,length(packet)]), title('Received Symbols (real part)')
-%     subplot(4,1,3)
-%     stem(0:length(packet)-1, real(y(D+1:end))), xlim([0,length(packet)]), title('FF Filtered Symbols (real part)')
-%     subplot(4,1,4)
-%     stem(0:length(packet)-1, real(decisions)), hold on, stem(0:length(packet)-1, real(packet))
-%     xlim([0,length(decisions)]), legend('Detected', 'Real'), title('Detected Symbols (real part)')
-%     
-%     figure
-%     subplot(4,1,1)
-%     stem(0:length(packet)-1, imag(packet)), xlim([0,length(packet)]), title('Sent Symbols (imag part)')
-%     subplot(4,1,2)
-%     stem(0:length(packet)-1, imag(x(1:length(packet)))), xlim([0,length(packet)]), title('Received Symbols (imag part)')
-%     subplot(4,1,3)
-%     stem(0:length(packet)-1, imag(y(D+1:end))), xlim([0,length(packet)]), title('FF Filtered Symbols (imag part)')
-%     subplot(4,1,4)
-%     stem(0:length(packet)-1, imag(decisions)), hold on, stem(0:length(packet)-1, imag(packet))
-%     xlim([0,length(decisions)]), legend('Detected', 'imag'), title('Detected Symbols (imag part)')
-%     
-%     sent_bit = ibmap(packet);
-%     rec_bit = ibmap(decisions);
-%     figure,
-%     stem(sent_bit), hold on, stem(rec_bit)
-%     legend('sent bit', 'received bit')
-% end
 
-%[pbit, num_bit_error] = BER(packet, decisions);
 end
-
