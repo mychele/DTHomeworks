@@ -64,7 +64,7 @@ if (chIsKnown)
    G = fft(g, 512);
    G = G(:);
 else
-   [G, sigma_w] = OFDM_channel_estimation();
+   [G, sigma_w] = OFDM_channel_estimation(snr);
 end
 
 % Process at the receiver

@@ -1,4 +1,4 @@
-function [G_hat, est_sigma_w] = OFDM_channel_estimation()
+function [G_hat, est_sigma_w] = OFDM_channel_estimation(snr)
 
 %% Channel ESTIMATION for OFDM
 % Send one block of data with symbols spaced of 16 channels
@@ -32,7 +32,6 @@ s = reshape(A_pref, [], 1);
 %% CHANNELIZATION
 % Do our own transmission and reception of the training sequence
 
-snr = 1; %dB
 snr_lin = 10^(snr/10);
 %fprintf('Symbols are pushed into the channel...\n');
 % Send over the noisy channel
