@@ -142,23 +142,26 @@ When using coding, the script has to perform more complex computations that are 
 % cyclic prefix
 % idft
 % p/s
+
 % This consideration on SNR
-As usual the SNR is defined as $\Gamma = \frac{\sigma_s^2 E_h}{\sigma_w^2}$. With an OFDM system, however, the meaning of $\sigma_s^2$ changes. In particular if the transmitter is implemented with an IDFT, which is
+As usual the SNR is defined as $\Gamma = \frac{\sigma_s^2 E_h}{\sigma_w^2}$. With an OFDM system, however, the meaning of $\sigma_s^2$ changes. In fact, the transmitter performs an IDFT, which is
 \begin{equation}
-	A_k[\ell] = \frac{1}{\ofdM} \sum_{i = 0}^{\ofdM - 1} W_{\ofdM}^{-i\ell} a_k[i], \quad \ell = 0, 1, \dots, \ofdM-1
+	A_k[\ell] = \frac{1}{\ofdM} \sum_{i = 0}^{\ofdM - 1} W_{\ofdM}^{-i\ell} a_k[i], \quad \ell = 0, 1, \dots, \ofdM-1,
 \end{equation}
-followed by the polyphase compoment of a prototype filter, which in our case is a $\delta_n$ filter, with a gain $\ofdM$ as specified in \cite{bc}, then we have 
+followed by the polyphase component of a prototype filter, which in our case is a $\delta_n$ filter. Then we have 
 % see formula 9.35, 9.38, 9.39
 \begin{equation}
-	\sigma_s^2 = \sigma_a^2
+	\sigma_s^2 = \dfrac{\sigma_a^2}{\ofdM}.
 \end{equation}
-since data is IID. 
 
-However, since the gain factor would simply change the scaling of the data and should be removed at the receiver, we don't consider it in the actual implementation. MATLAB \texttt{ifft} performs the IDFT with the correct scaling factor of $1/\ofdM$. Therefore, if the energy of the data symbols that are pushed into the channel is considered, then
+The MATLAB function \texttt{ifft} performs the IDFT with the correct scaling factor of $1/\ofdM$. Therefore, to compute the power of the noise introduced by the channel we must consider the SNR as
 \begin{equation}
-	\Gamma = \frac{\sigma_a^2 E_h}{\ofdM \sigma_w^2}
+	\Gamma = \dfrac{\sigma_a^2 E_h}{\ofdM \sigma_w^2},
 \end{equation}
-must be the SNR considered when computing the noise level introduced by the channel in our implementation.
+that yields
+\begin{equation}
+	\sigma_w^2 = \dfrac{\sigma_a^2 E_h}{\ofdM \Gamma}.
+\end{equation}
 
 
 \subsection*{Receiver structure}
