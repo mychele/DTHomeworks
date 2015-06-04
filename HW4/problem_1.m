@@ -5,7 +5,7 @@ clc
 
 rng default
 
-parpool(15);
+%parpool(15);
 
 % data
 sigma_a = 2;
@@ -81,10 +81,15 @@ parfor curr_snr = 1:length(snr_vec_enc)
    
 end
 
-%% Plot results
-% semilogy(snr_vec, Pbit_noenc), hold on,
-% semilogy(snr_vec_enc, Pbit_enc)
-% ylim([10^-5, 10^-1]), xlim([0, 14]), grid on
-
 %% Save results
 save('Problem1', 'snr_vec', 'snr_vec_enc', 'bit_number', 'Pbit_noenc', 'Pbit_enc');
+
+%% Plot results
+load ('Problem1');
+semilogy(snr_vec, Pbit_noenc), hold on,
+semilogy(snr_vec_enc, Pbit_enc)
+ylim([10^-5, 10^-1]), xlim([0, 14]), grid on
+xlabel('\Gamma (dB)')
+ylabel('Pbit')
+legend('Uncoded QPSK', 'Coded QPSK')
+title('Bit Error Rate for uncoded and coded QPSK');
