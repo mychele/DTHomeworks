@@ -1,4 +1,4 @@
-function [ BER, G ] = OFDM_BER( M, Npx, desired_bits, snr, coding, chIsKnown )
+function [ BER, G ] = OFDM_BER( M, Npx, N2, t0, desired_bits, snr, coding, chIsKnown )
 %This function performs the transmission and reception of bits with ODFM,
 %with or without encoding
 %   It needs
@@ -14,7 +14,6 @@ function [ BER, G ] = OFDM_BER( M, Npx, desired_bits, snr, coding, chIsKnown )
 %   IFFT operation, therefore sigma_s^2 = sigma_a^/M
 warning('off', 'all');
 OFDM = true;
-t0 = 5;
 
 % Compute the optimal number of bits
 fprintf('Start transmission...\n');
@@ -64,7 +63,7 @@ if (chIsKnown)
    G = fft(g, 512);
    G = G(:);
 else
-   [G, sigma_w] = OFDM_channel_estimation(snr);
+   [G, sigma_w] = OFDM_channel_estimation(snr, Npx, N2, t0);
 end
 
 % Process at the receiver

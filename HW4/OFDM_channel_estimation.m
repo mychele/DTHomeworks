@@ -1,4 +1,4 @@
-function [G_hat, est_sigma_w] = OFDM_channel_estimation(snr)
+function [G_hat, est_sigma_w] = OFDM_channel_estimation(snr, Npx, N2, t0)
 
 %% Channel ESTIMATION for OFDM
 % Send one block of data with symbols spaced of 16 channels
@@ -7,8 +7,6 @@ OFDM = true;
 M = 512;
 allowed_symb = 32;
 spacing = M/allowed_symb;
-Npx = 7;
-t0 = 5;
 
 block = ones(M, 1)*(-1-1i);
 
@@ -33,17 +31,14 @@ s = reshape(A_pref, [], 1);
 % Do our own transmission and reception of the training sequence
 
 snr_lin = 10^(snr/10);
-%fprintf('Symbols are pushed into the channel...\n');
-% Send over the noisy channel
 [r, ~, ~] = channel_output(s, snr_lin, OFDM);
 
 
 %% Process at the receiver
 
-%fprintf('Symbols received, processing begins...\n');
 r = r(1+t0 : end - mod(length(r), M+Npx) + t0);
 
-% perform the DFT
+% Perform the DFT
 r_matrix = reshape(r, M+Npx, []);
 r_matrix = r_matrix(Npx + 1:end, :);
 x_matrix = fft(r_matrix);
@@ -57,9 +52,8 @@ G_est = x_rcv ./ ts;
 
 % Solve LS for F*g=G_est where g is an 8x1 vector
 F = dftmtx(M);
-F = F(indices, 1:Npx+1);
+F = F(indices, 1:N2+1);
 g_hat = (F' * F) \ (F' * G_est);
-%estimator_var = diag(F' * F) * sigma_w;
 G_hat = fft(g_hat, M);
 
 

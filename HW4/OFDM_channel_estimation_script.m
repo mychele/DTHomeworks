@@ -7,6 +7,7 @@ M = 512;
 allowed_symb = 32;
 spacing = M/allowed_symb;
 Npx = 7;
+N2 = 4;
 t0 = 5;
 
 block = ones(M, 1)*(-1-1i);
@@ -32,7 +33,6 @@ s = reshape(A_pref, [], 1);
 
 snr = 6; %dB
 snr_lin = 10^(snr/10);
-%fprintf('Symbols are pushed into the channel...\n');
 % Send over the noisy channel
 [r, sigma_w, g] = channel_output(s, snr_lin, OFDM);
 g = g(1+t0 : end);   % Take t0 into account (just to plot stuff)
@@ -42,10 +42,9 @@ G = G(:);
 
 %% Process at the receiver
 
-%fprintf('Symbols received, processing begins...\n');
 r = r(1+t0 : end - mod(length(r), M+Npx) + t0);
 
-% perform the DFT
+% Perform the DFT
 r_matrix = reshape(r, M+Npx, []);
 r_matrix = r_matrix(Npx + 1:end, :);
 x_matrix = fft(r_matrix);
@@ -59,11 +58,10 @@ G_est = x_rcv ./ ts;
 
 % Solve LS for F*g=G_est where g is an 8x1 vector
 F = dftmtx(M);
-F = F(indices, 1:Npx+1);
+F = F(indices, 1:N2+1);
 g_hat = (F' * F) \ (F' * G_est);
 g_est = ifft(G_est);
 G_hat = fft(g_hat, M);
-%estimator_var = diag(F' * F) * sigma_w;
 
 % Noise estimation
 xhat = x_known * G_hat(indices);
@@ -78,7 +76,7 @@ fprintf('Real sigma_w^2 = %d\n', sigma_w);
 
 figure, hold on
 stem(0:Npx, abs(g))
-stem(0:Npx, abs(g_hat), 'x')
+stem(0:N2, abs(g_hat), 'x')
 stem(0:15, abs(g_est(1:16)), '^')
 legend('Actual g', 'g_hat', 'IDFT of G_est')
 
