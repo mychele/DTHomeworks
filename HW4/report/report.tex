@@ -96,14 +96,14 @@ basicstyle=\footnotesize\ttfamily
 
 % Description of system setup
 
-\begin{figure}[h!]
+\begin{figure}
 	\centering
-	\includegraphics[width = 0.8\textwidth]{SC_uncoded}
+	\includegraphics[width = 0.6\textwidth]{SC_uncoded}
 	\caption{Block diagram for the simulation of a Single Carrier uncoded QPSK}
 	\label{fig:problem1_scuncoded}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}
 	\centering
 	\includegraphics[width = \textwidth]{SC_coded}
 	\caption{Block diagram for the simulation of a Single Carrier coded QPSK}
@@ -112,14 +112,21 @@ basicstyle=\footnotesize\ttfamily
 
 The uncoded Single Carrier QPSK configuration was implemented as described in Figure~\ref{fig:problem1_scuncoded}. First of all, a random data stream is created using the \texttt{randi} function. For the Pbit simulations, $L_{bits} = 2^{24}$ bits were used for every SNR. While this number of bits is unnecessarily large to estimate the Bit Error Rate for the lower SNRs, it was decided not to optimize it because the simulations were sufficiently fast. This is due to the lightweight operations the script has to perform: after the initial bitmapping of the bits to obtain the QPSK symbols, the channel only adds noise and there is no need to perform any convolution with an impulse response since the channel is ideal. Finally, the receiver only computes a thresholding and an inverse bit mapping. The results of the simulation can be seen in Figure~\ref{fig:problem1_pbit}, and coincide with those obtained in the previous homework. % TODO insert this reference to the old homework???
 
-When using coding, the script has to perform more complex computations that are illustrated in Figure~\ref{fig:problem1_sccoded}. The random bit sequence needs to have a length compatible with both the encoder and the interleaver. In fact, the provided LDPC encoder requires information words to have length $L_{iw} = 32400$ bits, and encodes them into codewords of length $L_{cw} = 64800$ bits. This doesn't represent a limitation, as shorter information words may be padded to reach the desired length, encoded and de-padded at the receiver, once decoded. In order to simplify things, however, it was decided to only send information words that have length that is a multiple of the information word length required by the encoder. Additionally, the interleaver matrix was given dimensions of 30 x 36 in order to facilitate the process of interleaving the codeword bits. Since $30 \cdot 36 = 1080$ is a divisor of the length of the codewords outputted by the encoder, when codewords of length $L_{cw} = k \cdot 64800, k \in \mathbb{N^{+}}$ need to be interleaved, the interleaver uses a number of matrices equal to $\frac{L_{cw}}{30\cdot36} = 60 \cdot k$, thus ensuring that all matrices will be filled completely and that no additional padding is required. Using this setup, if the desired length is $L_d$, the nearest compatible length of the message to be sent can be computed using the expression $L_{msg} = \lceil \frac{L_{d}}{32400} \rceil \cdot 32400$.
-
-% Expressions of LLRs l'_2k and l'_(2k+1)
+When using coding, the script has to perform more complex computations that are illustrated in Figure~\ref{fig:problem1_sccoded}. The random bit sequence needs to have a length compatible with both the encoder and the interleaver. In fact, the provided LDPC encoder requires information words to have length $L_{iw} = 32400$ bits, and encodes them into codewords of length $L_{cw} = 64800$ bits. This doesn't represent a limitation, as shorter information words may be padded to reach the desired length, encoded and de-padded at the receiver, once decoded. In order to simplify things, however, it was decided to only send information words that have length that is a multiple of the information word length required by the encoder. Additionally, the interleaver matrix was given dimensions of 30 x 36 in order to facilitate the process of interleaving the codeword bits. Since $30 \cdot 36 = 1080$ is a divisor of the length of the codewords outputted by the encoder, when codewords of length $L_{cw} = k \cdot 64800, k \in \mathbb{N^{+}}$ need to be interleaved, the interleaver uses a number of matrices equal to $\frac{L_{cw}}{30\cdot36} = 60 \cdot k$, thus ensuring that all matrices will be filled completely and that no additional padding is required. Using this setup, if the desired length is $L_d$, the nearest compatible length of the message to be sent can be computed using the expression $L_{msg} = \lceil \frac{L_{d}}{32400} \rceil \cdot 32400$. Once the bits are generated, encoded and interleaved, they are translated into symbols using the QPSK bitmap and sent through the channel, that adds the noise $w_k \sim \mathcal{CN}(0, \sigma_w^2)$. If $\sigma^2_I = \frac{\sigma^2_w}{2}$ is the variance of the real and imaginary components of the noise and $\rho_k = \rho_{k,I} + j \rho_{k,Q}$ is the symbol received at time k, at the receiver side the Log Likelihood Ratio (LLR) can be computed using the following expression:
+\begin{equation}
+	l'_p =
+	\begin{cases}
+	\frac{2 \rho_{k,I}}{\sigma_I}, \quad p = 2k \\
+	\frac{2 \rho_{k,Q}}{\sigma_I}, \quad p = 2k +1
+	\end{cases}
+\end{equation}
+If the symbol period is $T_a$, the LLR vector will have bit period equal to $T_{cod} = \frac{T_a}{2}$, as one value of the LLR corresponds to one bit of the encoded message at the transmitter side. In order to get back to the actual correspondence with the original message $b_l$, it is necessary to deinterleave the LLR and to decode it. By feeding the LLR to the decoder, we are using it in its \emph{soft decoding} mode: the decoder will make use of the likelihood associated to the value of each bit, instead of the ``hard value'' of the bits, to perform the decoding. % TODO Necessary?
+The output of the decoder, $\hat{b}_l$, is the final decision on the received symbols. This is the vector that is compared to $b_l$ in order to compute the probability of bit error. The results can once again be seen in Figure~\ref{fig:problem1_pbit}. 
 
 % BER plot for coded vs uncoded QPSK
 \begin{figure}
 	\centering
-	\includegraphics[width = 0.8\textwidth]{problem1}
+	\includegraphics[width = 0.6\textwidth]{problem1}
 	\caption{BER simulation results for coded vs. uncoded QPSK}
 	\label{fig:problem1_pbit}
 \end{figure}
