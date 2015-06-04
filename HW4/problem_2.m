@@ -1,20 +1,18 @@
 % This script solves the second problem.
-clear
-close all
-clc
-
+clear, clc, close all
 rng default
+
+% Initialize parameters based on the assigned channel
+t0 = 5;
+N1 = 0;
+N2 = 4;
+M1_dfe = 15;
+D_dfe = M1_dfe - 1;
+M2_dfe = N2 + M1_dfe - 1 - D_dfe;
 
 parpool(15);
 
 %% Known channel, DFE, uncoded data (HW3)
-
-% The design of the DFE equalizer has to be carried out assuming the
-% channel is known
-% From the assigned impulse response
-t0 = 6;
-N1 = 0;
-N2 = 4;
 
 snr_vec_knownch_uncoded = 0:14;
 seq_lengths_knownch_uncoded = 2.^[13 13 13 13 13 13 13 15 18 18 20 20 22 23 23];
@@ -30,15 +28,12 @@ parfor snr_idx = 1:length(snr_vec_knownch_uncoded)
     
     % Send through the channel
     [rcv_symb, sigma_w, h] = channel_output(symbols, 10^(curr_snr/10), false);
-    rcv_symb = rcv_symb(t0:end-7)/h(t0);
-    hi = h(t0-N1:t0+N2)/h(t0);
+    rcv_symb = rcv_symb(t0+1 : end-7)/h(t0+1);
+    hi = h(t0+1-N1:t0+1+N2)/h(t0+1);
     
     % Receiver: filter with DFE
-    M1_dfe = 15;
-    D_dfe = M1_dfe - 1;
-    M2_dfe = N2 + M1_dfe - 1 - D_dfe;
-    [~, rcv_bits] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, false, false);
-    rcv_bits = ibmap(rcv_bits);
+    [~, rcv_symb] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, false, false);
+    rcv_bits = ibmap(rcv_symb);
     
     % Compute the Pbit and store it
     Pbit_knownch_uncoded(snr_idx) = sum(xor(rcv_bits.', bits))/length(bits);
@@ -50,12 +45,6 @@ save('Problem2_knownch_uncoded', 'snr_vec_knownch_uncoded', ...
     'seq_lengths_knownch_uncoded', 'Pbit_knownch_uncoded');
 
 %% Known channel, DFE, coded data
-% The design of the DFE equalizer has to be carried out assuming the
-% channel is known
-% From the assigned impulse response
-t0 = 6;
-N1 = 0;
-N2 = 4;
 
 % Get optimal number of bits
 desired_bits = 2^22;
@@ -75,26 +64,21 @@ parfor snr_idx = 1:length(snr_vec_knownch_coded)
     bits = randi([0 1], 1, seq_lengths_knownch_coded(snr_idx));
     
     enc_bits = encodeBits(bits);
-    
     int_enc_bits = interleaver(enc_bits);  % Interleave the encoded bits
-    
     symbols = bitmap(int_enc_bits.');
     
     % Send through the channel
     [rcv_symb, sigma_w, h] = channel_output(symbols, 10^(curr_snr/10), false);
-    rcv_symb = rcv_symb(t0:end-7)/h(t0);
-    hi = h(t0-N1:t0+N2)/h(t0);
+    rcv_symb = rcv_symb(t0+1 : end-7)/h(t0+1);
+    hi = h(t0+1-N1:t0+1+N2)/h(t0+1);
     
     % Receiver: filter with DFE
-    M1_dfe = 15;
-    D_dfe = M1_dfe - 1;
-    M2_dfe = N2 + M1_dfe - 1 - D_dfe;
-    [~, rcv_bits] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
+    [~, rcv_symb] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
     
     % Compute Log Likelihood Ratio
     llr = zeros(2*length(symbols),1);
-    llr(1:2:end) = -2*real(rcv_bits)/(sigma_w/2);
-    llr(2:2:end) = -2*imag(rcv_bits)/(sigma_w/2);
+    llr(1:2:end) = -2*real(rcv_symb)/(sigma_w/2);
+    llr(2:2:end) = -2*imag(rcv_symb)/(sigma_w/2);
     
     % Decode the bits
     llr = deinterleaver(llr); % Deinterleave the loglikelihood ratio first
@@ -111,13 +95,6 @@ save('Problem2_knownch_coded', 'snr_vec_knownch_coded', ...
 
 
 %% Estimated channel, DFE, uncoded data
-% L = 31
-% The design of the DFE equalizer has to be carried out assuming the
-% channel is known
-% From the assigned impulse response
-t0 = 6;
-N1 = 0;
-N2 = 4;
 L = 31;
 Nseq = 7;
 
@@ -133,17 +110,14 @@ parfor snr_idx = 1:length(snr_vec_estch_uncoded)
     [packet, rcv_symb, sigma_w] = txrc(seq_lengths_estch_uncoded(snr_idx), curr_snr);
     
     % Perform estimation
-    [h, est_sigma_w] = get_channel_info(rcv_symb(t0:t0+L+Nseq-1), N1, N2);
+    [h, est_sigma_w] = get_channel_info(rcv_symb(t0+1:t0+L+Nseq), N1, N2);
     
-    rcv_symb = rcv_symb(t0:end-7)/h(N1+1);
+    rcv_symb = rcv_symb(t0+1:end-7)/h(N1+1);
     hi = h / h(N1+1);
     
     % Receiver: filter with DFE
-    M1_dfe = 15;
-    D_dfe = M1_dfe - 1;
-    M2_dfe = N2 + M1_dfe - 1 - D_dfe;
-    [~, rcv_bits] = DFE_filter(rcv_symb, hi, N1, N2, est_sigma_w, D_dfe, M1_dfe, M2_dfe, false, false);
-    rcv_bits = ibmap(rcv_bits);
+    [~, rcv_symb] = DFE_filter(rcv_symb, hi, N1, N2, est_sigma_w, D_dfe, M1_dfe, M2_dfe, false, false);
+    rcv_bits = ibmap(rcv_symb);
     packet = ibmap(packet);
     
     % Compute the Pbit and store it
@@ -160,12 +134,6 @@ save('Problem2_estch_uncoded', 'snr_vec_estch_uncoded', ...
 % txrc only accepts L_data such that an ML sequence can be directly
 % created.
 
-% The design of the DFE equalizer has to be carried out assuming the
-% channel is known
-% From the assigned impulse response
-t0 = 6;
-N1 = 0;
-N2 = 4;
 L = 31;
 Nseq = 7;
 
@@ -198,21 +166,18 @@ for sim = 1:numsim
         [rcv_symb, sigma_w, ~] = channel_output(symbols, 10^(curr_snr/10), false);
         
         % Perform estimation
-        [h, est_sigma_w] = get_channel_info(rcv_symb(t0:t0+L+Nseq-1), N1, N2);
+        [h, est_sigma_w] = get_channel_info(rcv_symb(t0+1:t0+L+Nseq), N1, N2);
         
-        rcv_symb = rcv_symb(t0:end-7)/h(N1+1);
+        rcv_symb = rcv_symb(t0+1:end-7)/h(N1+1);
         hi = h / h(N1+1);
         
         % Receiver: filter with DFE
-        M1_dfe = 15;
-        D_dfe = M1_dfe - 1;
-        M2_dfe = N2 + M1_dfe - 1 - D_dfe;
-        [~, rcv_bits] = DFE_filter(rcv_symb, hi, N1, N2, est_sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
+        [~, rcv_symb] = DFE_filter(rcv_symb, hi, N1, N2, est_sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
         
         % Compute Log Likelihood Ratio
         llr = zeros(2*length(packet),1);
-        llr(1:2:end) = -2*real(rcv_bits(L+Nseq+1:end))/(est_sigma_w/2);
-        llr(2:2:end) = -2*imag(rcv_bits(L+Nseq+1:end))/(est_sigma_w/2);
+        llr(1:2:end) = -2*real(rcv_symb(L+Nseq+1:end))/(est_sigma_w/2);
+        llr(2:2:end) = -2*imag(rcv_symb(L+Nseq+1:end))/(est_sigma_w/2);
         
         llr = deinterleaver(llr); % Deinterleave the loglikelihood ratio first
         

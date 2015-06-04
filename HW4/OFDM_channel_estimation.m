@@ -1,4 +1,4 @@
-function [G_hat, est_sigma_w] = OFDM_channel_estimation()
+function [G_hat, est_sigma_w] = OFDM_channel_estimation(snr)
 
 %% Channel ESTIMATION for OFDM
 % Send one block of data with symbols spaced of 16 channels
@@ -17,11 +17,12 @@ block = ones(M, 1)*(-1-1i);
 % "estimation symbols" is doubled (-> better snr)
 % Note that the variance of the noise at the receiver, after the DFT, is
 % multplied by M, therefore it could be high
-ts = ts_generation(allowed_symb-1, 1);
+ts = ts_generation(allowed_symb-1, 1) * sqrt(2);
 init_step = 1; % < 16
+indices = init_step : spacing : init_step + spacing*(allowed_symb-1);
 % Scale in order to double the power of tx symbols
 % TODO What should we set the other symbols to?
-block(init_step:spacing:end) = ts * sqrt(2);
+block(indices) = ts;
 
 % Compute IDFT, add prefix, P/S
 A = ifft(block);
@@ -29,8 +30,8 @@ A_pref = [A(end-Npx + 1:end); A];
 s = reshape(A_pref, [], 1);
 
 %% CHANNELIZATION
+% Do our own transmission and reception of the training sequence
 
-snr = 1; %dB
 snr_lin = 10^(snr/10);
 %fprintf('Symbols are pushed into the channel...\n');
 % Send over the noisy channel
@@ -51,17 +52,14 @@ x_matrix = fft(r_matrix);
 x_rcv = x_matrix(init_step:spacing:end, 1);
 X_known = diag(ts)*sqrt(2);
 
-% LS estimaTION
-phi = X_known'*X_known;
-theta = X_known'*x_rcv;
-G_est = phi \ theta;
+% Compute G_est by dividing the received symbol by the transmitted one
+G_est = x_rcv ./ ts;
 
-% LS
-F = dftmtx(M);
-F = F(init_step : spacing : end, 1:Npx+1);
 % Solve LS for F*g=G_est where g is an 8x1 vector
+F = dftmtx(M);
+F = F(indices, 1:Npx+1);
 g_hat = (F' * F) \ (F' * G_est);
-
+%estimator_var = diag(F' * F) * sigma_w;
 G_hat = fft(g_hat, M);
 
 
