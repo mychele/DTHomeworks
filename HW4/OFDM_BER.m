@@ -1,4 +1,4 @@
-function [ BER, G ] = OFDM_BER( M, Npx, N2, t0, desired_bits, snr, coding, chIsKnown )
+function [ BER, G ] = OFDM_BER( M, Npx, N2, t0, desired_bits, snr, coding, chIsKnown, varargin )
 %This function performs the transmission and reception of bits with ODFM,
 %with or without encoding
 %   It needs
@@ -7,11 +7,27 @@ function [ BER, G ] = OFDM_BER( M, Npx, N2, t0, desired_bits, snr, coding, chIsK
 %   - the number of desired bits
 %   - the snr
 %   - the option coding to be set either true or false
+%   - the estimation method (1 standard, 2 8 points+noise) - optional, if
+%   not indicated the classic is used
 %   It returns
 %   - the BER
 %   - the channel frequency response
 %   This implementation doesn't rescale the power of sent symbols after the
 %   IFFT operation, therefore sigma_s^2 = sigma_a^/M
+
+if (length(varargin) == 1)
+    if (varargin{1} == 1)
+        fprintf('Use classic estimation method \n')
+        estMethod = 1;
+    elseif (varargin{1} == 2)
+        fprintf('Use new estimation method \n')
+        estMethod = 2;
+    end
+else
+    fprintf('Use classic estimation method \n')
+    estMethod = 1;
+end
+
 warning('off', 'all');
 OFDM = true;
 
@@ -46,7 +62,7 @@ a_matrix = reshape(a_pad, M, []); % it should mantain columnwise order
 % compute the ifft of blocks of 512 symbols
 % http://it.mathworks.com/matlabcentral/newsreader/view_thread/17104
 % it should be a columnwise operation!
-A_matrix = ifft(a_matrix); 
+A_matrix = ifft(a_matrix);
 
 % add the preamble to each column
 A_matrix = [A_matrix(M-Npx+1:M, :); A_matrix]; % very powerful operation
@@ -59,11 +75,15 @@ fprintf('Symbols are pushed into the channel...\n');
 snr_lin = 10^(snr/10);
 [r, sigma_w, g] = channel_output(s, snr_lin, OFDM);
 if (chIsKnown)
-   g = g(1+t0 : end);
-   G = fft(g, 512);
-   G = G(:);
+    g = g(1+t0 : end);
+    G = fft(g, 512);
+    G = G(:);
 else
-   [G, sigma_w] = OFDM_channel_estimation(snr, Npx, N2, t0);
+    if(estMethod == 1)
+        [G, sigma_w] = OFDM_channel_estimation(snr, Npx, N2, t0);
+    elseif(estMethod == 2)
+        [G, sigma_w] = OFDM_channel_estimation_2(snr, Npx, N2, t0);   
+    end 
 end
 
 % Process at the receiver
