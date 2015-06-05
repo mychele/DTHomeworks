@@ -203,11 +203,12 @@ figure, semilogy(snr_vec_knownch_uncoded, Pbit_knownch_uncoded), hold on
 semilogy(snr_vec_knownch_coded, Pbit_knownch_coded), hold on
 semilogy(snr_vec_estch_uncoded, Pbit_estch_uncoded, '--')
 semilogy(snr_vec_estch_coded, Pbit_estch_coded, '--')
-xlabel('snr [dB]'), ylabel('BER')
+xlabel('\Gamma [dB]'), ylabel('Pbit'), grid on
 ylim([10^-5, 10^-1])
 xlim([0, 14])
 legend('Known channel, uncoded', 'Known channel, coded', ...
     'Estimated channel, uncoded', 'Estimated channel, coded');
+title('Bit Error Rate for a DFE receiver')
 
 %% Clean parpool
 delete(gcp)
