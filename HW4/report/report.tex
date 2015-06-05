@@ -110,7 +110,7 @@ basicstyle=\footnotesize\ttfamily
 	\label{fig:problem1_sccoded}
 \end{figure}
 
-The uncoded Single Carrier QPSK configuration was implemented as described in Figure~\ref{fig:problem1_scuncoded}. First of all, a random data stream is created using the \texttt{randi} function. For the Pbit simulations, $L_{bits} = 2^{24}$ bits were used for every SNR. While this number of bits is unnecessarily large to estimate the Bit Error Rate for the lower SNRs, it was decided not to optimize it because the simulations were sufficiently fast. This is due to the lightweight operations the script has to perform: after the initial bitmapping of the bits to obtain the QPSK symbols, the channel only adds noise and there is no need to perform any convolution with an impulse response since the channel is ideal. Finally, the receiver only computes a thresholding and an inverse bit mapping. The results of the simulation can be seen in Figure~\ref{fig:problem1_pbit}, and coincide with those obtained in the previous homework. % TODO insert this reference to the old homework???
+The uncoded Single Carrier QPSK configuration was implemented as described in Figure~\ref{fig:problem1_scuncoded}. First of all, a random data stream is created using the \texttt{randi} function. For the BER simulations, $L_{bits} = 2^{24}$ bits were used for every SNR. While this number of bits is unnecessarily large to estimate the Bit Error Rate for the lower SNRs, it was decided not to optimize it because the simulations were sufficiently fast. This is due to the lightweight operations the script has to perform: after the initial bitmapping of the bits to obtain the QPSK symbols, the channel only adds noise and there is no need to perform any convolution with an impulse response since the channel is ideal. Finally, the receiver only computes a thresholding and an inverse bit mapping. The results of the simulation can be seen in Figure~\ref{fig:problem1_pbit}, and coincide with those obtained in the previous homework. % TODO insert this reference to the old homework???
 
 When using coding, the script has to perform more complex computations that are illustrated in Figure~\ref{fig:problem1_sccoded}. The random bit sequence needs to have a length compatible with both the encoder and the interleaver. In fact, the provided LDPC encoder requires information words to have length $L_{iw} = 32400$ bits, and encodes them into codewords of length $L_{cw} = 64800$ bits. This doesn't represent a limitation, as shorter information words may be padded to reach the desired length, encoded and de-padded at the receiver, once decoded. In order to simplify things, however, it was decided to only send information words that have length that is a multiple of the information word length required by the encoder. Additionally, the interleaver matrix was given dimensions of 30 x 36 in order to facilitate the process of interleaving the codeword bits. Since $30 \cdot 36 = 1080$ is a divisor of the length of the codewords outputted by the encoder, when codewords of length $L_{cw} = k \cdot 64800, k \in \mathbb{N^{+}}$ need to be interleaved, the interleaver uses a number of matrices equal to $\frac{L_{cw}}{30\cdot36} = 60 \cdot k$, thus ensuring that all matrices will be filled completely and that no additional padding is required. Using this setup, if the desired length is $L_d$, the nearest compatible length of the message to be sent can be computed using the expression $L_{msg} = \lceil \frac{L_{d}}{32400} \rceil \cdot 32400$. Once the bits are generated, encoded and interleaved, they are translated into symbols using the QPSK bitmap and sent through the channel, that adds the noise $w_k \sim \mathcal{CN}(0, \sigma_w^2)$. If $\sigma^2_I = \frac{\sigma^2_w}{2}$ is the variance of the real and imaginary components of the noise and $\rho_k = \rho_{k,I} + j \rho_{k,Q}$ is the symbol received at time k, at the receiver side the Log Likelihood Ratio (LLR) can be computed using the following expression:
 \begin{equation}
@@ -153,17 +153,14 @@ The output of the decoder, $\hat{b}_l$, is the final decision on the received sy
 \end{figure}
 
 \subsection*{Transmitter structure}
-
-% cyclic prefix
-% idft
-% p/s
+Figure~\ref{fig:OFDM} shows the structure of an OFDM transmitter - receiver and a model for the channel. The $a$ symbols could represent either coded or uncoded bits, as in previous problems. Let $k$ be the block index. The symbols are taken in chunks of $\ofdM = 512$ in order to compose the vector $a_k[i], i \in [0, \ofdM - 1]$. The IDFT is then computed to get $A_k[i], i\in [0, \ofdM-1]$. At this step a cyclic prefix (whose role will be explained after having introduced the receiver) is introduced, i.e. for each block the last $N_{px} = 7$ symbols are repeated at the beginning of the $A_k$ vector. Finally the symbols $A_k[i]$ are serialized in order to obtain the vector $s_n$, which is sent through the channel.
 
 % This consideration on SNR
-As usual the SNR is defined as $\Gamma = \frac{\sigma_s^2 E_h}{\sigma_w^2}$. With an OFDM system, however, the meaning of $\sigma_s^2$ changes. In fact, the transmitter performs an IDFT, which is
+As usual the SNR is defined as $\Gamma = \frac{\sigma_s^2 E_h}{\sigma_w^2}$. With an OFDM system, however, the meaning of $\sigma_s^2$ changes. As mentioned, the transmitter performs an IDFT, which is
 \begin{equation}
 	A_k[\ell] = \frac{1}{\ofdM} \sum_{i = 0}^{\ofdM - 1} W_{\ofdM}^{-i\ell} a_k[i], \quad \ell = 0, 1, \dots, \ofdM-1,
 \end{equation}
-followed by the polyphase component of a prototype filter, which in our case is a $\delta_n$ filter. Therefore we have 
+Therefore we have 
 % see formula 9.35, 9.38, 9.39
 \begin{equation}
 	\sigma_s^2 = \dfrac{\sigma_a^2}{\ofdM}.
@@ -178,10 +175,8 @@ that yields
 	\sigma_w^2 = \dfrac{\sigma_a^2 E_h}{\ofdM \Gamma}.
 \end{equation}
 
-
 \subsection*{Receiver structure}
-% TODO add figure as in line below
-The receiver of OFDM has the structure of Figure. The timing phase is $t_0 = 5 T$, which corresponds to the beginning at the receiver of the cyclic prefix. For each block of $\ofdM + N_{px}$ symbols the first $N_{px}$ are discarded and the DFT is then computed only on the $\ofdM$ samples which don't belong to the cyclic prefix of each block. Let the vector of symbols before the DFT be $\mathbf{r}_k$, with $k$ the block index, and $\mathbf{g}_{c,\ofdM}$ be the channel impulse response, of length $N \le N_{px} - 1$, padded with zeros in order to have a vector of length $M$. Then it is possible to define the circulant matrix of the IDFT of the transmitted symbols $a_k[i], i = 0, \dots, \ofdM$ as
+The receiver of OFDM has the structure of Figure~\ref{fig:OFDM}. The timing phase is $t_0 = 5 T$, which corresponds to the beginning at the receiver of the cyclic prefix. For each block of $\ofdM + N_{px}$ symbols the first $N_{px}$ are discarded and the DFT is then computed only on the $\ofdM$ samples which don't belong to the cyclic prefix of each block. Let the vector of symbols before the DFT be $\mathbf{r}_k$, with $k$ the block index, and $\mathbf{g}_{c,\ofdM}$ be the channel impulse response, of length $N \le N_{px} - 1$, padded with zeros in order to have a vector of length $M$. Then it is possible to define the circulant matrix of the IDFT of the transmitted symbols $a_k[i], i = 0, \dots, \ofdM$ as
 \begin{equation}
 	\boldsymbol{\Xi} = 
 	\begin{bmatrix}
@@ -200,21 +195,21 @@ with $w_k$ a vector of AWGN samples. Then the receiver performs the DFT using an
 	 \mathbf{x}_k & = & \DFTmat \mathbf{r}_k = \DFTmat \boldsymbol{\Xi} \DFTmat^{-1} \DFTmat \mathbf{g}_{c,\ofdM} + \DFTmat \mathbf{w}_k\\
 	  & = & \mathrm{diag}\{\mathbf{a}_k\} \mathbf{G}_c + \mathbf{W}_k
 \end{eqnarray}
-because $\boldsymbol{\Xi}$ is a circulant matrix. $W_k$ is a still a vector of independent Gaussian random variables, each of them with variance $\sigma_W^2 = \ofdM \sigma_w^2$. 
+because $\boldsymbol{\Xi}$ is a circulant matrix. $\mathbf{W}_k$ is a still a vector of independent Gaussian random variables, each of them with variance $\sigma_W^2 = \ofdM \sigma_w^2$. 
 
 This procedure removes the effects of ICI and ISI introduced by the non-ideal channel, and it is followed by a scaling of the received symbols on each channel in order to get the same constellation of the transmitter. In particular for each subchannel $i$ 
 \begin{equation}
 	y_k[i] = \frac{x_k[i]}{G_c[i]} = a_k[i] + \frac{W_k[i]}{G_c[i]}
+	\label{eq:yofdm}
 \end{equation}
 Finally the receiver performs a decision. If the transmitted bits are uncoded, it uses a threshold detector on each subchannel and an inverse bitmap. Note that the performances of an uncoded OFDM system are negatively affected by the presence of subchannels in which the frequency response $G_c$ of the channel exhibits a great attenuation, because in that subchannels the received symbols are zeros or below noise level. 
 % TODO fix this sentence
 
-If the coded option is used, instead, the data which would be lost because of frequency response attenuation in that subchannel can be recovered with coding. In particular given the observed symbol $y_k[i]$ the log-likelihood ratios (LLR) of each subchannel are defined as
+If the coded option is used, instead, the data which would be lost because of frequency response attenuation in that subchannel can be recovered with coding. In particular given the observed symbol $y_k[i]$ defined in~\eqref{eq:yofdm} let the variance of the noise per component of subchannel $i$ be $\sigma_I^2 = 0.5 \sigma_W^2/|G_c[i]|^2 = 0.5 \ofdM \sigma_w^2/|G_c[i]|^2$. Then the log-likelihood ratios (LLR) of each subchannel are defined as
 \begin{eqnarray}
-	\mathrm{LLR}_I = \frac{2\mathrm{Re}(y_k[i])}{0.5\sigma_W^2/|G_c[i]|^2} = \frac{2\mathrm{Re}(y_k[i]) |G_c[i]|^2 }{0.5 M \sigma_w^2} \\
-	\mathrm{LLR}_Q = \frac{2\mathrm{Im}(y_k[i])}{0.5 \sigma_W^2/|G_c[i]|^2} = \frac{2\mathrm{Im}(y_k[i]) |G_c[i]|^2 }{0.5 M \sigma_w^2} \\
+	\mathrm{LLR}_I = \frac{2\Re(y_k[i])}{\sigma_I^2} = 2\Re(y_k[i]) \frac{|G_c[i]|^2 }{0.5 \ofdM \sigma_w^2} \\
+	\mathrm{LLR}_Q = \frac{2\Im(y_k[i])}{\sigma_I^2} = 2\Im(y_k[i]) \frac{|G_c[i]|^2 }{0.5 \ofdM \sigma_w^2} \\
 \end{eqnarray}
-since $0.5 \sigma_W^2/|G_c[i]|^2$ is variance per component of the noise of $y_k[i]$ for each subchannel.
 
 \subsection*{Channel estimation for OFDM}
 In order to perform the operations described in the previous section, the receiver has to know the frequency response of the channel and the noise power of each subchannel. In this homework the simulation of the BER has been carried out both with an a-priori perfectly known channel and with an estimated channel. 
