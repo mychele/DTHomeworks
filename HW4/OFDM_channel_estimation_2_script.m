@@ -5,7 +5,6 @@
 %#ok<*SAGROW>
 
 clear, close all
-numsim = 500;
 OFDM = true;
 M = 512;
 allowed_symb = 32;
@@ -32,7 +31,6 @@ s = reshape(A_pref, [], 1);
 
 %% CHANNELIZATION
 
-
 snr = 6; %dB
 snr_lin = 10^(snr/10);
 % Send over the noisy channel
@@ -58,7 +56,7 @@ x_known = diag(ts);
 % Compute G_est by dividing the received symbol by the transmitted one
 G_est = x_rcv ./ ts;
 
-% Solve LS for F*g=G_est where g is an 8x1 vector
+% Solve LS for F*g=G_est where g is an (N2+1)x1 vector
 F = dftmtx(M);
 F = F(indices, 1:N2+1);
 g_hat = (F' * F) \ (F' * G_est);
@@ -73,9 +71,8 @@ for j=0:nsamples-1
 end
 est_sigma_w = est_sigma_w / nsamples / M * sigma_ts;
 
-
 % Error on the estimate of G
-est_err = sum(abs(G_hat - G).^2);
+est_err = sum(abs(G_hat - G).^2) / numel(G);
 
 
 
@@ -83,6 +80,7 @@ est_err = sum(abs(G_hat - G).^2);
 
 fprintf('Est sigma_w^2 = %.2d\n', est_sigma_w);
 fprintf('Real sigma_w^2 = %.2d\n', sigma_w);
+fprintf('Error on the estimate of G = %.2d\n', est_err);
 
 figure, hold on
 stem(0:Npx, abs(g))

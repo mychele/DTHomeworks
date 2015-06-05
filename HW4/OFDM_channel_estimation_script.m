@@ -67,12 +67,16 @@ G_hat = fft(g_hat, M);
 xhat = x_known * G_hat(indices);
 E = sum(abs(xhat - x_rcv).^2)/length(xhat);
 est_sigma_w = E/M;
-fprintf('Est sigma_w^2 = %d\n', est_sigma_w);
-fprintf('Real sigma_w^2 = %d\n', sigma_w);
 
+% Error on the estimate of G
+est_err = sum(abs(G_hat - G).^2) / numel(G);
 
 
 %% Plots
+
+fprintf('Est sigma_w^2 = %.2d\n', est_sigma_w);
+fprintf('Real sigma_w^2 = %.2d\n', sigma_w);
+fprintf('Error on the estimate of G = %.2d\n', est_err);
 
 figure, hold on
 stem(0:Npx, abs(g))
