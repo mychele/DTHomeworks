@@ -15,7 +15,7 @@ desired_bits = 2^22;
 estMethod = 2;
 
 %% BER with coding, estimated channel
-repeat = 10;
+repeat = 100;
 isKnown = false;
 coding = true;
 snr_vec_coding_estimated_2 = [0, 1, 2:0.05:2.6, 3];
@@ -28,7 +28,7 @@ parfor snr_i = 1:length(snr_vec_coding_estimated_2)
     end
 end
 
-save('OFDM_coded_estimated_2', 'BER_coding_estimated_2', 'snr_vec_coding_estimated_2', 'desired_bits');
+save('OFDM_coded_estimated_2_long', 'BER_coding_estimated_2', 'snr_vec_coding_estimated_2', 'desired_bits');
 %% BER without coding, estimated channel
 coding = false;
 snr_vec_nocoding_estimated_2 = 0:15;
@@ -41,6 +41,6 @@ parfor snr_i = 1:length(snr_vec_nocoding_estimated_2)
     end
 end
 
-save('OFDM_uncoded_estimated_2', 'BER_nocoding_estimated_2', 'snr_vec_nocoding_estimated_2', 'desired_bits');
+save('OFDM_uncoded_estimated_2_long', 'BER_nocoding_estimated_2', 'snr_vec_nocoding_estimated_2', 'desired_bits');
 
 delete(gcp);
