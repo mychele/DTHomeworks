@@ -95,13 +95,13 @@ plot(real(G)), hold on
 plot(real(G_hat))
 plot(indices, real(G_est), '^')
 title(strcat('Real part of true and estimated G at ', num2str(snr), ' dB'))
-legend('real(G)', 'real(G_{hat})', 'real(G_{est})'), xlabel('i - subchannels'), ylabel('Real(G)'),
+legend('True', 'Final estimate', 'First raw estimate'), xlabel('i - subchannels'), ylabel('Real(G)'),
 grid on, xlim([1, M])
 
 subplot 212
 plot(imag(G)), hold on
 plot(imag(G_hat))
 plot(indices, imag(G_est), '^')
-title(strcat('Real part of true and estimated G at ', num2str(snr), ' dB'))
-legend('imag(G)', 'imag(G_{hat})', 'imag(G_{est})'), xlabel('i - subchannels'), ylabel('imag(G)'),
+title(strcat('Imaginary part of true and estimated G at ', num2str(snr), ' dB'))
+legend('True', 'Final estimate', 'Raw estimate'), xlabel('i - subchannels'), ylabel('imag(G)'),
 grid on, xlim([1, M])
