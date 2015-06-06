@@ -11,7 +11,7 @@ D_dfe = M1_dfe - 1;
 M2_dfe = N2 + M1_dfe - 1 - D_dfe;
 sigma_a = 2;
 
-%parpool(15);
+parpool(15);
 
 %% Estimated channel, DFE, coded data
 % In this section we don't use the txrc function for now. This is because
@@ -34,7 +34,7 @@ seq_lengths_estch_coded_new = bit_number*ones(1, length(snr_vec_estch_coded_new)
 Pbit_estch_coded_new = zeros(length(snr_vec_estch_coded_new),numsim);
 
 for sim = 1:numsim
-    for snr_idx = 1:length(snr_vec_estch_coded_new)
+    parfor snr_idx = 1:length(snr_vec_estch_coded_new)
         curr_snr = snr_vec_estch_coded_new(snr_idx);
         fprintf('Estimated channel, coded, snr = %.2f\n', curr_snr);
         
