@@ -285,11 +285,12 @@ In order to perform the operations described in the previous section, the receiv
 %TODO give reasons behind this kind of spacing
 The estimation of the channel has to be performed with $L_{ts} = 32$ pilot symbols, using one single block, for instance $k=0$. In \eqref{eq:snrOFDM} the power of the transmitted symbols is usually $\sigma_a^2 = 2$, but the pilot symbols have power $\sigma_{ts}^2 = 4$ as required. The pilot symbols $a_{ts}[i]$ are transmitted on the $L_{ts}$ subchannels with indices
 \begin{equation}
-	i \in \mathcal{T}_{ind} = \{q \frac{\ofdM}{L_{ts}}, \, q = 0,\ldots,L_{ts}-1 \}  = \{ 0, 16, 32, \dots, 496 \},
+	i \in \mathcal{T}_{ind} = \left\{q \, \frac{\ofdM}{L_{ts}}, \ q = 0,\ldots,L_{ts}-1 \right\}  = \left\{ 0, 16, 32, \dots, 496 \right\},
+	\label{eq:OFDMequallyspacedindices}
 \end{equation}
-i.e. with a spacing of $\ofdM/L_{ts}$ subchannels between each other. The other $\ofdM - L_{ts}$ symbols can be data or anything else, since they are not used for the estimation. At the receiver, after the DFT, each of the $L_{ts}$ symbols $x_0[i], i \in \mathcal{T}_{ind}$ is divided by the corresponding pilot symbol $a_{ts}[i]$ in order to get $\tilde{G}[i]$. Formally, the estimated frequency response of the $i$-th subchannel is
+i.e. with a spacing of $\ofdM/L_{ts}$ subchannels between each other. The other $\ofdM - L_{ts}$ symbols can be data or anything else, since they are not used for the estimation. At the receiver, after the DFT, each of the $L_{ts}$ symbols $x_0[i], i \in \mathcal{T}_{ind}$ is divided by the corresponding pilot symbol $a_{ts}[i]$ in order to get $\tilde{G}_c[i]$. Formally, the estimated frequency response of the $i$-th subchannel is
 \begin{equation}
-	\tilde{G}[i] = \dfrac{x_0[i]}{a_{ts}[i]} = \dfrac{a_{ts}[i] G_c[i] + W_0[i]}{a_{ts}[i]} = G_c[i] + \dfrac{W_0[i]}{a_{ts}[i]}, \qquad i \in \mathcal{T}_{ind}.
+	\tilde{G}_c[i] = \dfrac{x_0[i]}{a_{ts}[i]} = \dfrac{a_{ts}[i] G_c[i] + W_0[i]}{a_{ts}[i]} = G_c[i] + \dfrac{W_0[i]}{a_{ts}[i]}, \qquad i \in \mathcal{T}_{ind}.
 \end{equation}
 
 Our estimation method exploits the fact that the channel impulse response can have at most $N_{px} + 1 = 8$ taps, so the uncorrelated samples of the frequency response $G_c[i]$ are at most 8. In the presence of noise, however, the estimated frequency response has more than 8 degrees of liberty, and we will try to determine a better estimate (more robust to noise), by using all 32 symbols, equally spaces as described above.
@@ -298,42 +299,47 @@ Let $\DFTmat$ be a $\ofdM \times \ofdM$ DFT matrix as before, and let $\DFTmat'$
 \begin{equation}
 	\mathbf{G}_c = \DFTmat \cdot \mathbf{g}_{c,\ofdM} = \DFTmat' \cdot \mathbf{g}_c.
 \end{equation}
-By choosing the 32 subchannels with pilot symbols (i.e. for $ i \in \mathcal{T}_{ind}$) we define a matrix $\DFTreduced$ of size $L_{ts} \times N_{px} + 1$ as the result of selecting the rows $ i\in \mathcal{T}_{ind} $ of matrix $\DFTmat'$.. Let 
+By choosing the 32 subchannels with pilot symbols (i.e. for $ i \in \mathcal{T}_{ind}$) we define a matrix $\DFTreduced$ of size $L_{ts} \times N_{px} + 1$ as the result of selecting the rows $ i\in \mathcal{T}_{ind} $ of matrix $\DFTmat'$. Let 
 \begin{equation}
 \mathbf{\tilde{W}} = \left[ \dfrac{W_0[i]}{a_{ts}[i]} \right] _{i\ \in \mathcal{T}_{ind}}
 \end{equation}
-be the vector of noise samples corresponding to the considered subchannels (i.e. the ones we are using to transmit the pilot symbols). Then it is possible to write $\mathbf{\tilde{G}}_c$ as
+be the vector of noise samples corresponding to the considered subchannels (i.e. the ones we are using to transmit the pilot symbols). Then, defining the vector $\tilde{\mathbf{G}}_c = [ \tilde{G}_c[i] ]_{i\in \mathcal{T}_{ind}}$, it is possible to write $\mathbf{\tilde{G}}_c$ as
 \begin{equation}
 	\mathbf{\tilde{G}}_c = \DFTreduced \cdot \mathbf{g}_{c} + \mathbf{\tilde{W}}.
 	\label{eq:OFDMfreqresp}
 \end{equation}
 
-Given an observation $\boldsymbol{\Omega}$ of the vector $\tilde{\mathbf{G}}_c = [ \tilde{G}[i] ]_{i\in \mathcal{T}_{ind}}$ the vector $\mathbf{g}_{c}$ can be finally computed by applying the LS method, which is formulated as
+Given an observation of $\tilde{\mathbf{G}}_c $, the vector $\mathbf{g}_{c}$ can be finally computed by applying the LS method, formulated as
 \begin{equation}
-	\mathbf{\hat{g}}_c = \arg\min_{\mathbf{g}_c} ||\DFTreduced \cdot \mathbf{g}_{c} - \boldsymbol{\Omega}||^2.
+	\mathbf{\hat{g}}_c = \arg\min_{\mathbf{g}_c} \left|\left|\DFTreduced \cdot \mathbf{g}_{c} - \tilde{\mathbf{G}}_c\right|\right|^2.
+	\label{eq:OFDM_LS}
 \end{equation}
 In matrix form, the solution is given by the following equations:
 \begin{align}
 	\boldsymbol{\Phi} &= \DFTreduced^H \DFTreduced \\
-	\boldsymbol{\theta} &= \DFTreduced^H \boldsymbol{\Omega} \\ 
+	\boldsymbol{\theta} &= \DFTreduced^H \tilde{\mathbf{G}}_c \\ 
 	\hat{\mathbf{g}}_{c} &= \boldsymbol{\Phi}^{-1} \boldsymbol{\theta}.
 \end{align}
-Finally, let $\hat{\mathbf{g}}_{c, \ofdM}$ be $\hat{\mathbf{g}}_{c}$ with a zero padding in order to make it $\ofdM$ samples long, as defined before. In order to estimate the frequency response at each subchannel, the DFT is applied on $\hat{\mathbf{g}}_{c, \ofdM}$, to obtain $\mathbf{\hat{G}}_c = \mathcal{F}[\mathbf{\hat{g}}_{c, \ofdM}]$. 
-
-In conclusion, the noise power is estimated as 
+Let $\hat{\mathbf{g}}_{c, \ofdM}$ be $\hat{\mathbf{g}}_{c}$ with a zero padding in order to make it $\ofdM$ samples long, as defined before. In order to estimate the frequency response at each subchannel, the DFT is applied on $\hat{\mathbf{g}}_{c, \ofdM}$, to obtain $\mathbf{\hat{G}}_c = \mathcal{F}[\mathbf{\hat{g}}_{c, \ofdM}]$. 
+Finally, the noise power is estimated as 
 \begin{equation}
-	\hat{\sigma}_w^2 = \frac{1}{L_{ts}} \sum_{i \in \mathcal{T}_{ind}} |a_{ts}[i]\hat{G}_c[i] - x_0[i]|^2
+	\hat{\sigma}_w^2 = \frac{1}{L_{ts}} \sum_{i \in \mathcal{T}_{ind}} \left| a_{ts}[i]\hat{G}_c[i] - x_0[i] \right| ^2
 \end{equation}
 provided that $a_{ts}[i]\hat{G}_c[i] - x_0[i]$ has zero mean.
 
 
 \subsection*{Alternative method dunno}
 
-In absence of noise, \eqref{eq:OFDMfreqresp} can easily be inverted to obtain the exact value of $\mathbf{g}_c$. In fact, that equation represents a system of 32 equations in 8 unknowns, which is an overdetermined system with a unique solution. In fact, we could in principle use any 8 subchannels to get an estimated frequency response -- we tried different scenarios and the resulting estimate is as good as we want, provided a high enough SNR. The presence of noise affects the variances of the estimator: more precisely, the variance of the estimate $\hat{G}_c[i]$, that only depends on the noise, gets very high for subchannel indices $i$ that are far from the nearest element of the set $\mathcal{T}_{ind}$. For this reason, the solution of equally spaced subchannels for the estimation is the most robust to noise.
+In absence of noise, \eqref{eq:OFDMfreqresp} can easily be inverted to obtain the exact value of $\mathbf{g}_c$. In fact, that equation represents a system of 32 equations in 8 unknowns, which is an overdetermined system with a unique solution. In fact, we could in principle use any 8 subchannels to get an estimated frequency response -- we tried different scenarios and the resulting estimate is as good as we want, provided a high enough SNR. The presence of noise affects the variance of the estimators: more precisely, the variance of the estimate $\hat{G}_c[i]$, that only depends on the noise, becomes very high for subchannel indices $i$ that are far from the nearest element of the set $\mathcal{T}_{ind}$. For instance, if we use as training subchannels the ones in the middle, i.e. $i = 241,\ldots,272$, then the estimated $\hat{G}_c[i]$ for very low and very high frequencies will be very unreliable. The solution of equally spaced subchannels for the estimation turns out to be the most robust to noise.
 
-As already mentioned, the frequency response we are estimating has only 8 degrees of liberty, therefore in principle we could use for instance 8 equally spaced subchannels to get a good result. Moreover, for the same reason, the 512 coefficients $G_c[i]$ are heavily correlated, therefore adjacent subchannels will have similar frequency response. The last observation suggests that a good solution for the estimation of the subchannel noise would be to transmit training symbols on adjacent subchannels, and measure the variance of the estimated frequency responses $\hat{G}_c[i]$, assuming in those subchannels $G_c[i]$ is approximately constant. Indeed, if the noise is powerful enough, the variability of the estimated $\hat{G}_c[i]$ is almost completely due to noise.
+As already mentioned, the frequency response we are estimating has only 8 degrees of liberty, therefore in principle we could use for instance 8 equally spaced subchannels to get a good result. Moreover, for the same reason, the 512 coefficients $G_c[i]$ are heavily correlated, therefore adjacent subchannels will have a similar frequency response. The last observation suggests that a good solution for the estimation of the subchannel noise would be to transmit training symbols on adjacent subchannels, and measure the variance of the estimated frequency responses $\hat{G}_c[i]$, assuming in those subchannels $G_c[i]$ is approximately constant. Indeed, if the noise is powerful enough, the variability of the estimated $\hat{G}_c[i]$ in adjacent subchannels is almost completely due to noise.
 
 %TODO Spiegare bene come funziona, selezionando varianze e mediandole, poi scalamenti vari..
+The frequency response estimation in this case is the same as in the first method, except for the index selection. A first estimate of the frequency response in 32 indices is performed as in \eqref{eq:OFDMfreqresp}, then the LS problem in \eqref{eq:OFDM_LS} is solved. The difference is in the definition of the 32 chosen indices: the new set is
+\begin{equation}
+	\mathcal{T}_{ind}^{(2)} = \left\{q \, \frac{\ofdM}{L_{ts}}, \ q = 0,\ldots,L_{ts}-1 \right\}  = \left\{ 0, 16, 32, \dots, 496 \right\},
+\end{equation} %TODO modify this equation
+which is different from the equally spaced pattern defined in \eqref{eq:OFDMequallyspacedindices}.
 
 The main tradeoff of this method is the following. Using larger groups of subchannels we are increasing the accuracy of the variance estimation, but there are two downsides. Firstly, the variability of the frequency response starts playing a major role in the estimated variance, yielding a worse estimation of the noise variance that does not prevail anymore. Secondly, we are increasing the spacing between groups of subchannels, therefore the estimation of the frequency response itself gets worse. On the other hand, using small groups, the estimated variance would be mainly due to noise, and the frequeny response estimation would be more accurate, but we have too few samples in each group to compute the sample variance.
 
