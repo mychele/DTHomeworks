@@ -1,4 +1,4 @@
-function [ Jmin, r ] = DFE_filter(x, hi, N1, N2, est_sigmaw, D, M1, M2, coding, verb)
+function [ Jmin, psi, r ] = DFE_filter(x, hi, N1, N2, est_sigmaw, D, M1, M2, coding, verb)
 % Function that performs DFE filtering. It needs
 % packet is the sequence of sent symbols
 % x is the received samples vector in T, normalized by h0
