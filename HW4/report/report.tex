@@ -76,7 +76,7 @@ basicstyle=\footnotesize\ttfamily
 \newcommand{\DFTreduced} {\mathbf{\tilde{F}}}
 
 
-
+\usepackage{placeins}
 \graphicspath{ {figures/} }
 
 % equations are numbered section by section
@@ -146,7 +146,17 @@ The output of the decoder, $\hat{b}_l$, is the final decision on the received sy
 \end{figure}
 
 % TODO possibly adjust this consideration with figure on just the coding/decoding 
-From now on a QPSK symbol $a_k$ will represent either uncoded or coded bits. In the first case the symbol $a_k$ is obtained just by applying the bitmap on 2 consecutive uncoded bits, as in the first block of Figure~\ref{fig:problem1_scuncoded}. In the second cases, instead, the first 2 blocks of Figure~\ref{fig:problem1_sccoded} are used to encode the bits before the bitmap is actually computed.
+From now on in the Figures that represent the different systems under analysis the coding and decoding blocks will be omitted in order to simplify the description. Therefore a QPSK symbol $a_k$ in the following Figures will represent either uncoded or coded bits. In the first case the symbol $a_k$ is obtained just by applying the bitmap on 2 consecutive uncoded bits. In the second cases, instead, the coding procedure of Figure~\ref{fig:code} is used to encode the bits before the bitmap is actually computed.
+
+\begin{figure}[H]
+	\centering
+	\subfigure[Coding]{\includegraphics[width = 0.45\textwidth]{coding}}
+	\subfigure[Decoding]{\includegraphics[width = 0.45\textwidth]{decoding}}
+	\caption{Blocks for coding and decoding}
+	\label{fig:code}
+\end{figure}
+
+\FloatBarrier
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%% PROBLEM 2 %%%%%%%%%%%%%%%%
@@ -154,6 +164,7 @@ From now on a QPSK symbol $a_k$ will represent either uncoded or coded bits. In 
 
 \section*{Problem 2}
 The setup used for the simulations with the DFE only varies when considering the coded and uncoded setting: using the actual or estimated impulse response only reflects changes on the DFE setting (i.e., the impulse response and the noise variance). 
+The simulations that do not use channel coding follow the block scheme in Figure~\ref{fig:DFE_system} with symbols $a_k$ that map uncoded bits, while if channel coding is exploited the bits are coded as in Figure~\ref{fig:code}.
 
 \begin{figure}[h!]
 	\centering
@@ -162,13 +173,11 @@ The setup used for the simulations with the DFE only varies when considering the
 	\label{fig:DFE_system}
 \end{figure}
 
-The simulations that do not use channel coding follow the block scheme in Figure~\ref{fig:DFE_system} with symbols $a_k$ that map uncoded bits, while if the bits are coded as in Figure%TODO
-
-The timing phase $t_0 = 5$ was determined as the index of the first non-zero sample of the channel impulse response ${h_i}$.
+The timing phase $t_0 = 5$ was determined as the index of the first non-zero sample of the channel impulse response ${g_i}$. The SNR of the system is $\Gamma = \frac{\sigma_a^2 E_g}{\sigma_w^2}$, with $\sigma_w^2$ the power of the additive white Gaussian noise of the channel.
 
 % About the DFE
-The DFE filter is designed considering the perfectly known channel impulse response and channel noise. The parameters are $M_1, M_2, D$, but $M_2$ is actually dependent on $M_1$ and $D$ because in order to cancel out all the postcursors it must be $N_2 + M_1 - 1 - D$. The values of $M_1$ and $D$ chosen are the ones
-that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we are asked to consider, which is $\Gamma = 0$. The choice is then checked against the $J_{min}$ for higher SNR up to 14 dB, and if they are too small, i.e. they do not minimize the functional, they are updated in order to have filters that work in the best way for all the $\Gamma \in [0, 14]$ dB considered. In Figure~\ref{fig:jmin_DFE} the functional $J_{min}$ is plotted against $M_1, D$. 
+The DFE filter is designed considering the perfectly known channel impulse response and channel noise. The parameters are $M_1, M_2, D$, but $M_2$ is actually dependent on $M_1$ and $D$ because in order to cancel out all the postcursors it must be $M_2 = N_2 + M_1 - 1 - D$. The values of $M_1$ and $D$ chosen are the ones
+that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we are asked to consider, which is $\Gamma = 0$. The choice is then checked against the $J_{min}$ for higher SNR up to 14 dB, and if they are too small, i.e. they do not minimize the functional, they are updated in order to have filters that work in the best way for all the $\Gamma \in [0, 14]$ dB considered. In Figure~\ref{fig:jmin_DFE} the functional $J_{min}$ is plotted against $M_1, D$ for the lowest and highest SNR considered. 
 \begin{figure}[h!]
 	\centering
 	\subfigure[$\Gamma = 0$ dB]{\includegraphics[width = 0.45\textwidth]{JminDFE_0}}
@@ -177,29 +186,27 @@ that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we
 	\label{fig:jmin_DFE}
 \end{figure}
 
-The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M_2 = 4$ for each SNR. The actual coefficients of the filter change accordingly to the values of the channel noise (known or estimated).
-
+The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M_2 = 4$ for each SNR. The actual coefficients of the filter change accordingly to the values of the channel noise (known or estimated), while these parameters are fixed both for different SNR and for simulations with the known channel (on which the optimization has been carried out) and the ones with estimated channel.
 
 % Required stuff:
-% Setting of the DFE (as of the previous homework)
-% In the HW text it is said that this should be re-designed for every SNR, specify this is what we do (the values of sigma_w are needed by the DFE and vary for each of the SNRs)
 % Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been cancelled by the DFE, specify this!
 % Write expression of LLRs for the estimated channel. Specify that we use the estimated channel noise, as it is the only thing the receiver actually knows. 
 
-
-\begin{figure}
+\begin{figure}[H]
 	\centering
 	\includegraphics[width = 0.6\textwidth]{problem2}
-	\caption{BER simulation for a DFE receiver using the estimated and actual channel ir, with or without coding}
+	\caption{BER simulation for a DFE receiver using the estimated and actual channel impulse response $g_i$, with or without coding}
 	\label{fig:problem2_pbit}
 \end{figure}
+
+\FloatBarrier
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%% PROBLEM 3 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Problem 3}
 
-\begin{figure}
+\begin{figure}[h!]
 	\centering
 	\includegraphics[width = 0.8\textwidth]{OFDM}
 	\caption{OFDM system structure}
