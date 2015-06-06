@@ -5,7 +5,7 @@ clear
 close all
 clc
 rng default
-snr_vec = [0, 5, 10, 15]; % dB
+snr_vec = [0, 14]; % dB
 
 % From the assignment
 t0 = 6;
@@ -17,7 +17,7 @@ N = N1 + N2 + 1;
 
 printmsg_delete = ''; % Just to display progress updates
 
-M1_max = N+50;
+M1_max = N+30;
 D_max = M1_max-1;
 JminDFE = zeros(length(snr_vec), M1_max, D_max);
 L_data = 128; % useless
@@ -29,7 +29,7 @@ for snr_i = 1:length(snr_vec)
 
     % Create, send and receive data with the given channel
     snrlin = 10^(snr_ch/10);
-    [rcv_symb, sigma_w, h] = channel_output(symbols, snrlin);
+    [rcv_symb, sigma_w, h] = channel_output(symbols, snrlin, false);
 
     % Normalization!
     rcv_symb = rcv_symb(t0:end-7)/h(t0);
