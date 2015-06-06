@@ -158,10 +158,24 @@ The simulations that do not use channel coding follow the block scheme in %Figur
 
 The timing phase $t_0 = 5$ was determined as the index of the first non-zero sample of the channel impulse response ${h_i}$.
 
+% About the DFE
+The DFE filter is designed considering the perfectly known channel impulse response and channel noise. The parameters are $M_1, M_2, D$, but $M_2$ is actually dependent on $M_1$ and $D$ because in order to cancel out all the postcursors it must be $N_2 + M_1 - 1 - D$. The values of $M_1$ and $D$ chosen are the ones
+that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we are asked to consider, which is $\Gamma = 0$. The choice is then checked against the $J_{min}$ for higher SNR up to 14 dB, and if they are too small, i.e. they do not minimize the functional, they are updated in order to have filters that work in the best way for all the $\Gamma \in [0, 14]$ dB considered. In Figure~\ref{fig:jmin_DFE} the functional $J_{min}$ is plotted against $M_1, D$. 
+\begin{figure}[h!]
+	\centering
+	\subfigure[$\Gamma = 0$ dB]{\includegraphics[width = 0.45\textwidth]{JminDFE_0}}
+	\subfigure[$\Gamma = 14$ dB]{\includegraphics[width = 0.45\textwidth]{JminDFE_14}}
+	\caption{$J_{min}$ for different values of $\Gamma$}
+	\label{fig:jmin_DFE}
+\end{figure}
+
+
+The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M_2 = 4$ for each SNR. The actual coefficients of the filter change accordingly to the values of the channel noise (known or estimated).
+
+
 % Required stuff:
 % Setting of the DFE (as of the previous homework)
 % In the HW text it is said that this should be re-designed for every SNR, specify this is what we do (the values of sigma_w are needed by the DFE and vary for each of the SNRs)
-% Write values of t0, M1, M2 and D used. Say that these will be used for every SNR
 % Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been cancelled by the DFE, specify this!
 % Write expression of LLRs for the estimated channel. Specify that we use the estimated channel noise, as it is the only thing the receiver actually knows. 
 
