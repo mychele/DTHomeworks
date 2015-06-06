@@ -57,7 +57,7 @@ G_hat = fft(g_hat, M);
 est_sigma_w = 0;
 for j=0:nsamples-1
    tempGest = G_est((j*symbpersegment + 1) : (j*symbpersegment + 1)+3);
-   est_sigma_w = est_sigma_w + var(tempGest - mean(tempGest));
+   est_sigma_w = est_sigma_w + var(tempGest);
 end
 est_sigma_w = est_sigma_w / nsamples / M * sigma_ts;
 

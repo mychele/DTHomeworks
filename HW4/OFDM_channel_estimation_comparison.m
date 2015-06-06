@@ -141,8 +141,7 @@ for snr_i = 1:length(snr_vec)
       est_sigma_w(sim, snr_i) = 0;
       for j=0:nsamples-1
          tempGest = G_est((j*symbpersegment + 1) : (j*symbpersegment + 1)+3);
-         est_sigma_w(sim, snr_i) = est_sigma_w(sim, snr_i) + ...
-            var(tempGest - mean(tempGest));
+         est_sigma_w(sim, snr_i) = est_sigma_w(sim, snr_i) + var(tempGest);
       end
       est_sigma_w(sim, snr_i) = est_sigma_w(sim, snr_i) / nsamples / M * sigma_ts;
       
