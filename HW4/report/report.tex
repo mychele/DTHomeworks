@@ -145,7 +145,8 @@ The output of the decoder, $\hat{b}_l$, is the final decision on the received sy
 	\label{fig:problem1_pbit}
 \end{figure}
 
-
+% TODO possibly adjust this consideration with figure on just the coding/decoding 
+From now on a QPSK symbol $a_k$ will represent either uncoded or coded bits. In the first case the symbol $a_k$ is obtained just by applying the bitmap on 2 consecutive uncoded bits, as in the first block of Figure~\ref{fig:problem1_scuncoded}. In the second cases, instead, the first 2 blocks of Figure~\ref{fig:problem1_sccoded} are used to encode the bits before the bitmap is actually computed.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%% PROBLEM 2 %%%%%%%%%%%%%%%%
@@ -154,7 +155,14 @@ The output of the decoder, $\hat{b}_l$, is the final decision on the received sy
 \section*{Problem 2}
 The setup used for the simulations with the DFE only varies when considering the coded and uncoded setting: using the actual or estimated impulse response only reflects changes on the DFE setting (i.e., the impulse response and the noise variance). 
 
-The simulations that do not use channel coding follow the block scheme in %Figure~\ref
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.7\textwidth]{DFE}
+	\caption{DFE filter}
+	\label{fig:DFE_system}
+\end{figure}
+
+The simulations that do not use channel coding follow the block scheme in Figure~\ref{fig:DFE_system} with symbols $a_k$ that map uncoded bits, while if the bits are coded as in Figure%TODO
 
 The timing phase $t_0 = 5$ was determined as the index of the first non-zero sample of the channel impulse response ${h_i}$.
 
@@ -169,7 +177,6 @@ that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we
 	\label{fig:jmin_DFE}
 \end{figure}
 
-
 The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M_2 = 4$ for each SNR. The actual coefficients of the filter change accordingly to the values of the channel noise (known or estimated).
 
 
@@ -178,7 +185,6 @@ The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M
 % In the HW text it is said that this should be re-designed for every SNR, specify this is what we do (the values of sigma_w are needed by the DFE and vary for each of the SNRs)
 % Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been cancelled by the DFE, specify this!
 % Write expression of LLRs for the estimated channel. Specify that we use the estimated channel noise, as it is the only thing the receiver actually knows. 
-
 
 
 \begin{figure}
