@@ -85,6 +85,9 @@ for k = 0:length(x) - 1 + D
     end
     
     y(k+1) = c_opt.'*xconv;
+    
+    y(k+1) = y(k+1) / psi(D+1); % normalize y
+    
     r(k+1) = y(k+1) + b.'*a_old;
     detected(k+1) = qpsk_td(r(k+1));
 end

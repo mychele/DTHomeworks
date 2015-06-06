@@ -11,7 +11,7 @@ D_dfe = M1_dfe - 1;
 M2_dfe = N2 + M1_dfe - 1 - D_dfe;
 sigma_a = 2;
 
-parpool(15);
+%parpool(15);
 
 %% Estimated channel, DFE, coded data
 % In this section we don't use the txrc function for now. This is because
@@ -29,17 +29,17 @@ bit_number = ceil(desired_bits / search_step) * search_step;
 
 numsim = 10;
 
-snr_vec_estch_coded = [1, 2, 3:0.02:3.6];  % Pbit falls at 3.5 dB
-seq_lengths_estch_coded = bit_number*ones(1, length(snr_vec_estch_coded));
-Pbit_estch_coded = zeros(length(snr_vec_estch_coded),numsim);
+snr_vec_estch_coded_new = [1, 2, 3:0.02:3.6];  % Pbit falls at 3.5 dB
+seq_lengths_estch_coded_new = bit_number*ones(1, length(snr_vec_estch_coded_new));
+Pbit_estch_coded_new = zeros(length(snr_vec_estch_coded_new),numsim);
 
 for sim = 1:numsim
-    parfor snr_idx = 1:length(snr_vec_estch_coded)
-        curr_snr = snr_vec_estch_coded(snr_idx);
+    for snr_idx = 1:length(snr_vec_estch_coded_new)
+        curr_snr = snr_vec_estch_coded_new(snr_idx);
         fprintf('Estimated channel, coded, snr = %.2f\n', curr_snr);
         
         % Generate the current needed sequence
-        packet = randi([0 1], 1, seq_lengths_estch_coded(snr_idx));
+        packet = randi([0 1], 1, seq_lengths_estch_coded_new(snr_idx));
         
         enc_packet = encodeBits(packet);
         int_enc_packet = interleaver(enc_packet);  % Interleave the encoded bits
@@ -70,7 +70,7 @@ for sim = 1:numsim
         dec_packet = decodeBits(llr).';
         
         % Compute the Pbit and store it
-        Pbit_estch_coded(snr_idx, sim) = sum(xor(dec_packet, packet))/length(packet);
+        Pbit_estch_coded_new(snr_idx, sim) = sum(xor(dec_packet, packet))/length(packet);
         
     end
 end
