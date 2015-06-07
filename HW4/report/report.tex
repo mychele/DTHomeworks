@@ -111,7 +111,7 @@ basicstyle=\footnotesize\ttfamily
 	\label{fig:problem1_sccoded}
 \end{figure}
 
-The uncoded Single Carrier QPSK configuration with ideal channel was implemented as described in Figure~\ref{fig:problem1_scuncoded}. First of all, a random data stream is created using the \texttt{randi} function. For the BER simulations, $L_{bits} = 2^{24}$ bits were used for every SNR. While this number of bits is unnecessarily large to estimate the Bit Error Rate for the lower SNRs, it was decided not to optimize it because the simulations were sufficiently fast. This is due to the lightweight operations the script has to perform: after the initial bitmapping of the bits to obtain the QPSK symbols, the channel only adds noise and there is no need to perform any convolution with an impulse response since the channel is ideal. Finally, the receiver only computes a thresholding and an inverse bit mapping. The results of the simulation can be seen in Figure~\ref{fig:problem1_pbit}, and coincide with those obtained in the previous homework. %TODO insert this reference to the old homework???
+The uncoded Single Carrier QPSK configuration with ideal channel was implemented as described in Figure~\ref{fig:problem1_scuncoded}. First of all, a random data stream is created using the \texttt{randi} function. For the BER simulations, $L_{bits} = 2^{24}$ bits were used for every SNR. While this number of bits is unnecessarily large to estimate the Bit Error Rate for the lower SNRs, it was decided not to optimize it because the simulations were sufficiently fast. This is due to the lightweight operations the script has to perform: after the initial bitmapping of the bits to obtain the QPSK symbols, the channel only adds noise and there is no need to perform any convolution with an impulse response since the channel is ideal. Finally, the receiver only computes a thresholding and an inverse bit mapping. The results of the simulation can be seen in Figure~\ref{fig:problem1_pbit}, and coincide with those obtained in the previous homework. 
 
 When using coding, the script has to perform more complex computations that are illustrated in Figure~\ref{fig:problem1_sccoded}. The random bit sequence needs to have a length compatible with both the encoder and the interleaver. In fact, the provided LDPC encoder requires information words to have length $L_{iw} = 32400$ bits, and encodes them into codewords of length $L_{cw} = 64800$ bits. This doesn't represent a limitation, as shorter information words may be padded to reach the desired length, encoded and de-padded at the receiver, once decoded. In order to simplify things, however, it was decided to only send information words that have length that is a multiple of the information word length required by the encoder. Therefore for this problem the number of bits used in order to estimate the bit error probability is $16783200$, which is smallest multiple of the information word length greater than $2^{24}$. 
 
@@ -134,9 +134,8 @@ At this point it is possible to define a log-likelihood ratio for the real part 
 	\end{dcases}
 \end{equation}
 
-%TODO: more about what the LLR is and on how it works? 
 
-If the symbol period is $T_a$, the LLR vector will have bit period equal to $T_{cod} = \frac{T_a}{2}$, as one value of the LLR corresponds to one bit of the encoded message at the transmitter side. In order to get back to the actual correspondence with the original message $b_l$, it is necessary to deinterleave the LLR and to decode it. By feeding the LLR to the decoder, we are using it in its \emph{soft decoding} mode: the decoder will make use of the likelihood associated to the value of each bit, instead of the ``hard value'' of the bits, to perform the decoding. %TODO Necessary?
+If the symbol period is $T_a$, the LLR vector will have bit period equal to $T_{cod} = \frac{T_a}{2}$, as one value of the LLR corresponds to one bit of the encoded message at the transmitter side. In order to get back to the actual correspondence with the original message $b_l$, it is necessary to deinterleave the LLR and to decode it. By feeding the LLR to the decoder, we are using it in its \emph{soft decoding} mode: the decoder will make use of the likelihood associated to the value of each bit, instead of the ``hard value'' of the bits, to perform the decoding. 
 The output of the decoder, $\hat{b}_l$, is the final decision on the received symbols. This is the vector that is compared to $b_l$ in order to compute the probability of bit error. The results can once again be seen in Figure~\ref{fig:problem1_pbit}. 
 
 % BER plot for coded vs uncoded QPSK
@@ -173,8 +172,6 @@ In order to compute the BER, we need to use two different schemes in case we exp
 	\label{fig:DFE_system}
 \end{figure}
 
-% TODO Check out the new formulaTION, consider if this should be added:
-% Indeed, with this choice the symbol $a_k$ is seen by the receiver as multiplied by the maximum tap of the channel impulse response.
 The timing phase is $t_0 = 5 T_a$. Since $t_0$ is defined as the phase offset between the transmitted and received sequence that yields the highest cross-correlation between the two, it was determined as the index for which $|g_i|$ is maximum, which in this case coincides with the first non-zero sample of the channel impulse response ${g_i}$. This choice means that considered the given channel the number of precursors and postcursors we will consider are $N_1 = 0$ and $N_2 = 4$. The SNR of the system is $\Gamma = \frac{\sigma_a^2 E_g}{\sigma_w^2}$, with $\sigma_w^2$ the power of the additive white Gaussian noise of the channel.
 
 % About the DFE
@@ -231,7 +228,7 @@ In the case of the DFE driven by the estimate of channel impulse response and no
 
 The results of the simulations can be seen in Fig.~\ref{fig:problem2_pbit}. The number of bits used in these simulations is as in Table~\ref{table:BER_len_DFE} for the uncoded case, while for the coded case the length of the bit sequence is fixed to $4212000$, which is the smallest integer greater than $2^{22}$ that is a multiple of the length of encoder information word. This is a sufficient number of bits to estimate error probabilities up to $10^{-5}$, as requested.
 
-The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Fig.~\ref{fig:problem1_pbit}). As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR about 1.2 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR more than 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. % TODO More on this?
+The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Fig.~\ref{fig:problem1_pbit}). As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR about 1.2 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR more than 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. 
 \begin{table}[h!]
 	\begin{tabular}{c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c|c}
 		SNR $\Gamma$	& 0 & 1 & 2 & 3 & 4 &	5	&	6	&	7	&	8	&	9	&	10	&	11	&	12	&	13	&	14	\\ \hline	
@@ -240,10 +237,6 @@ The behavior of the system using channel coding with respect to the uncoded one 
 	\caption{Length of sequences used to evaluate the BER for the DFE uncoded case}
 	\label{table:BER_len_DFE}
 \end{table}
-
-% Required stuff:
-% Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been canceled by the DFE, specify this!
-% Write expression of LLRs for the estimated channel. Specify that we use the estimated channel noise, as it is the only thing the receiver actually knows. 
 
 \begin{figure}[h!]
 	\centering
@@ -301,7 +294,7 @@ and express $\mathbf{r}_k$ as
 \begin{equation}
 	\mathbf{r}_k = \boldsymbol{\Xi} \mathbf{g}_{c,\ofdM} + \mathbf{w}_k
 \end{equation}
-with $\mathbf{w}_k$ a vector of AWGN samples. %TODO variance? has this w been defined before?
+with $\mathbf{w}_k$ a vector of AWGN samples with variance $\sigma_w^2$.
 The receiver then performs the DFT using an $\ofdM \times \ofdM$ DFT matrix $\DFTmat$, and since $\boldsymbol{\Xi}$ is a circulant matrix, the result can be written as
 \begin{equation}
 	 \mathbf{x}_k = \DFTmat \mathbf{r}_k = \DFTmat \boldsymbol{\Xi} \DFTmat^{-1} \DFTmat \mathbf{g}_{c,\ofdM} + \DFTmat \mathbf{w}_k = \mathrm{diag}\{\mathbf{a}_k\} \mathbf{G}_c + \mathbf{W}_k.
@@ -332,7 +325,6 @@ Then the log-likelihood ratios (LLR) of each subchannel for the pair of bits tha
 \subsection*{Channel and noise estimation for OFDM}
 In order to perform the operations described in the previous section, the receiver has to know the frequency response of the channel and the noise power of each subchannel. In this homework the simulation of the BER has been carried out both with an \textit{a priori} perfectly known channel and with an estimated channel. 
 
-%TODO give reasons behind this kind of spacing
 The estimation of the channel has to be performed with $L_{ts} = 32$ pilot symbols, using one single block, for instance $k=0$. In \eqref{eq:snrOFDM} the power of the transmitted symbols is usually $\sigma_a^2 = 2$, but the pilot symbols have power $\sigma_{ts}^2 = 4$ as required. The pilot symbols $a_{ts}[i]$ are transmitted on the $L_{ts}$ subchannels with indices
 \begin{equation}
 	i \in \mathcal{T}_{ind} = \left\{q \, \frac{\ofdM}{L_{ts}}, \ q = 0, 1, \ldots,L_{ts}-1 \right\}  = \left\{ 0, 16, 32, \dots, 496 \right\},
@@ -378,17 +370,6 @@ Finally, the noise variance is estimated as
 	\label{eq:OFDMestimerror_firstmethod}
 \end{equation}
 assuming that $a_{ts}[i]\hat{G}_c[i] \! - \! x_0[i]$ has zero mean.
-
-As final remark, to further improve the performance of the system, once $t_0$ is fixed we can truncate the impulse response in order to reduce the degrees of freedom. In fact, the number of postcursors was not dealt with -- i.e. we considered $N_2 \! = \! N_{px} \! = \! 7$. With the notation defined above, we perform the frequency response estimation varying the value of $N_2$ up to $N_{px}$. The estimated noise \eqref{eq:OFDMestimerror_firstmethod}, interpreted as normalized error functional, is plotted versus $N_2$ in Fig.~\ref{fig:OFDM_chooseN2}, that clearly yields $N_2 = 4$ as estimate of the number of postcursors.
-
-Therefore, the rationale above can be developed using $N_2$ in place of $N_{px}$, i.e. allowing only $N_2 + 1$ degrees of freedom for the $\mathbf{\hat{g}}_c$ resulting from the LS problem \eqref{eq:OFDM_LS}. Intuitively, observing that the last $N_{px} \! - \! N_2 \! = \! 3$ samples of $\mathbf{g}_c$ are negligible, we are forcing the channel estimation to yield exactly zero for those coefficients, leading to frequency response and noise estimates closer to the actual values. All results in Problem 3 are obtained with the assumption $N_2 = 4$, and we observed that the estimation is actually improved, as expected. Note that in the following section a different noise estimation is introduced, but for the scenarios at hand they behave in a similar way, thus we will keep the choice $N_2 = 4$ in the next section as well.
-
-\begin{figure}
-	\centering
-	\includegraphics[width = 0.65\textwidth]{OFDM_chooseN2}
-	\caption{Estimation error \eqref{eq:OFDMestimerror_firstmethod} for different SNRs, plotted across different choices of the number $N_2$ of postcursors.}
-	\label{fig:OFDM_chooseN2}
-\end{figure}
 
 
 \subsection*{Second method for channel and noise estimation}
@@ -460,7 +441,7 @@ The second method instead performs much better even with $L_{ts} \! = \! 32$. As
 
 The overestimation factor of the second method becomes larger than the underestimation factor of the first one when the SNR exceeds 18 dB approximately. Therefore, for the scenarios considered in this homework, the second method proves better than the first one with regards to the noise estimation, whereas the frequency response estimation error is the same, even though the estimated responses are different across the two methods. In conclusion, we chose to apply the second method to the OFDM simulations with estimated channel.
 
-Note that, while the formulation for the LLRs for the OFDM system which uses the channel estimation is the same as~\eqref{eq:LLRofdm}, the variance of subchannel noise used in the log-likelihood ratios of each subchannel is the estimated one, computed from the estimate $\hat{\sigma}_w^2$ of the channel noise given in~\eqref{eq:noisepwrest_newmethod}. Therefore we have that 
+Note that, while the formulation for the LLRs for the OFDM system which uses the channel estimation is the same as in~\eqref{eq:LLRofdm}, the variance of subchannel noise used in the log-likelihood ratios of each subchannel is the estimated one, computed from the estimate $\hat{\sigma}_w^2$ of the channel noise given in~\eqref{eq:noisepwrest_newmethod}. Therefore we have that 
 \begin{equation}
 	\hat{\sigma}_I^2  = \frac{\ofdM \hat{\sigma}_w^2}{2 |\hat{G}_c[i]|^2}
 \end{equation}
@@ -488,7 +469,7 @@ The coded case, instead, performs much better and gets close to the simulated th
 	\label{fig:BEROFDM}
 \end{figure}
 
-Figure~\ref{fig:BEROFDM_comparison} shows instead the comparison between the mean BER of 100 simulations using the 2 different channel estimates, previously introduced in this report. The sample mean of the BER in different simulations can be taken as an estimate of the BER only because the impulse response doesn't change over time, otherwise it would not be meaningful. Note that the errorbars for the confidence intervals are not plotted, otherwise the figure would not be readable. Note also that the non-monotonic behavior can be explained by the fact that 100 simulations are not enough. However the objective of this measures is to show if there is any difference between the performances of an OFDM system in terms of BER when the two different channel estimates are applied. It can be seen that if channel coding is used the BER for the 2 systems is nearly the same, even if the BER of the system with the second channel estimation method for lower SNRs shows a steeper descent and it gains a fraction of dB over the system using the first estimation method introduced. 
+Figure~\ref{fig:BEROFDM_comparison} shows instead the comparison between the mean BER of 100 simulations using the 2 different channel estimates, previously introduced in this report. The sample mean of the BER in different simulations can be taken as an estimate of the BER only because the impulse response doesn't change over time, otherwise it would not be meaningful. Note that the errorbars for the confidence intervals are not plotted, otherwise the figure would not be readable. Note also that the non-monotonic behavior can be explained by the fact that 100 simulations are not enough. However the objective of this measures is to show if there is any difference between the performances of an OFDM system in terms of BER when the two different channel estimates are applied. It can be seen that if channel coding is used the BER for the 2 systems is nearly the same, even if the BER of the system with the second channel estimation method for lower SNRs shows a steeper descent and it gains a fraction of dB over the system using the first estimation method. 
 
 If channel coding is not used, instead, the two systems behaves exactly in the same way.
 \begin{figure}[h!]
@@ -500,9 +481,9 @@ If channel coding is not used, instead, the two systems behaves exactly in the s
 
 The last comparison is between the performances of OFDM and DFE, both coded, with known or estimated channel. The BER curves can be seen in Figure~\ref{fig:DFEOFDM}. Note that in this Figure the values of the SNR $\Gamma$ in the x axis are in $[0, 4]$ dB. Indeed the steep descent that the BER curves present for the coded case happens below 4 dB for all the systems under analysis, therefore it wouldn't make sense to extend it to 14 dB as requested. 
 
-It can be observed that the OFDM, with the known channel, gains about 0.5 dB over the DFE for the same BER. Instead, in channel estimation is used, the OFDM gains about 2 dB. However, the 2 estimation methods are different and the curves plotted are just a single realization, therefore the comparison is less meaningful. However the SNR at which the BER for both systems, with estimated channel, in the different observed realizations is as in Figure~\ref{fig:DFEOFDM}, around 2.1 dB for the OFDM and 3.3 dB for the DFE.
+It can be observed that the OFDM, with the known channel, gains about 0.5 dB over the DFE for the same BER. Instead, if channel estimation is used, the OFDM gains about 2 dB. However, the 2 estimation methods are different and the curves plotted are just a single realization, therefore the comparison is less meaningful. However the SNR at which the BER for both systems, with estimated channel, shows the descending behavior in the different observed realizations is as in Figure~\ref{fig:DFEOFDM}, around 2.1 dB for the OFDM and 3.3 dB for the DFE.
 
-\begin{figure}[H]
+\begin{figure}[h!]
 	\centering
 	\includegraphics[width = 0.75\textwidth]{OFDMDFE}
 	\caption{Comparison between DFE and OFDM, both coded}
