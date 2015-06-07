@@ -188,8 +188,56 @@ that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we
 
 The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M_2 = 4$ for each SNR. The actual coefficients of the filter change accordingly to the values of the channel noise (known or estimated), while these parameters are fixed both for different SNR and for simulations with the known channel (on which the optimization has been carried out) and the ones with estimated channel.
 
+When the channel estimate is needed, it is performed by sending a training sequence of $L=31$ binary symbols through the channel. The LS estimate of the channel impulse response and of the noise variance is then used by the DFE to perform the equalization.
+
+In the coded case, the samples $y_k$ that are used to compute the \emph{log-likelihood-ratio} are those that the DFE itself uses to perform the decision (see Figure~\ref{fig:DFE_system}). We define $\psi = g * c$ the convolution of the channel impulse response with the FF filter, and $v_k = i_k + n_k$ the total noise, obtained as the sum of the white channel noise $n_k$ and of the ISI terms $i_k$. Using the previous definitions, the signal at detection point can be expressed as $y_k = \psi_D a_{k-D} + v_k$. Furthermore, recall the definition of functional 
+\begin{equation}
+ 	J = E[|a_{k-D} - y_k|^2] = E[|e_k|^2].
+\end{equation}
+This allows us to write 
+\begin{equation}
+	e_k = a_{k-D} - \psi_D a_{k-D} - v_k = a_{k-D} (1 - \psi_D) - v_k.
+\end{equation}
+
+Now, if we pick $c = c_{opt}$ (as we actually do, since we compute the FF filter using the Weiner-Hopf method), the functional is minimized, and since the terms $a_{k-D} (1 - \psi_D)$ and $v_k$ are assumed to be uncorrelated, we can write: % TODO @MICHELE, @ANDREA: Does this sound right? In order for the formula to work, this must be true (i.e., E[a_{k-D} (1 - \psi_D) - v_k] must be zero). Check this plz.
+\begin{equation}
+	J_{min} = E[|a_{k-D} (1 - \psi_D) - v_k|^2] = \sigma_a^2 |1-\psi_D|^2 + \sigma_v^2.
+\end{equation}
+
+Since we are interested in an expression for the noise variance at detection point in the DFE $\sigma_v^2$, we finally find that 
+\begin{equation}
+	v_k \sim \mathcal{CN}(0, J_{min}-\sigma_a^2|1-\psi_D|^2).
+\end{equation}
+
+In order to maintain the receiver QPSK constellation the same as that of the transmitter, we normalize the $y_k$ signal and use:
+\begin{equation}
+ 	 \bar{y}_k = \frac{y_k}{\psi_D} = a_{k-D} + \bar{v}_k, \quad \bar{v}_k \sim \mathcal{CN}\left(0, \frac{J_{min}-\sigma_a^2|1-\psi_D|^2}{|\psi_D|^2}\right).
+ 	 \label{eq:noisevar}
+ \end{equation}
+
+If we set the DFE to use the actual impulse response of the channel and channel noise, we can assume that there is no ISI left after the cancellation performed using the $b$ filter. Thus, the variance of the noise component of the samples $y_k = y_{k,I} + j y_{k,Q}$ considered in the LLR formula is $\sigma_w^2 = 2 \sigma_I^2$, as only the white component of the noise is left. As the only noise that we assume to be present is the channel noise, the LLR formula that is used in this case is the same as that used in Problem 1:
+
+\begin{equation}
+	\ell'_p =
+	\begin{dcases}
+	\frac{2 y_{k,I}}{\sigma_I^2}, \quad p = 2k \\
+	\frac{2 y_{k,Q}}{\sigma_I^2}, \quad p = 2k +1
+	\end{dcases}
+\end{equation}
+
+When, on the other hand, at the DFE we use an estimate of the channel impulse response and channel noise, we assume that the ISI cancellation may not be perfect. In this case, the expression for the samples at detection point takes into account the noise variance computed in~\eqref{eq:noisevar}, and hence becomes:
+\begin{equation}
+	\ell'_p =
+	\begin{dcases}
+	\frac{2 y_{k,I}}{\sigma_v^2/2}, \quad p = 2k \\
+	\frac{2 y_{k,Q}}{\sigma_v^2/2} \quad p = 2k +1
+	\end{dcases}
+\end{equation}
+
+The results of the simulations can be seen in Figure~\ref{fig:problem2_pbit}. The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Figure~\ref{fig:problem1_pbit}. As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR 1 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. % TODO More on this?
+
 % Required stuff:
-% Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been cancelled by the DFE, specify this!
+% Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been canceled by the DFE, specify this!
 % Write expression of LLRs for the estimated channel. Specify that we use the estimated channel noise, as it is the only thing the receiver actually knows. 
 
 \begin{figure}[H]
@@ -293,7 +341,7 @@ i.e. with a spacing of $\ofdM/L_{ts}$ subchannels between each other. The other 
 	\tilde{G}_c[i] = \dfrac{x_0[i]}{a_{ts}[i]} = \dfrac{a_{ts}[i] G_c[i] + W_0[i]}{a_{ts}[i]} = G_c[i] + \dfrac{W_0[i]}{a_{ts}[i]}, \qquad i \in \mathcal{T}_{ind}.
 \end{equation}
 
-Our estimation method exploits the fact that the channel impulse response can have at most $N_{px} + 1 = 8$ taps, so the uncorrelated samples of the frequency response $G_c[i]$ are at most 8. In the presence of noise, however, the estimated frequency response has more than 8 degrees of liberty, and we will try to determine a better estimate (more robust to noise), by using all 32 symbols, equally spaces as described above.
+Our estimation method exploits the fact that the channel impulse response can have at most $N_{px} + 1 = 8$ taps, so the uncorrelated samples of the frequency response $G_c[i]$ are at most 8. In the presence of noise, however, the estimated frequency response has more than 8 degrees of freedom, and we will try to determine a better estimate (more robust to noise), by using all 32 symbols, equally spaces as described above.
 
 Let $\DFTmat$ be a $\ofdM \times \ofdM$ DFT matrix as before, and let $\DFTmat'$ be the result of keeping only the first $N_{px}+1$ columns of $\DFTmat$. Defining $\mathbf{G}_c = [ G_c[i] ]_{i = 0,\ldots,\ofdM-1}$ as the DFT of the channel impulse response, then
 \begin{equation}
