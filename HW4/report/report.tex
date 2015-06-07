@@ -328,15 +328,15 @@ Instead, if coding is used, the data that would be lost because of the attenuati
 \begin{equation}
 	\sigma_I^2 = \frac{\sigma_W^2}{2 |G_c[i]|^2} = \frac{\ofdM \sigma_w^2}{2 |G_c[i]|^2}.
 \end{equation}
-Then the log-likelihood ratios (LLR) of each subchannel for the pair of bits that are mapped in each symbol are defined as
+Then the log-likelihood ratios (LLR) of each subchannel for the pair of bits that are mapped in each symbol are defined as (using $n$ as bit index, since $k$ is the block index):
 \begin{equation}
 \ell'_p[i] =
 	\begin{dcases}
-	\frac{2 y_{k,I}[i]}{\sigma_I^2} = 2 y_{k,I}[i] \frac{|G_c[i]|^2 }{\frac{1}{2} \ofdM \sigma_w^2}, \quad p = 2k \\
-	\frac{2 y_{k,Q}[i]}{\sigma_I^2} = 2 y_{k,Q}[i] \frac{|G_c[i]|^2 }{\frac{1}{2} \ofdM \sigma_w^2}, \quad p = 2k+1 \\
+	\frac{2 y_{n,I}[i]}{\sigma_I^2} = 2 y_{n,I}[i] \frac{|G_c[i]|^2 }{\frac{1}{2} \ofdM \sigma_w^2}, \quad p = 2n \\
+	\frac{2 y_{n,Q}[i]}{\sigma_I^2} = 2 y_{n,Q}[i] \frac{|G_c[i]|^2 }{\frac{1}{2} \ofdM \sigma_w^2}, \quad p = 2n+1 \\
 	\end{dcases}
+\label{eq:LLRofdm}
 \end{equation}
-%% TODO check indices
 
 \subsection*{Channel and noise estimation for OFDM}
 In order to perform the operations described in the previous section, the receiver has to know the frequency response of the channel and the noise power of each subchannel. In this homework the simulation of the BER has been carried out both with an \textit{a priori} perfectly known channel and with an estimated channel. 
@@ -468,6 +468,21 @@ As for the second metric, the first method always underestimates the noise power
 The second method instead performs much better even with $L_{ts} \! = \! 32$. As we already mentioned, the noise power in this case is overestimated, since the variance $v_q$ we used to estimate the noise in \eqref{eq:noisepwrest_newmethod} considers both the actual channel noise and the local variability of $G_c [i]$. Therefore, for high values of the SNR, the part of $v_q$ that is due to the variability of $G_c [i]$ dominates over the noise variance, and the value of $\hat{\sigma}_w^2$ as the noise power goes to zero tends to a (finite non-zero) number that depends on the variability of $G_c[i]$ around the subchannels chosen in \eqref{eq:OFDMnewmethodindices}.
 
 The overestimation factor of the second method becomes larger than the underestimation factor of the first one when the SNR exceeds 18 dB approximately. Therefore, for the scenarios considered in this homework, the second method proves better than the first one with regards to the noise estimation, whereas the frequency response estimation error is the same, even though the estimated responses are different across the two methods. In conclusion, we chose to apply the second method to the OFDM simulations with estimated channel.
+
+Note that, while the formulation for the LLRs for the OFDM system which uses the channel estimation is the same as~\eqref{eq:LLRofdm}, the variance of subchannel noise used in the log-likelihood ratios of each subchannel is the estimated one, computed from the estimate $\hat{\sigma}_w^2$ of the channel noise given in~\eqref{eq:noisepwrest_newmethod}. Therefore we have that 
+\begin{equation}
+	\hat{\sigma}_I^2  = \frac{\ofdM \hat{\sigma}_w^2}{2 |\hat{G}_c[i]|^2}
+\end{equation}
+and
+\begin{equation}
+\ell'_p[i] =
+	\begin{dcases}
+	\frac{2 y_{n,I}[i]}{\hat{\sigma}_I^2} = 2 y_{n,I}[i] \frac{|\hat{G}_c[i]|^2 }{\frac{1}{2} \ofdM \hat{\sigma}_w^2}, \quad p = 2n \\
+	\frac{2 y_{n,Q}[i]}{\hat{\sigma}_I^2} = 2 y_{n,Q}[i] \frac{|\hat{G}_c[i]|^2 }{\frac{1}{2} \ofdM \hat{\sigma}_w^2}, \quad p = 2n+1 \\
+	\end{dcases}
+\end{equation}
+
+%%%%%%
 
 \subsection*{BER for OFDM and comparison with DFE}
 The results of the simulations for the OFDM bit error rate are in Figure~\ref{fig:BEROFDM}. Note that for the estimated channel just one realization is plotted and that the channel estimation method is the second between the 2 introduced. The number of bits used in these simulations is $2^{22}$ for the uncoded cases, which may be an unnecessary high number but it is justified by the low demand of the OFDM system in terms of memory and computational resources, and $4212000$ for the coded case, as in Problem 2, following the same rationale.
