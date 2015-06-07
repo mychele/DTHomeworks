@@ -163,8 +163,9 @@ From now on in the Figures that represent the different systems under analysis t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section*{Problem 2}
-The setup used for the simulations with the DFE only varies when considering the coded and uncoded setting: using the actual or estimated impulse response only reflects changes on the DFE setting (i.e., the impulse response and the noise variance). 
-The simulations that do not use channel coding follow the block scheme in Figure~\ref{fig:DFE_system} with symbols $a_k$ that map uncoded bits, while if channel coding is exploited the bits are coded as in Figure~\ref{fig:code}.
+In order to compute the BER, we need to use two different schemes in case we exploit channel coding or not. If channel coding is used, the DFE scheme depicted in Figure~\ref{fig:DFE_system} is preceded by a series of blocks that code the message and interleave it, as shown in Figure~\ref{fig:code}. At the receiver side, the $y_k$ signal upon which the DFE takes the decisions is then used to compute the \emph{log-likelihood-ratio} and decoded message using the scheme of Figure~\ref{fig:code}.
+
+On the other hand, the simulations that do not use channel coding follow the block scheme in Figure~\ref{fig:DFE_system}, where the symbols $a_k$ are the output of a bitmap that maps the input message to QPSK symbols, and the output of the DFE, $\hat{a}_{k-D}$, is then feeded to an inverse bitmap block that translates back the symbols into bits.
 
 \begin{figure}[h!]
 	\centering
