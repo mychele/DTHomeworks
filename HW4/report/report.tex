@@ -228,15 +228,15 @@ If we set the DFE to use the actual impulse response of the channel and channel 
 \begin{equation}
 	\ell'_p =
 	\begin{dcases}
-	\frac{2 y_{k,I}}{\sigma_v^2/2}, \quad p = 2k \\
-	\frac{2 y_{k,Q}}{\sigma_v^2/2}, \quad p = 2k +1
+	\frac{2 y_{k,I}}{\frac{1}{2} \sigma_v^2}, \quad p = 2k \\
+	\frac{2 y_{k,Q}}{\frac{1}{2} \sigma_v^2}, \quad p = 2k +1
 	\end{dcases}
 	\label{eq:problem2llr}
 \end{equation}
 
 In the case of the DFE driven by the estimate of channel impulse response and noise power, the resulting LLR formula is the same as~\eqref{eq:problem2llr}, however the component variance $\sigma_v^2$ this time is different, because the filter coefficients and the functional $J_{min}$ are computed exploiting the imperfect estimation of the channel. This means that also the resulting $\sigma_v^2$ will contain a flawed estimate of the channel noise. 
 
-The results of the simulations can be seen in Figure~\ref{fig:problem2_pbit}. The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Figure~\ref{fig:problem1_pbit}. As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR about 1.2 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR more than 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. % TODO More on this?
+The results of the simulations can be seen in Fig.~\ref{fig:problem2_pbit}. The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Fig.~\ref{fig:problem1_pbit}). As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR about 1.2 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR more than 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. % TODO More on this?
 
 % Required stuff:
 % Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been canceled by the DFE, specify this!
@@ -323,8 +323,8 @@ Then the log-likelihood ratios (LLR) of each subchannel for the pair of bits tha
 \begin{equation}
 \ell'_p[i] =
 	\begin{dcases}
-	\frac{2\Re(y_k[i])}{\sigma_I^2} = 2\Re(y_k[i]) \frac{|G_c[i]|^2 }{0.5 \ofdM \sigma_w^2}, \quad p = 2k \\
-	\frac{2\Im(y_k[i])}{\sigma_I^2} = 2\Im(y_k[i]) \frac{|G_c[i]|^2 }{0.5 \ofdM \sigma_w^2}, \quad p = 2k+1 \\
+	\frac{2 y_{k,I}[i]}{\sigma_I^2} = 2 y_{k,I}[i] \frac{|G_c[i]|^2 }{\frac{1}{2} \ofdM \sigma_w^2}, \quad p = 2k \\
+	\frac{2 y_{k,Q}[i]}{\sigma_I^2} = 2 y_{k,Q}[i] \frac{|G_c[i]|^2 }{\frac{1}{2} \ofdM \sigma_w^2}, \quad p = 2k+1 \\
 	\end{dcases}
 \end{equation}
 %% TODO check indices
