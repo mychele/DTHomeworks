@@ -190,7 +190,9 @@ The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M
 
 When the channel estimate is needed, it is performed by sending a training sequence of $L=31$ binary symbols through the channel. The LS estimate of the channel impulse response and of the noise variance is then used by the DFE to perform the equalization.
 
-In the coded case, the samples $y_k$ that are used to compute the \emph{log-likelihood-ratio} are those that the DFE itself uses to perform the decision (see Figure~\ref{fig:DFE_system}). We define $\psi = g * c$ the convolution of the channel impulse response with the FF filter, and $v_k = i_k + n_k$ the total noise, obtained as the sum of the white channel noise $n_k$ and of the ISI terms $i_k$. Using the previous definitions, the signal at detection point can be expressed as $y_k = \psi_D a_{k-D} + v_k$. Furthermore, recall the definition of functional 
+In the coded case, the samples $y_k$ that are used to compute the \emph{log-likelihood-ratio} are those that the DFE itself uses to perform the decision (see Figure~\ref{fig:DFE_system}). We define $\psi = g * c$ the convolution of the channel impulse response with the FF filter, and $v_k = i_k + n_k$ the total noise, obtained as the sum of the white channel noise $n_k$ and of the residual of ISI term $i_k$. This last term is due to imperfect cancellations performed by the DFE filter and it can be modeled as Gaussian.
+
+Using the previous definitions, the signal at detection point can be expressed as $y_k = \psi_D a_{k-D} + v_k$. Furthermore, recall the definition of functional 
 \begin{equation}
  	J = E[|a_{k-D} - y_k|^2] = E[|e_k|^2].
 \end{equation}
@@ -215,17 +217,17 @@ In order to maintain the receiver QPSK constellation the same as that of the tra
  	 \label{eq:noisevar}
  \end{equation}
 
-If we set the DFE to use the actual impulse response of the channel and channel noise, we can assume that there is no ISI left after the cancellation performed using the $b$ filter. Thus, the variance of the noise component of the samples $y_k = y_{k,I} + j y_{k,Q}$ considered in the LLR formula is $\sigma_w^2 = 2 \sigma_I^2$, as only the white component of the noise is left. As the only noise that we assume to be present is the channel noise, the LLR formula that is used in this case is the same as that used in Problem 1:
+If we set the DFE to use the actual impulse response of the channel and channel noise, we can assume that there is no much ISI left after the cancellation performed using the $b$ filter. Anyway there could be still some wrong decisions which result in erroneous cancellations. Thus, the variance of the noise component of the samples $y_k = y_{k,I} + j y_{k,Q}$ considered in the LLR formula is $\sigma_I^2 = 0.5 \sigma_v^2$, as the per component noise must be considered, with $\sigma_v^2$ as in~\eqref{eq:noisevar}. The LLR formula that is used in this case is then:
 
 \begin{equation}
 	\ell'_p =
 	\begin{dcases}
-	\frac{2 y_{k,I}}{\sigma_I^2}, \quad p = 2k \\
-	\frac{2 y_{k,Q}}{\sigma_I^2}, \quad p = 2k +1
+	\frac{2 y_{k,I}}{\sigma_v^2/2}, \quad p = 2k \\
+	\frac{2 y_{k,Q}}{\sigma_v^2/2}, \quad p = 2k +1
 	\end{dcases}
 \end{equation}
 
-When, on the other hand, at the DFE we use an estimate of the channel impulse response and channel noise, we assume that the ISI cancellation may not be perfect. In this case, the expression for the samples at detection point takes into account the noise variance computed in~\eqref{eq:noisevar}, and hence becomes:
+In the case of the DFE driven by the estimate of channel impulse response and noise power, the filter coefficients and the functional $J_{min}$ are computed exploiting this imperfect information. Also in this case the expression for the samples at detection point takes into account the noise variance computed in~\eqref{eq:noisevar}, and hence becomes:
 \begin{equation}
 	\ell'_p =
 	\begin{dcases}
