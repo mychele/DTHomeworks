@@ -372,7 +372,7 @@ In matrix form, the solution is given by the following equations:
 	\hat{\mathbf{g}}_{c} &= \boldsymbol{\Phi}^{-1} \boldsymbol{\theta}.
 \end{align}
 Let $\hat{\mathbf{g}}_{c, \ofdM}$ be $\hat{\mathbf{g}}_{c}$ with a zero padding in order to make it $\ofdM$ samples long, as defined before. In order to estimate the frequency response at each subchannel, the DFT is applied on $\hat{\mathbf{g}}_{c, \ofdM}$, to obtain $\mathbf{\hat{G}}_c = \mathcal{F}[\mathbf{\hat{g}}_{c, \ofdM}]$. 
-Finally, the noise power is estimated as 
+Finally, the noise variance is estimated as 
 \begin{equation}
 	\hat{\sigma}_w^2 = \frac{\hat{\sigma}_W^2}{\ofdM} = \frac{1}{\ofdM \: L_{ts}} \sum_{i \in \mathcal{T}_{ind}} \left| a_{ts}[i]\hat{G}_c[i] - x_0[i] \right| ^2,
 	\label{eq:OFDMestimerror_firstmethod}
