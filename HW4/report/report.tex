@@ -192,7 +192,7 @@ that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we
 	\label{fig:jmin_DFE}
 \end{figure}
 
-The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M_2 = 4$ for each SNR. The actual coefficients of the filter change accordingly to the values of the channel noise (known or estimated), while these parameters are fixed both for different SNR and for simulations with the known channel (on which the optimization has been carried out) and the ones with estimated channel.
+The values chosen for the DFE of the receiver are $M_1 = 15, D = M_1 - 1 = 14, M_2 = 4$. These parameters are fixed: they are used both when simulating different SNRs and when supposing the channel to be known or estimated. Instead, the actual coefficients of the filters are computed separately for each simulation, and hence change according to the impulse response and noise variance of the channel (be it the actual ones or the estimated ones).
 
 When the channel estimate is needed, it is performed by sending a training sequence of $L=31$ binary symbols through the channel. The LS estimate of the channel impulse response and of the noise variance is then used by the DFE to perform the equalization.
 
