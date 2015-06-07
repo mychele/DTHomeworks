@@ -177,8 +177,9 @@ On the other hand, the simulations that do not use channel coding follow the blo
 	\label{fig:DFE_system}
 \end{figure}
 
-% TODO Fix this? Correct this? Make this more accurate? Make it more likely to yield positive responses?
-The timing phase $t_0 = 5 T_a$ was determined as the index for which $|g_i|$ is maximum, which in this case coincides with the first non-zero sample of the channel impulse response ${g_i}$. This choice means that the number of precursors and postcursors we will consider are $N1 = 0$ and $N2 = 4$. 
+% TODO Check out the new formulaTION, consider if this should be added:
+% Indeed, with this choice the symbol $a_k$ is seen by the receiver as multiplied by the maximum tap of the channel impulse response.
+The timing phase is $t_0 = 5 T_a$. Since $t_0$ is defined as the phase offset between the transmitted and received sequence that yields the highest cross-correlation between the two, it was determined as the index for which $|g_i|$ is maximum, which in this case coincides with the first non-zero sample of the channel impulse response ${g_i}$. This choice means that considered the given channel the number of precursors and postcursors we will consider are $N1 = 0$ and $N2 = 4$. 
 
 The SNR of the system is $\Gamma = \frac{\sigma_a^2 E_g}{\sigma_w^2}$, with $\sigma_w^2$ the power of the additive white Gaussian noise of the channel.
 
