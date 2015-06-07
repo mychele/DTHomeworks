@@ -15,7 +15,7 @@ parpool(15);
 %% Known channel, DFE, uncoded data (HW3)
 
 snr_vec_knownch_uncoded = 0:14;
-seq_lengths_knownch_uncoded = 2.^[13 13 13 13 13 13 13 15 18 18 20 20 22 23 23];
+seq_lengths_knownch_uncoded = 2.^[13 13 13 13 13 13 13 15 18 18 20 20 22 22 22];
 Pbit_knownch_uncoded = zeros(length(snr_vec_knownch_uncoded),1);
 
 parfor snr_idx = 1:length(snr_vec_knownch_uncoded)
