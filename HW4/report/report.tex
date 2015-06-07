@@ -471,6 +471,17 @@ If channel coding is not used, instead, the two systems behaves exactly in the s
 	\label{fig:BEROFDM_comparison}
 \end{figure}
 
+The last comparison is between the performances of OFDM and DFE, both coded, with known or estimated channel. The BER curves can be seen in Figure~\ref{fig:DFEOFDM}. Note that in this Figure the values of the SNR $\Gamma$ in the x axis are in $[0, 4]$ dB. Indeed the steep descent that the BER curves present for the coded case happens below 4 dB for all the systems under analysis, therefore it wouldn't make sense to extend it to 14 dB as requested. 
+
+It can be observed that the OFDM, with the known channel, gains about 0.5 dB over the DFE for the same BER. Instead, in channel estimation is used, the OFDM gains about 2 dB. However, the 2 estimation methods are different and the curves plotted are just a single realization, therefore the comparison is less meaningful. However the SNR at which the BER for both systems, with estimated channel, in the different observed realizations is as in Figure~\ref{fig:DFEOFDM}, around 2.1 dB for the OFDM and 3.3 dB for the DFE.
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.8\textwidth]{OFDMDFE}
+	\caption{Comparison between DFE and OFDM, both coded}
+	\label{fig:DFEOFDM}
+\end{figure}
+
 \begin{thebibliography}{10}
 
 \bibitem{bc}
