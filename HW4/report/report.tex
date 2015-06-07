@@ -163,7 +163,9 @@ From now on in the Figures that represent the different systems under analysis t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section*{Problem 2}
-In order to compute the BER, we need to use two different schemes in case we exploit channel coding or not. If channel coding is used, the DFE scheme depicted in Figure~\ref{fig:DFE_system} is preceded by a series of blocks that code the message and interleave it, as shown in Figure~\ref{fig:code}. At the receiver side, the $y_k$ signal upon which the DFE takes the decisions is then used to compute the \emph{log-likelihood-ratio} and decoded message using the scheme of Figure~\ref{fig:code}.
+In order to compute the BER, we need to use two different schemes in case we exploit channel coding or not. 
+
+If channel coding is used, the DFE scheme depicted in Figure~\ref{fig:DFE_system} is preceded by a series of blocks that code the message and interleave it, as shown in Figure~\ref{fig:code}. At the receiver side, the $y_k$ signal upon which the DFE takes the decisions is then used to compute the \emph{log-likelihood-ratio} and decoded message using the scheme of Figure~\ref{fig:code}.
 
 On the other hand, the simulations that do not use channel coding follow the block scheme in Figure~\ref{fig:DFE_system}, where the symbols $a_k$ are the output of a bitmap that maps the input message to QPSK symbols, and the output of the DFE, $\hat{a}_{k-D}$, is then feeded to an inverse bitmap block that translates back the symbols into bits.
 
@@ -174,7 +176,10 @@ On the other hand, the simulations that do not use channel coding follow the blo
 	\label{fig:DFE_system}
 \end{figure}
 
-The timing phase $t_0 = 5$ was determined as the index of the first non-zero sample of the channel impulse response ${g_i}$. The SNR of the system is $\Gamma = \frac{\sigma_a^2 E_g}{\sigma_w^2}$, with $\sigma_w^2$ the power of the additive white Gaussian noise of the channel.
+% TODO Fix this? Correct this? Make this more accurate? Make it more likely to yield positive responses?
+The timing phase $t_0 = 5$ was determined as the index for which $|g_i|$ is maximum, which in this case coincides with the first non-zero sample of the channel impulse response ${g_i}$. This choice means that the number of precursors and postcursors we will consider are $N1 = 0$ and $N2 = 4$. 
+
+The SNR of the system is $\Gamma = \frac{\sigma_a^2 E_g}{\sigma_w^2}$, with $\sigma_w^2$ the power of the additive white Gaussian noise of the channel.
 
 % About the DFE
 The DFE filter is designed considering the perfectly known channel impulse response and channel noise. The parameters are $M_1, M_2, D$, but $M_2$ is actually dependent on $M_1$ and $D$ because in order to cancel out all the postcursors it must be $M_2 = N_2 + M_1 - 1 - D$. The values of $M_1$ and $D$ chosen are the ones
