@@ -236,7 +236,7 @@ If we set the DFE to use the actual impulse response of the channel and channel 
 
 In the case of the DFE driven by the estimate of channel impulse response and noise power, the resulting LLR formula is the same as~\eqref{eq:problem2llr}, however the component variance $\sigma_v^2$ this time is different, because the filter coefficients and the functional $J_{min}$ are computed exploiting the imperfect estimation of the channel. This means that also the resulting $\sigma_v^2$ will contain a flawed estimate of the channel noise. 
 
-The results of the simulations can be seen in Figure~\ref{fig:problem2_pbit}. The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Figure~\ref{fig:problem1_pbit}. As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR 1 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. % TODO More on this?
+The results of the simulations can be seen in Figure~\ref{fig:problem2_pbit}. The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Figure~\ref{fig:problem1_pbit}. As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR about 1.2 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR more than 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. % TODO More on this?
 
 % Required stuff:
 % Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been canceled by the DFE, specify this!
@@ -447,6 +447,29 @@ As for the second metric, the first method always underestimates the noise power
 The second method instead performs much better even with $L_{ts} \! = \! 32$. As we already mentioned, the noise power in this case is overestimated, since the variance $v_q$ we used to estimate the noise in \eqref{eq:noisepwrest_newmethod} considers both the actual channel noise and the local variability of $G_c [i]$. Therefore, for high values of the SNR, the part of $v_q$ that is due to the variability of $G_c [i]$ dominates over the noise variance, and the value of $\hat{\sigma}_w^2$ as the noise power goes to zero tends to a (finite non-zero) number that depends on the variability of $G_c[i]$ around the subchannels chosen in \eqref{eq:OFDMnewmethodindices}.
 
 The overestimation factor of the second method becomes larger than the underestimation factor of the first one when the SNR exceeds 18 dB approximately. Therefore, for the scenarios considered in this homework, the second method proves better than the first one with regards to the noise estimation, whereas the frequency response estimation error is the same, even though the estimated responses are different across the two methods. In conclusion, we chose to apply the second method to the OFDM simulations with estimated channel.
+
+\subsection*{BER for OFDM and comparison with DFE}
+The results of the simulations for the OFDM bit error rate are in Figure~\ref{fig:BEROFDM}. Note that for the estimated channel just one realization is plotted and that the channel estimation method is the first between the 2 introduced. The number of bits used in these simulations is $2^{22}$ for the uncoded cases, which may be an unnecessary high number but it is justified by the low demand of the OFDM system in terms of memory and computational resources, and $4212000$ for the coded case, which is the closest integer greater than $2^{22}$ that is a multiple of the encoder codeword. This is a sufficient number of bits to estimate error probabilities up to $10^{-5}$, as requested. %TODO check this
+
+As for the uncoded case, the performances of the system are worsened by the fact that some subchannels exhibit an high attenuation which makes the detection of correct symbols very difficult. Uncoded OFDM does not reach bit error rates below $10^{-3}$ and the BER for the simulation with perfectly known and the one with estimated channel are nearly the same. 
+
+The coded case, instead, performs much better and gets close to the simulated theoretical bound of Problem 1. Indeed, for the perfectly known channel, the steep descent of the BER curve starts at 1.6 dB, while for the estimated channel case it is shifted right of 0.5 dB.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.8\textwidth]{OFDM_BER_1}
+	\caption{BER for OFDM, coded and uncoded, known and estimated channel}
+	\label{fig:BEROFDM}
+\end{figure}
+
+Figure~\ref{fig:BEROFDM_comparison} shows instead the comparison between the mean BER of 100 simulations using the 2 different channel estimates, previously introduced in this report. The sample mean of the BER in different simulations can be taken as an estimate of the BER only because the impulse response doesn't change over time, otherwise it would not be meaningful. Note that the errorbars for the confidence intervals are not plotted, otherwise the figure would not be readable. Note also that the non-monotonic behavior can be explained by the fact that 100 simulations are not enough. However the objective of this measures is to show if there is any difference between the performances of an OFDM system in terms of BER when the two different channel estimates are applied. It can be seen that if channel coding is used the BER for the 2 systems is nearly the same, even if the BER of the system with the second channel estimation method for lower SNRs shows a steeper descent and it gains a fraction of dB over the system using the first estimation method introduced. 
+
+If channel coding is not used, instead, the two systems behaves exactly in the same way.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width = 0.8\textwidth]{OFDM_BER_est_comparison}
+	\caption{BER for OFDM, coded and uncoded, using the 2 different channel estimations}
+	\label{fig:BEROFDM_comparison}
+\end{figure}
 
 \begin{thebibliography}{10}
 
