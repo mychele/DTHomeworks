@@ -1,5 +1,4 @@
 function [output] = ibmap(input)
-    % Check if the input array has even length
     L = length(input);
     
     output = zeros(2*L,1);
