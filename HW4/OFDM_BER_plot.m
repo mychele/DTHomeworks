@@ -1,4 +1,4 @@
-%% Load OFDM BER
+%% OFDM BER
 load('OFDM_uncoded_estimated.mat');
 load('OFDM_coded_estimated.mat');
 load('OFDM_coded_known.mat');
@@ -19,7 +19,7 @@ xlim([0, 14])
 grid on
 title('BER for OFDM')
 
-%% New estimation method
+%% Comparison between channel estimations
 load('OFDM_uncoded_estimated_2_long.mat');
 load('OFDM_coded_estimated_2_long.mat');
 load('OFDM_uncoded_estimated_long.mat');
@@ -39,3 +39,23 @@ ylabel('Pbit')
 ylim([10^-5, 10^-0.5])
 grid on
 title('BER for OFDM, comparison between the BER with the 2 different estimation methods')
+
+%% Comparison between DFE and OFDM
+
+load('Problem2_estch_coded.mat');
+load('Problem2_knownch_coded.mat');
+load('OFDM_coded_estimated.mat');
+load('OFDM_coded_known.mat');
+
+%% Plot
+figure, 
+semilogy(snr_vec_knownch_coded, Pbit_knownch_coded, '-v'), hold on
+semilogy(snr_vec_estch_coded, Pbit_estch_coded, '--^'), hold on,
+semilogy(snr_vec_coding_known, BER_coding_known, '-v'), hold on,
+semilogy(snr_vec_coding_estimated, BER_coding_estimated, '--^'), hold on,
+xlabel('\Gamma [dB]'), ylabel('Pbit'), grid on
+ylim([10^-5, 10^-1])
+xlim([0, 4])
+legend('DFE, known channel', 'DFE, estimated channel', ...
+    'OFDM, known channel', 'OFDM, estimated channel');
+title('Comparison between Bit Error Rate for DFE and OFDM systems')
