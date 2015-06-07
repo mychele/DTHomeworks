@@ -172,7 +172,7 @@ On the other hand, the simulations that do not use channel coding follow the blo
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width = 0.7\textwidth]{DFE}
+	\includegraphics[width = 0.65\textwidth]{DFE}
 	\caption{DFE filter}
 	\label{fig:DFE_system}
 \end{figure}
@@ -188,8 +188,8 @@ The DFE filter is designed considering the perfectly known channel impulse respo
 that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we are asked to consider, which is $\Gamma = 0$. The choice is then checked against the $J_{min}$ for higher SNR up to 14 dB, and if they are too small, i.e. they do not minimize the functional, they are updated in order to have filters that work in the best way for all the $\Gamma \in [0, 14]$ dB considered. In Figure~\ref{fig:jmin_DFE} the functional $J_{min}$ is plotted against $M_1, D$ for the lowest and highest SNR considered. 
 \begin{figure}[h!]
 	\centering
-	\subfigure[$\Gamma = 0$ dB]{\includegraphics[width = 0.45\textwidth]{JminDFE_0}}
-	\subfigure[$\Gamma = 14$ dB]{\includegraphics[width = 0.45\textwidth]{JminDFE_14}}
+	\subfigure[$\Gamma = 0$ dB]{\includegraphics[width = 0.4\textwidth]{JminDFE_0}}
+	\subfigure[$\Gamma = 14$ dB]{\includegraphics[width = 0.4\textwidth]{JminDFE_14}}
 	\caption{$J_{min}$ for different values of $\Gamma$}
 	\label{fig:jmin_DFE}
 \end{figure}
@@ -254,19 +254,20 @@ The behavior of the system using channel coding with respect to the uncoded one 
 % Write expressions of LLRs for the known channel, specifying that the noise that is being taken into account is the actual channel noise. There also is no ISI noise as it is assumed to have been canceled by the DFE, specify this!
 % Write expression of LLRs for the estimated channel. Specify that we use the estimated channel noise, as it is the only thing the receiver actually knows. 
 
-\begin{figure}[H]
+\begin{figure}[h!]
 	\centering
-	\includegraphics[width = 0.6\textwidth]{problem2}
+	\includegraphics[width = 0.75\textwidth]{problem2}
 	\caption{BER simulation for a DFE receiver using the estimated and actual channel impulse response $g_i$, with or without coding}
 	\label{fig:problem2_pbit}
 \end{figure}
-
-\FloatBarrier
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%% PROBLEM 3 %%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Problem 3}
+
+\subsection*{Transmitter structure}
+Figure~\ref{fig:OFDM} shows the structure of an OFDM transmitter-receiver and a model for the channel. The symbols denoted by $a_k$ could represent either coded or uncoded bits, as in previous problems. The block index is called $k$. The symbols are taken in chunks of $\ofdM = 512$ in order to compose the vector $a_k[i], i \in [0, \ofdM - 1]$. The IDFT is then computed to get $A_k[i], i\in [0, \ofdM-1]$. At this point a cyclic prefix (whose role will be explained after having introduced the receiver) is inserted, i.e. for each block the last $N_{px} = 7$ symbols are repeated at the beginning of the vector $A_k$. Finally, the symbols $A_k[i]$ are serialized and sent through the channel as part of the signal $s_n$.
 
 \begin{figure}[h!]
 	\centering
@@ -274,10 +275,6 @@ The behavior of the system using channel coding with respect to the uncoded one 
 	\caption{OFDM system structure}
 	\label{fig:OFDM}
 \end{figure}
-
-\subsection*{Transmitter structure}
-Figure~\ref{fig:OFDM} shows the structure of an OFDM transmitter-receiver and a model for the channel. The symbols denoted by $a_k$ could represent either coded or uncoded bits, as in previous problems. The block index is called $k$. The symbols are taken in chunks of $\ofdM = 512$ in order to compose the vector $a_k[i], i \in [0, \ofdM - 1]$. The IDFT is then computed to get $A_k[i], i\in [0, \ofdM-1]$. At this point a cyclic prefix (whose role will be explained after having introduced the receiver) is inserted, i.e. for each block the last $N_{px} = 7$ symbols are repeated at the beginning of the vector $A_k$. Finally, the symbols $A_k[i]$ are serialized and sent through the channel as part of the signal $s_n$.
-
 % Consideration on SNR
 As usual the SNR is defined as $\Gamma = \frac{\sigma_s^2 E_h}{\sigma_w^2}$, however in an OFDM system the meaning of $\sigma_s^2$ changes. As mentioned, the transmitter performs an IDFT, which is
 \begin{equation}
@@ -478,7 +475,7 @@ As for the uncoded case, the performances of the system are worsened by the fact
 The coded case, instead, performs much better and gets close to the simulated theoretical bound of Problem 1. Indeed, for the perfectly known channel, the steep descent of the BER curve starts at 1.6 dB, while for the estimated channel case it is shifted right of 0.5 dB.
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width = 0.8\textwidth]{OFDM_BER_1}
+	\includegraphics[width = 0.75\textwidth]{OFDM_BER_1}
 	\caption{BER for OFDM, coded and uncoded, known and estimated channel}
 	\label{fig:BEROFDM}
 \end{figure}
@@ -488,7 +485,7 @@ Figure~\ref{fig:BEROFDM_comparison} shows instead the comparison between the mea
 If channel coding is not used, instead, the two systems behaves exactly in the same way.
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width = 0.8\textwidth]{OFDM_BER_est_comparison}
+	\includegraphics[width = 0.75\textwidth]{OFDM_BER_est_comparison}
 	\caption{BER for OFDM, coded and uncoded, using the 2 different channel estimations}
 	\label{fig:BEROFDM_comparison}
 \end{figure}
@@ -497,12 +494,14 @@ The last comparison is between the performances of OFDM and DFE, both coded, wit
 
 It can be observed that the OFDM, with the known channel, gains about 0.5 dB over the DFE for the same BER. Instead, in channel estimation is used, the OFDM gains about 2 dB. However, the 2 estimation methods are different and the curves plotted are just a single realization, therefore the comparison is less meaningful. However the SNR at which the BER for both systems, with estimated channel, in the different observed realizations is as in Figure~\ref{fig:DFEOFDM}, around 2.1 dB for the OFDM and 3.3 dB for the DFE.
 
-\begin{figure}[h!]
+\begin{figure}[H]
 	\centering
-	\includegraphics[width = 0.8\textwidth]{OFDMDFE}
+	\includegraphics[width = 0.75\textwidth]{OFDMDFE}
 	\caption{Comparison between DFE and OFDM, both coded}
 	\label{fig:DFEOFDM}
 \end{figure}
+
+\FloatBarrier
 
 \begin{thebibliography}{10}
 
