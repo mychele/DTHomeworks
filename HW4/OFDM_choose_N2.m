@@ -21,7 +21,7 @@ A = ifft(block);
 A_pref = [A(end-Npx + 1:end); A];
 s = reshape(A_pref, [], 1);
 
-%% CHANNELIZATION
+%% Channel output
 
 snr = 6; %dB
 snr_lin = 10^(snr/10);
@@ -62,8 +62,6 @@ for N2 = 1:Npx
    E = sum(abs(xhat - x_rcv).^2)/length(xhat);
    est_sigma_w(N2) = E/M; %#ok<SAGROW>
 end
-
-
 
 %% Plot
 
