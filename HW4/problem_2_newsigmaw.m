@@ -21,14 +21,14 @@ L = 31;
 Nseq = 7;
 
 % Get optimal number of bits
-desired_bits = 2^23;
+desired_bits = 2^24;
 % Compute the closest number of bits that both interleaver and encoder will like
 search_step = 32400;
 bit_number = ceil(desired_bits / search_step) * search_step;
 
-numsim = 60;
+numsim = 8;
 
-snr_vec_knownch_coded_new = [1, 2, 3:0.05:3.6];  % Pbit falls at 3.5 dB
+snr_vec_knownch_coded_new = [1, 2, 3:0.08:3.96];  % Pbit falls at 3.5 dB
 seq_lengths_knownch_coded_new = bit_number*ones(1, length(snr_vec_knownch_coded_new));
 Pbit_knownch_coded_new = zeros(length(snr_vec_knownch_coded_new),numsim);
 
@@ -49,7 +49,8 @@ for sim = 1:numsim
         [rcv_symb, sigma_w, h] = channel_output(symbols, 10^(curr_snr/10), false);
         rcv_symb = rcv_symb(t0+1:end-7)/h(N1+1);
         hi = h / h(N1+1);
-        
+        hi = hi(:);
+ 
         % Receiver: filter with DFE
         [Jmin, psi, rcv_symb] = DFE_filter(rcv_symb, hi, N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
         
@@ -68,6 +69,7 @@ for sim = 1:numsim
         Pbit_knownch_coded_new(snr_idx, sim) = sum(xor(dec_packet, packet))/length(packet);
         
     end
+    fprintf('Completed simulation %d\n', sim);
 end
 % Save current results
 save('Problem2_knownch_coded_new', 'snr_vec_knownch_coded_new', ...
@@ -82,14 +84,12 @@ L = 31;
 Nseq = 7;
 
 % Get optimal number of bits
-desired_bits = 2^23;
+desired_bits = 2^24;
 % Compute the closest number of bits that both interleaver and encoder will like
 search_step = 32400;
 bit_number = ceil(desired_bits / search_step) * search_step;
 
-numsim = 60;
-
-snr_vec_estch_coded_new = [1, 2, 3:0.05:3.6];  % Pbit falls at 3.5 dB
+snr_vec_estch_coded_new = [1, 2, 3:0.08:3.96];  % Pbit falls at 3.5 dB
 seq_lengths_estch_coded_new = bit_number*ones(1, length(snr_vec_estch_coded_new));
 Pbit_estch_coded_new = zeros(length(snr_vec_estch_coded_new),numsim);
 
@@ -114,7 +114,8 @@ for sim = 1:numsim
         
         rcv_symb = rcv_symb(t0+1:end-7)/h(N1+1);
         hi = h / h(N1+1);
-        
+        hi = hi(:);
+
         % Receiver: filter with DFE
         [Jmin, psi, rcv_symb] = DFE_filter(rcv_symb, hi, N1, N2, est_sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
         
@@ -133,6 +134,7 @@ for sim = 1:numsim
         Pbit_estch_coded_new(snr_idx, sim) = sum(xor(dec_packet, packet))/length(packet);
         
     end
+    fprintf('Completed simulation %d\n', sim);
 end
 % Save current results
 save('Problem2_estch_coded_new', 'snr_vec_estch_coded_new', ...
