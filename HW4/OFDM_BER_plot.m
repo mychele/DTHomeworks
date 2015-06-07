@@ -19,19 +19,22 @@ grid on
 title('BER for OFDM')
 
 %% New estimation method
-load('OFDM_uncoded_estimated_2.mat');
-load('OFDM_coded_estimated_2.mat');
+load('OFDM_uncoded_estimated_2_long.mat');
+load('OFDM_coded_estimated_2_long.mat');
+load('OFDM_uncoded_estimated_long.mat');
+load('OFDM_coded_estimated_long.mat');
+
 
 %% Plot
 figure,
-semilogy(snr_vec_coding_estimated, median(BER_coding_estimated, 2), '--'), hold on,
-semilogy(snr_vec_nocoding_estimated, BER_nocoding_estimated(:, 7), '--'), hold on
-semilogy(snr_vec_coding_estimated_2, median(BER_coding_estimated_2, 2)), hold on,
-semilogy(snr_vec_nocoding_estimated_2, BER_nocoding_estimated_2(:, 7), '--')
+semilogy(snr_vec_coding_estimated, mean(BER_coding_estimated, 2), '--'), hold on,
+semilogy(snr_vec_nocoding_estimated, mean(BER_nocoding_estimated,2), '--'), hold on
+semilogy(snr_vec_coding_estimated_2, mean(BER_coding_estimated_2, 2)), hold on,
+semilogy(snr_vec_nocoding_estimated_2, mean(BER_nocoding_estimated_2, 2), '--')
 legend('OFDM, estimated channel, coded, standard', 'OFDM, estimated channel, uncoded, standard', ...
-    'OFDM, estimated channel, coded', 'OFDM, estimated channel, uncoded')
+    'OFDM, estimated channel, coded, new', 'OFDM, estimated channel, uncoded, new')
 xlabel('SNR')
 ylabel('BER')
 ylim([10^-5, 10^-0.5])
 grid on
-title('BER for OFDM')
+title('BER for OFDM, comparison between the BER with the 2 different estimation methods')
