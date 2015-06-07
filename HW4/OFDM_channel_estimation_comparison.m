@@ -10,7 +10,6 @@ OFDM = true;
 M = 512;
 allowed_symb = 32;
 Npx = 7;
-N2 = 4;
 t0 = 5;
 
 snr_vec = 0:2:24;
@@ -63,7 +62,7 @@ for snr_i = 1:length(snr_vec)
       
       % Solve LS for F*g=G_est where g is an 8x1 vector
       F = dftmtx(M);
-      F = F(indices, 1:N2+1);
+      F = F(indices, 1:Npx+1);
       g_hat = (F' * F) \ (F' * G_est);
       g_est = ifft(G_est);
       G_hat = fft(g_hat, M);
@@ -129,7 +128,7 @@ for snr_i = 1:length(snr_vec)
       
       % Solve LS for F*g=G_est where g is an 8x1 vector
       F = dftmtx(M);
-      F = F(indices, 1:N2+1);
+      F = F(indices, 1:Npx+1);
       g_hat = (F' * F) \ (F' * G_est);
       g_est = ifft(G_est);
       G_hat = fft(g_hat, M);
@@ -187,7 +186,7 @@ title('Estimation error on G')
 
 figure, hold on
 stem(0:Npx, abs(g))
-stem(0:N2, abs(g_hat), 'x')
+stem(0:Npx, abs(g_hat), 'x')
 stem(0:15, abs(g_est(1:16)), '^')
 legend('Actual g', 'g_hat', 'IDFT of G_est')
 

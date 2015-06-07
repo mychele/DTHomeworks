@@ -1,4 +1,4 @@
-function [ BER, G ] = OFDM_BER( M, Npx, N2, t0, desired_bits, snr, coding, chIsKnown, varargin )
+function [ BER, G ] = OFDM_BER( M, Npx, t0, desired_bits, snr, coding, chIsKnown, varargin )
 %This function performs the transmission and reception of bits with ODFM,
 %with or without encoding
 %   It needs
@@ -80,9 +80,9 @@ if (chIsKnown)
     G = G(:);
 else
     if(estMethod == 1)
-        [G, sigma_w] = OFDM_channel_estimation(snr, Npx, N2, t0);
+        [G, sigma_w] = OFDM_channel_estimation(snr, Npx, t0);
     elseif(estMethod == 2)
-        [G, sigma_w] = OFDM_channel_estimation_2(snr, Npx, N2, t0);   
+        [G, sigma_w] = OFDM_channel_estimation_2(snr, Npx, t0);   
     end 
 end
 

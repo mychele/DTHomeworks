@@ -1,4 +1,4 @@
-function [G_hat, est_sigma_w] = OFDM_channel_estimation_2(snr, Npx, N2, t0)
+function [G_hat, est_sigma_w] = OFDM_channel_estimation_2(snr, Npx, t0)
 
 %% Channel ESTIMATION for OFDM (second method)
 % Send one block of data using 8 equally spaced groups of 4
@@ -45,9 +45,9 @@ x_rcv = x_matrix(indices, 1);
 % Compute G_est by dividing the received symbol by the transmitted one
 G_est = x_rcv ./ ts;
 
-% Solve LS for F*g=G_est where g is an (N2+1)x1 vector
+% Solve LS for F*g=G_est where g is an (Npx+1)x1 vector
 F = dftmtx(M);
-F = F(indices, 1:N2+1);
+F = F(indices, 1:Npx+1);
 g_hat = (F' * F) \ (F' * G_est);
 G_hat = fft(g_hat, M);
 
