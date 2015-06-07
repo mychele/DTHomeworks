@@ -177,7 +177,7 @@ On the other hand, the simulations that do not use channel coding follow the blo
 \end{figure}
 
 % TODO Fix this? Correct this? Make this more accurate? Make it more likely to yield positive responses?
-The timing phase $t_0 = 5$ was determined as the index for which $|g_i|$ is maximum, which in this case coincides with the first non-zero sample of the channel impulse response ${g_i}$. This choice means that the number of precursors and postcursors we will consider are $N1 = 0$ and $N2 = 4$. 
+The timing phase $t_0 = 5 T_a$ was determined as the index for which $|g_i|$ is maximum, which in this case coincides with the first non-zero sample of the channel impulse response ${g_i}$. This choice means that the number of precursors and postcursors we will consider are $N1 = 0$ and $N2 = 4$. 
 
 The SNR of the system is $\Gamma = \frac{\sigma_a^2 E_g}{\sigma_w^2}$, with $\sigma_w^2$ the power of the additive white Gaussian noise of the channel.
 
@@ -231,16 +231,10 @@ If we set the DFE to use the actual impulse response of the channel and channel 
 	\frac{2 y_{k,I}}{\sigma_v^2/2}, \quad p = 2k \\
 	\frac{2 y_{k,Q}}{\sigma_v^2/2}, \quad p = 2k +1
 	\end{dcases}
+	\label{eq:problem2llr}
 \end{equation}
 
-In the case of the DFE driven by the estimate of channel impulse response and noise power, the filter coefficients and the functional $J_{min}$ are computed exploiting this imperfect information. Also in this case the expression for the samples at detection point takes into account the noise variance computed in~\eqref{eq:noisevar}, and hence becomes:
-\begin{equation}
-	\ell'_p =
-	\begin{dcases}
-	\frac{2 y_{k,I}}{\sigma_v^2/2}, \quad p = 2k \\
-	\frac{2 y_{k,Q}}{\sigma_v^2/2} \quad p = 2k +1
-	\end{dcases}
-\end{equation}
+In the case of the DFE driven by the estimate of channel impulse response and noise power, the resulting LLR formula is the same as~\eqref{eq:problem2llr}, however the component variance $\sigma_v^2$ this time is different, because the filter coefficients and the functional $J_{min}$ are computed exploiting the imperfect estimation of the channel. This means that also the resulting $\simga_v^2$ will contain a flawed estimate of the channel noise. 
 
 The results of the simulations can be seen in Figure~\ref{fig:problem2_pbit}. The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Figure~\ref{fig:problem1_pbit}. As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR 1 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. % TODO More on this?
 
