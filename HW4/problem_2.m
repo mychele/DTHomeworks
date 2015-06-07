@@ -73,12 +73,14 @@ parfor snr_idx = 1:length(snr_vec_knownch_coded)
     hi = h(t0+1-N1:t0+1+N2)/h(t0+1);
     
     % Receiver: filter with DFE
-    [~, rcv_symb] = DFE_filter(rcv_symb, hi.', N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
+    [Jmin, psi, rcv_symb] = DFE_filter(rcv_symb, hi, N1, N2, sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
+    
+    noise_var = (Jmin-sigma_a*abs(1-psi(D_dfe+1))^2)/abs(psi(D_dfe+1))^2; % This includes white noise and isi
     
     % Compute Log Likelihood Ratio
-    llr = zeros(2*length(symbols),1);
-    llr(1:2:end) = -2*real(rcv_symb)/(sigma_w/2);
-    llr(2:2:end) = -2*imag(rcv_symb)/(sigma_w/2);
+    llr = zeros(2*length(packet),1);
+    llr(1:2:end) = -2*real(rcv_symb(L+Nseq+1:end))/(noise_var/2);
+    llr(2:2:end) = -2*imag(rcv_symb(L+Nseq+1:end))/(noise_var/2);
     
     % Decode the bits
     llr = deinterleaver(llr); % Deinterleave the loglikelihood ratio first
@@ -169,12 +171,14 @@ for sim = 1:numsim
         hi = h / h(N1+1);
         
         % Receiver: filter with DFE
-        [~, rcv_symb] = DFE_filter(rcv_symb, hi, N1, N2, est_sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
+        [Jmin, psi, rcv_symb] = DFE_filter(rcv_symb, hi, N1, N2, est_sigma_w, D_dfe, M1_dfe, M2_dfe, true, false);
+        
+        noise_var = (Jmin-sigma_a*abs(1-psi(D_dfe+1))^2)/abs(psi(D_dfe+1))^2; % This includes white noise and isi
         
         % Compute Log Likelihood Ratio
         llr = zeros(2*length(packet),1);
-        llr(1:2:end) = -2*real(rcv_symb(L+Nseq+1:end))/(est_sigma_w/2);
-        llr(2:2:end) = -2*imag(rcv_symb(L+Nseq+1:end))/(est_sigma_w/2);
+        llr(1:2:end) = -2*real(rcv_symb(L+Nseq+1:end))/(noise_var/2);
+        llr(2:2:end) = -2*imag(rcv_symb(L+Nseq+1:end))/(noise_var/2);
         
         llr = deinterleaver(llr); % Deinterleave the loglikelihood ratio first
         
