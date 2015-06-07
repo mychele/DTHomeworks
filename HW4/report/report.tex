@@ -354,7 +354,7 @@ By choosing the 32 subchannels with pilot symbols (i.e. for $ i \in \mathcal{T}_
 	\mathbf{\tilde{W}} = \left[ \dfrac{W_0[i]}{a_{ts}[i]} \right] _{i\ \in \mathcal{T}_{ind}}
 	\label{eq:ODFMnoisevarnormalized}
 \end{equation}
-be the vector of noise samples corresponding to the considered subchannels (i.e. the ones we are using to transmit the pilot symbols). Then, defining the vector $\tilde{\mathbf{G}}_c = [ \tilde{G}_c[i] ]_{i\in \mathcal{T}_{ind}}$, it is possible to write $\mathbf{\tilde{G}}_c$ as
+be the vector of noise samples corresponding to the considered subchannels (i.e. the ones we are using to transmit the pilot symbols), normalized by the transmitted symbol. Then, defining the vector $\tilde{\mathbf{G}}_c = [ \tilde{G}_c[i] ]_{i\in \mathcal{T}_{ind}}$, it is possible to write $\mathbf{\tilde{G}}_c$ as
 \begin{equation}
 	\mathbf{\tilde{G}}_c = \DFTreduced \cdot \mathbf{g}_{c} + \mathbf{\tilde{W}}.
 	\label{eq:OFDMfreqresp}
@@ -374,9 +374,9 @@ In matrix form, the solution is given by the following equations:
 Let $\hat{\mathbf{g}}_{c, \ofdM}$ be $\hat{\mathbf{g}}_{c}$ with a zero padding in order to make it $\ofdM$ samples long, as defined before. In order to estimate the frequency response at each subchannel, the DFT is applied on $\hat{\mathbf{g}}_{c, \ofdM}$, to obtain $\mathbf{\hat{G}}_c = \mathcal{F}[\mathbf{\hat{g}}_{c, \ofdM}]$. 
 Finally, the noise power is estimated as 
 \begin{equation}
-	\hat{\sigma}_w^2 = \frac{1}{L_{ts}} \sum_{i \in \mathcal{T}_{ind}} \left| a_{ts}[i]\hat{G}_c[i] - x_0[i] \right| ^2
+	\hat{\sigma}_w^2 = \frac{\hat{\sigma}_W^2}{\ofdM} = \frac{1}{\ofdM \: L_{ts}} \sum_{i \in \mathcal{T}_{ind}} \left| a_{ts}[i]\hat{G}_c[i] - x_0[i] \right| ^2,
 \end{equation}
-provided that $a_{ts}[i]\hat{G}_c[i] \! - \! x_0[i]$ has zero mean.
+assuming that $a_{ts}[i]\hat{G}_c[i] \! - \! x_0[i]$ has zero mean.
 
 
 \subsection*{Second method for channel and noise estimation}
