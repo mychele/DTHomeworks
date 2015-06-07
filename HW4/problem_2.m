@@ -130,9 +130,6 @@ save('Problem2_estch_uncoded', 'snr_vec_estch_uncoded', ...
     'seq_lengths_estch_uncoded', 'Pbit_estch_uncoded');
 
 %% Estimated channel, DFE, coded data
-% In this section we don't use the txrc function for now. This is because
-% txrc only accepts L_data such that an ML sequence can be directly
-% created.
 
 L = 31;
 Nseq = 7;

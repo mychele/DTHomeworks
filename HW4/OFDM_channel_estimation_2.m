@@ -25,12 +25,10 @@ A = ifft(block);
 A_pref = [A(end-Npx + 1:end); A];
 s = reshape(A_pref, [], 1);
 
-%% CHANNELIZATION
-
+%% Send and receive
 snr_lin = 10^(snr/10);
 % Send over the noisy channel
 [r, ~, ~] = channel_output(s, snr_lin, OFDM);
-
 
 % --- Process at the receiver
 

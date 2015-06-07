@@ -27,7 +27,7 @@ parfor curr_snr = 1:length(snr_vec)
    bits = randi([0 1], 1, bit_number);
    symbols = bitmap(bits.');
    
-   % Send stuff through
+   % Send data through the ideal channel
    snrlin = 10^(snrdb/10);
    Eh = 1;  % Energy of the ideal channel ir
    sigma_w = sigma_a*Eh/snrlin;
@@ -37,7 +37,7 @@ parfor curr_snr = 1:length(snr_vec)
    % Threshold the bits
    decided_symbols = zeros(1, length(rcv_bits));
    for idx = 1:length(rcv_bits)
-      decided_symbols(idx) = qpsk_td(rcv_bits(idx));  % TODO modify qpsk_td to handle vectors
+      decided_symbols(idx) = qpsk_td(rcv_bits(idx));
    end
    
    decided_bits = ibmap(decided_symbols);
@@ -61,7 +61,7 @@ parfor curr_snr = 1:length(snr_vec_enc)
    
    symbols = bitmap(int_enc_bits.');
    
-   % Send stuff through
+   % Send the data through the ideal channel
    snrlin = 10^(snrdb/10);
    Eh = 1;
    sigma_w = sigma_a*Eh/snrlin;

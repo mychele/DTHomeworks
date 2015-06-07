@@ -100,8 +100,6 @@ A = ifft(block);
 A_pref = [A(end-Npx + 1:end); A];
 s = reshape(A_pref, [], 1);
 
-% CHANNELIZATION
-
 for snr_i = 1:length(snr_vec)
    for sim=1:numsim
       
@@ -112,7 +110,6 @@ for snr_i = 1:length(snr_vec)
       g = g(1+t0 : end);   % Take t0 into account (just to plot stuff)
       G = fft(g, 512);
       G = G(:);
-      
       
       % --- Process at the receiver
       
@@ -188,25 +185,25 @@ title('Estimation error on G')
 
 % Plots for second method
 
-% figure, hold on
-% stem(0:Npx, abs(g))
-% stem(0:N2, abs(g_hat), 'x')
-% stem(0:15, abs(g_est(1:16)), '^')
-% legend('Actual g', 'g_hat', 'IDFT of G_est')
+figure, hold on
+stem(0:Npx, abs(g))
+stem(0:N2, abs(g_hat), 'x')
+stem(0:15, abs(g_est(1:16)), '^')
+legend('Actual g', 'g_hat', 'IDFT of G_est')
 
-% figure,
-% subplot 211
-% plot(real(G)), hold on
-% plot(real(G_hat))
-% plot(indices, real(G_est), '^')
-% title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
-% legend('real(G)', 'real(G_hat)', 'real(G_{est})'), xlabel('i - subchannels'), ylabel('Real(G)'),
-% grid on, xlim([1, M])
-%
-% subplot 212
-% plot(imag(G)), hold on
-% plot(imag(G_hat))
-% plot(indices, imag(G_est), '^')
-% title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
-% legend('imag(G)', 'imag(G_hat)', 'imag(G_{est})'), xlabel('i - subchannels'), ylabel('imag(G)'),
-% grid on, xlim([1, M])
+figure,
+subplot 211
+plot(real(G)), hold on
+plot(real(G_hat))
+plot(indices, real(G_est), '^')
+title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
+legend('real(G)', 'real(G_hat)', 'real(G_{est})'), xlabel('i - subchannels'), ylabel('Real(G)'),
+grid on, xlim([1, M])
+
+subplot 212
+plot(imag(G)), hold on
+plot(imag(G_hat))
+plot(indices, imag(G_est), '^')
+title(strcat('Comparison between estimated - LS+interpol - and real at ', num2str(snr), ' dB'))
+legend('imag(G)', 'imag(G_hat)', 'imag(G_{est})'), xlabel('i - subchannels'), ylabel('imag(G)'),
+grid on, xlim([1, M])

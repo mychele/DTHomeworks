@@ -19,7 +19,6 @@ ts = ts_generation(allowed_symb-1, 1) * sqrt(2);
 init_step = 1; % < 16
 indices = init_step : spacing : init_step + spacing*(allowed_symb-1);
 % Scale in order to double the power of tx symbols
-% TODO What should we set the other symbols to?
 block(indices) = ts;
 
 % Compute IDFT, add prefix, P/S
@@ -27,8 +26,7 @@ A = ifft(block);
 A_pref = [A(end-Npx + 1:end); A];
 s = reshape(A_pref, [], 1);
 
-%% CHANNELIZATION
-% Do our own transmission and reception of the training sequence
+%% Transmission and reception of the training sequence
 
 snr_lin = 10^(snr/10);
 [r, ~, ~] = channel_output(s, snr_lin, OFDM);
@@ -55,7 +53,6 @@ F = dftmtx(M);
 F = F(indices, 1:N2+1);
 g_hat = (F' * F) \ (F' * G_est);
 G_hat = fft(g_hat, M);
-
 
 % Noise estimation
 xhat = X_known * G_hat(init_step : spacing : end);
