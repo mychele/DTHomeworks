@@ -234,7 +234,7 @@ If we set the DFE to use the actual impulse response of the channel and channel 
 	\label{eq:problem2llr}
 \end{equation}
 
-In the case of the DFE driven by the estimate of channel impulse response and noise power, the resulting LLR formula is the same as~\eqref{eq:problem2llr}, however the component variance $\sigma_v^2$ this time is different, because the filter coefficients and the functional $J_{min}$ are computed exploiting the imperfect estimation of the channel. This means that also the resulting $\simga_v^2$ will contain a flawed estimate of the channel noise. 
+In the case of the DFE driven by the estimate of channel impulse response and noise power, the resulting LLR formula is the same as~\eqref{eq:problem2llr}, however the component variance $\sigma_v^2$ this time is different, because the filter coefficients and the functional $J_{min}$ are computed exploiting the imperfect estimation of the channel. This means that also the resulting $\sigma_v^2$ will contain a flawed estimate of the channel noise. 
 
 The results of the simulations can be seen in Figure~\ref{fig:problem2_pbit}. The behavior of the system using channel coding with respect to the uncoded one is similar to what was found in Problem 1 (see Figure~\ref{fig:problem1_pbit}. As the BER displayed in Problem 1 represents an AWGN theoretical limit it can be seen that with respect to the ideal channel, a DFE equalizing a non-ideal channel needs a SNR 1 dB higher to achieve the same performance if the actual impulse response and channel noise are known, and a SNR 2 dBs higher if the channel information must be estimated (with a training sequence of length $L=31$). This applies both to the coded and to the uncoded scenarios. % TODO More on this?
 
@@ -329,7 +329,7 @@ Then the log-likelihood ratios (LLR) of each subchannel for the pair of bits tha
 \end{equation}
 %% TODO check indices
 
-\subsection*{Channel estimation for OFDM}
+\subsection*{Channel and noise estimation for OFDM}
 In order to perform the operations described in the previous section, the receiver has to know the frequency response of the channel and the noise power of each subchannel. In this homework the simulation of the BER has been carried out both with an \textit{a priori} perfectly known channel and with an estimated channel. 
 
 %TODO give reasons behind this kind of spacing
@@ -379,18 +379,18 @@ Finally, the noise power is estimated as
 provided that $a_{ts}[i]\hat{G}_c[i] \! - \! x_0[i]$ has zero mean.
 
 
-\subsection*{Alternative method dunno}
+\subsection*{Second method for channel and noise estimation}
 
-In absence of noise, \eqref{eq:OFDMfreqresp} can easily be inverted to obtain the exact value of $\mathbf{g}_c$. In fact, that equation represents a system of 32 equations in 8 unknowns, which is an overdetermined system with a unique solution. In fact, we could in principle use any 8 subchannels to get an estimated frequency response -- we tried different scenarios and the resulting estimate is as good as we want, provided a high enough SNR. The presence of noise affects the variance of the estimators: more precisely, the variance of the estimate $\hat{G}_c[i]$, that only depends on the noise, becomes very high for subchannel indices $i$ that are far from the nearest element of the set $\mathcal{T}_{ind}$. For instance, if we use as training subchannels the ones in the middle, i.e. $i = 241,\ldots,272$, then the estimated $\hat{G}_c[i]$ for very low and very high frequencies will be very unreliable. The solution of equally spaced subchannels for the estimation turns out to be the most robust to noise.
+In absence of noise, \eqref{eq:OFDMfreqresp} can easily be inverted to obtain the exact value of $\mathbf{g}_c$. In fact, that equation represents a system of 32 equations in 8 unknowns, which is an overdetermined system with a unique solution. In fact, we could in principle use any 8 subchannels to get an estimated frequency response -- we tried different scenarios and the resulting estimate is as good as we want, provided a high enough SNR. The presence of noise affects the variance of the estimators: more precisely, the variance of the estimate $\hat{G}_c[i]$, that only depends on the noise, becomes very high for subchannel indices $i$ that are far from the nearest element of the set $\mathcal{T}_{ind}$. For instance, if we use as training subchannels the ones in the middle, i.e. $i = 241,\ldots,272$, then the estimated $\hat{G}_c[i]$ for very low and very high frequencies will be very unreliable. The solution with equally spaced subchannels for the estimation turns out to be the most robust to noise.
 
-As already mentioned, the frequency response we are estimating has only 8 degrees of liberty, therefore in principle we could use for instance 8 equally spaced subchannels to get a good result. Moreover, for the same reason, the 512 coefficients $G_c[i]$ are heavily correlated, therefore adjacent subchannels will have a similar frequency response. The last observation suggests that a good solution for the estimation of the subchannel noise would be to transmit training symbols on adjacent subchannels, and measure the variance of the estimated frequency responses $\hat{G}_c[i]$, assuming in those subchannels $G_c[i]$ is approximately constant. Indeed, if the noise is powerful enough, the variability of the estimated $\hat{G}_c[i]$ in adjacent subchannels is almost completely due to noise. We chose to consider 8 equally spaced groups of 4 adjacent subchannels each, as explained in the following.
+As already mentioned, the frequency response we are estimating has only 8 degrees of freedom, therefore in principle we could use for instance 8 equally spaced subchannels to get a good result. Moreover, for the same reason, the 512 coefficients $G_c[i]$ are heavily correlated, therefore adjacent subchannels will have a similar frequency response. The latter observation suggests that a good solution for the estimation of the subchannel noise would be to transmit training symbols on adjacent subchannels, and measure the variance of the estimated frequency responses $\hat{G}_c[i]$, assuming in those subchannels $G_c[i]$ is approximately constant. Indeed, if the noise is powerful enough, the variability of the estimated $\hat{G}_c[i]$ in adjacent subchannels is almost completely due to noise. We chose to consider 8 equally spaced groups of 4 adjacent subchannels each, as explained in the following.
 
 The frequency response estimation in this case is the same as in the first method, except for the index selection -- therefore the resulting estimate will actually be different. A first estimate of the frequency response in 32 indices is performed as in \eqref{eq:OFDMfreqresp}, then the LS problem in \eqref{eq:OFDM_LS} is solved to get $\mathbf{\hat{g}}_c$ and then $\mathbf{\hat{G}}_c$. The difference is in the definition of the $L_{ts}\!=\!32$ chosen indices: the new set of indices is
 \begin{equation}
 	\mathcal{T}_{ind}^{(2)} = \left\{q \, \frac{\ofdM}{8} + j, \quad q = 0,7, \quad j=0,\ldots,3 \right\}  = \left\{ 0, 1, 2, 3, 64, 65, 66, 67, \dots \right\},
 	\label{eq:OFDMnewmethodindices}
 \end{equation}
-differently from the equally spaced pattern defined in \eqref{eq:OFDMequallyspacedindices}. The frequency response estimation is illustrated in Fig.~\ref{fig:p3_newmethodexample}, in which we show the true response $\mathbf{G}_c$, the estimate $\mathbf{\hat{G}}_c$, and the first raw estimate $\mathbf{\tilde{G}}_c$. The latter vector is shorter then the other, since it consists of $L_{ts}$ elements, which are unevenly placed across the frequency spectrum as per \eqref{eq:OFDMnewmethodindices}.
+differently from the equally spaced pattern defined in \eqref{eq:OFDMequallyspacedindices}. The frequency response estimation is illustrated in Fig.~\ref{fig:p3_newmethodexample}, in which we show the true response $\mathbf{G}_c$, the estimate $\mathbf{\hat{G}}_c$, and the first raw estimate $\mathbf{\tilde{G}}_c$. The latter vector is shorter than the others, since it consists of $L_{ts}$ elements, which are unevenly placed across the frequency spectrum as per \eqref{eq:OFDMnewmethodindices}.
 
 \begin{figure}
 	\centering
@@ -405,18 +405,48 @@ As for the noise variance estimation, we proceed as follows. For each of the 8 s
 \end{equation}
 therefore the estimate of the noise variance for a given subchannel group $q$ is
 \begin{equation}
-	\hat{\sigma}_{w,q}^2 = v_q \: \dfrac{\sigma_{ts}^2}{\ofdM}.
+	\hat{\sigma}_{w,q}^2 = \hat{\sigma}_{\tilde{W}, q}^2 \: \dfrac{\sigma_{ts}^2}{\ofdM} = v_q \: \dfrac{\sigma_{ts}^2}{\ofdM}.
 \end{equation}
-Since we have 32 allowed subchannel, and we used the scheme defined in \eqref{eq:OFDMnewmethodindices} for the frequency response estimation, we can iterate the noise estimation on all 8 groups and then take the average, so the estimate of the noise variance is finally
+Since we have 32 allowed subchannels, and we used the scheme defined in \eqref{eq:OFDMnewmethodindices} for the frequency response estimation, we can iterate the noise estimation on all 8 groups and then take the average, so the estimate of the noise variance is finally
 \begin{equation}
 	\hat{\sigma}_w^2 = \dfrac{\sigma_{ts}^2}{\ofdM} \left( \frac{1}{8} \sum_{q=0}^{7} v_q \right).
+	\label{eq:noisepwrest_newmethod}
 \end{equation}
 
 The main tradeoff of this method is the following. Using larger groups of subchannels we are increasing the accuracy of the variance estimation, but there are two downsides. Firstly, the variability of the frequency response starts playing a major role in the estimated variance, yielding a worse estimation of the noise variance, which does not prevail anymore. Secondly, we are increasing the spacing between groups of subchannels, therefore the estimation of the frequency response itself gets worse. On the other hand, using small groups, the estimated variance would be mainly due to noise, and the frequeny response estimation would be more accurate, but we have too few samples in each group to compute the sample variance.
 
-Using 8 groups of 4 subsequent subchannels, the implementation is easy, we get a good estimate of the frequency response, and the estimate of the noise power is strongly improved with respect to our original method, up until SNR = 18 dB approximately. With high SNR instead, the estimated variance $v_q$ is given by the local variability of the frequency response $\mathbf{G}_c$ rather than the channel noise. In that case the frequency response estimate is almost perfect, whereas the subchannel noise power will be strongly overestimated since $v_q$ is lower bounded by the local variability of $\mathbf{G}_c$. Some of these performance results are discussed below.
+Using 8 groups of 4 subsequent subchannels, the implementation is straightforward, we get a good estimate of the frequency response, and the estimate of the noise power is strongly improved with respect to our original method, up until SNR = 18 dB approximately. With high SNR instead, the estimated variance $v_q$ is given by the local variability of the frequency response $\mathbf{G}_c$ rather than the channel noise. In that case the frequency response estimate is almost perfect, whereas the subchannel noise power will be strongly overestimated since $v_q$ is lower bounded by the local variability of $\mathbf{G}_c$. Some of these performance results are discussed below.
 
-%TODO Discuss performances (comparison script)
+To compare the two methods we tested both of them at different values of SNR. For each SNR, 1000 simulations are performed, in which the channel frequency response and noise power are estimated by mean of the two methods. Hence we consider two performance metrics:
+\begin{itemize}
+	\item the estimation error on the frequency response $\mathbf{G}_c$ defined as
+		\begin{equation}
+			\mathcal{E}_G = \dfrac{1}{\ofdM} \sum_{i=0}^{\ofdM - 1} \left| \mathbf{\hat{G}}_c [i] - \mathbf{G}_c [i] \right|^2,
+		\end{equation}
+	\item the estimated noise variance $\hat{\sigma}_w^2$ with respect to the true $\sigma_w^2$ known \textit{a priori}.
+\end{itemize}
+
+Looking at Fig.~\ref{fig:p3_comparison}, the following considerations are in order. As for the first metric, the estimation error on $\mathbf{G}_c$ is the same for the two methods (the 95\% confidence intervals are almost completely overlapped) even though, according to \eqref{eq:OFDMnewmethodindices}, in the second method the training symbols are not sent in subchannels evenly spaced apart.
+
+\begin{figure}
+\centering
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth]{p3_comparison_estimerror}
+\end{minipage}\hfill
+\begin{minipage}{0.49\textwidth}
+\centering
+\includegraphics[width=\textwidth]{p3_comparison_noise}
+\end{minipage}
+\caption{Estimation error on $\mathbf{G}_c$ and estimated noise variance $\hat{\sigma}_w^2$ for the two methods. Mean and 95\% confidence intervals over 1000 simulations. The estimated $\hat{\sigma}_w^2$ is also compared with the actual value of $\sigma_w^2$.}
+\label{fig:p3_comparison}
+\end{figure}
+
+As for the second metric, the first method always underestimates the noise power. This is due to the fact that some noise is considered as part of the channel response, so its estimated power will be less than the actual one. As a side note, we observed that by increasing the number $L_{ts}$ of training symbols the noise estimation improves: in fact, having more data available, the estimator can more easily distinguish the noise from the useful signal. The underestimation factor is constant for all SNRs.
+
+The second method instead performs much better even with $L_{ts} \! = \! 32$. As we already mentioned, the noise power in this case is overestimated, since the variance $v_q$ we used to estimate the noise in \eqref{eq:noisepwrest_newmethod} considers both the actual channel noise and the local variability of $G_c [i]$. Therefore, for high values of the SNR, the part of $v_q$ that is due to the variability of $G_c [i]$ dominates over the noise variance, and the value of $\hat{\sigma}_w^2$ as the noise power goes to zero tends to a (finite non-zero) number that depends on the variability of $G_c[i]$ around the subchannels chosen in \eqref{eq:OFDMnewmethodindices}.
+
+The overestimation factor of the second method becomes larger than the underestimation factor of the first one when the SNR exceeds 18 dB approximately. Therefore, for the scenarios considered in this homework, the second method proves better than the first one with regards to the noise estimation, whereas the frequency response estimation error is the same, even though the estimated responses are different across the two methods. In conclusion, we chose to apply the second method to the OFDM simulations with estimated channel.
 
 \begin{thebibliography}{10}
 

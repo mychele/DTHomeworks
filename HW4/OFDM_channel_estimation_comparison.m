@@ -5,7 +5,7 @@
 %#ok<*SAGROW>
 
 clear, close all
-numsim = 500;
+numsim = 1000;
 OFDM = true;
 M = 512;
 allowed_symb = 32;
@@ -13,7 +13,7 @@ Npx = 7;
 N2 = 4;
 t0 = 5;
 
-snr_vec = 0:2:22;
+snr_vec = 0:2:24;
 
 block = ones(M, 1)*(-1-1i);
 % Scale in order to double the power of tx symbols
@@ -74,7 +74,7 @@ for snr_i = 1:length(snr_vec)
       est_sigma_w(sim, snr_i) = E/M;
       
       % Error on the estimate of G
-      est_err(sim, snr_i) = sum(abs(G_hat - G).^2);
+      est_err(sim, snr_i) = sum(abs(G_hat - G).^2) / M;
       
    end
    
@@ -147,7 +147,7 @@ for snr_i = 1:length(snr_vec)
       
       
       % Error on the estimate of G
-      est_err(sim, snr_i) = sum(abs(G_hat - G).^2);
+      est_err(sim, snr_i) = sum(abs(G_hat - G).^2) / M;
    end
 end
 
@@ -166,21 +166,23 @@ errorbar(snr_vec, meanest2, ciest2)
 plot(snr_vec, sigma_w)
 hold off
 grid on, box on, set(gca, 'yscale', 'log')
-legend('Original method', 'Second method', 'Actual \sigma_w')
+legend('First method', 'Second method', 'Actual \sigma_w')
 xlim([snr_vec(1), snr_vec(end)])
 ax = gca; ax.XTick = snr_vec;
 xlabel('SNR (dB)')
-title('Comparison of estimates of \sigma_w')
+ylabel('Estimated \sigma_w^2')
+title('Comparison of estimates of \sigma_w^2')
 
 figure, hold on
 errorbar(snr_vec, meanesterr, ciesterr)
 errorbar(snr_vec, meanesterr2, ciesterr2)
 hold off
 grid on, box on, set(gca, 'yscale', 'log')
-legend('Original method', 'Second method')
+legend('First method', 'Second method')
 xlim([snr_vec(1), snr_vec(end)])
 ax = gca; ax.XTick = snr_vec;
 xlabel('SNR (dB)')
+ylabel('Estimation error')
 title('Estimation error on G')
 
 
