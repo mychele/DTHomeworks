@@ -164,11 +164,7 @@ From now on in the Figures that represent the different systems under analysis t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section*{Problem 2}
-In order to compute the BER, we need to use two different schemes in case we exploit channel coding or not. 
-
-If channel coding is used, the DFE scheme depicted in Figure~\ref{fig:DFE_system} is preceded by a series of blocks that code the message and interleave it, as shown in Figure~\ref{fig:code}. At the receiver side, the $y_k$ signal upon which the DFE takes the decisions is then used to compute the \emph{log-likelihood-ratio} and decoded message using the scheme of Figure~\ref{fig:code}.
-
-On the other hand, the simulations that do not use channel coding follow the block scheme in Figure~\ref{fig:DFE_system}, where the symbols $a_k$ are the output of a bitmap that maps the input message to QPSK symbols, and the output of the DFE, $\hat{a}_{k-D}$, is then feeded to an inverse bitmap block that translates back the symbols into bits.
+In order to compute the BER, we need to use two different schemes in case we exploit channel coding or not. If channel coding is used, the DFE scheme depicted in Figure~\ref{fig:DFE_system} is preceded by a series of blocks that code the message and interleave it, as shown in Figure~\ref{fig:code}. At the receiver side, the $y_k$ signal upon which the DFE takes the decisions is then used to compute the \emph{log-likelihood-ratio} and decoded message using the scheme of Figure~\ref{fig:code}. On the other hand, the simulations that do not use channel coding follow the block scheme in Figure~\ref{fig:DFE_system}, where the symbols $a_k$ are the output of a bitmap that maps the input message to QPSK symbols, and the output of the DFE, $\hat{a}_{k-D}$, is then feeded to an inverse bitmap block that translates back the symbols into bits.
 
 \begin{figure}[h!]
 	\centering
@@ -179,13 +175,10 @@ On the other hand, the simulations that do not use channel coding follow the blo
 
 % TODO Check out the new formulaTION, consider if this should be added:
 % Indeed, with this choice the symbol $a_k$ is seen by the receiver as multiplied by the maximum tap of the channel impulse response.
-The timing phase is $t_0 = 5 T_a$. Since $t_0$ is defined as the phase offset between the transmitted and received sequence that yields the highest cross-correlation between the two, it was determined as the index for which $|g_i|$ is maximum, which in this case coincides with the first non-zero sample of the channel impulse response ${g_i}$. This choice means that considered the given channel the number of precursors and postcursors we will consider are $N1 = 0$ and $N2 = 4$. 
-
-The SNR of the system is $\Gamma = \frac{\sigma_a^2 E_g}{\sigma_w^2}$, with $\sigma_w^2$ the power of the additive white Gaussian noise of the channel.
+The timing phase is $t_0 = 5 T_a$. Since $t_0$ is defined as the phase offset between the transmitted and received sequence that yields the highest cross-correlation between the two, it was determined as the index for which $|g_i|$ is maximum, which in this case coincides with the first non-zero sample of the channel impulse response ${g_i}$. This choice means that considered the given channel the number of precursors and postcursors we will consider are $N_1 = 0$ and $N_2 = 4$. The SNR of the system is $\Gamma = \frac{\sigma_a^2 E_g}{\sigma_w^2}$, with $\sigma_w^2$ the power of the additive white Gaussian noise of the channel.
 
 % About the DFE
-The DFE filter is designed considering the perfectly known channel impulse response and channel noise. The parameters are $M_1, M_2, D$, but $M_2$ is actually dependent on $M_1$ and $D$ because in order to cancel out all the postcursors it must be $M_2 = N_2 + M_1 - 1 - D$. The values of $M_1$ and $D$ chosen are the ones
-that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we are asked to consider, which is $\Gamma = 0$. The choice is then checked against the $J_{min}$ for higher SNR up to 14 dB, and if they are too small, i.e. they do not minimize the functional, they are updated in order to have filters that work in the best way for all the $\Gamma \in [0, 14]$ dB considered. In Figure~\ref{fig:jmin_DFE} the functional $J_{min}$ is plotted against $M_1, D$ for the lowest and highest SNR considered. 
+The DFE filter is designed considering the perfectly known channel impulse response and channel noise. The parameters are $M_1, M_2, D$, but $M_2$ is actually dependent on $M_1$ and $D$ because in order to cancel out all the postcursors it must be $M_2 = N_2 + M_1 - 1 - D$. The values of $M_1$ and $D$ chosen are the ones that minimize the functional $J_{min}$ of the DFE for the lowest SNR $\Gamma$ we are asked to consider, which is $\Gamma = 0$. The choice is then checked against the $J_{min}$ for higher SNR up to 14 dB, and if they are too small, i.e. they do not minimize the functional, they are updated in order to have filters that work in the best way for all the $\Gamma \in [0, 14]$ dB considered. In Figure~\ref{fig:jmin_DFE} the functional $J_{min}$ is plotted against $M_1, D$ for the lowest and highest SNR considered. 
 \begin{figure}[h!]
 	\centering
 	\subfigure[$\Gamma = 0$ dB]{\includegraphics[width = 0.4\textwidth]{JminDFE_0}}
@@ -208,17 +201,14 @@ This allows us to write
 \begin{equation}
 	e_k = a_{k-D} - \psi_D a_{k-D} - v_k = a_{k-D} (1 - \psi_D) - v_k.
 \end{equation}
-
 Now, if we pick $c = c_{opt}$ (as we actually do, since we compute the FF filter using the Weiner-Hopf method), the functional is minimized, and since the terms $a_{k-D} (1 - \psi_D)$ and $v_k$ are assumed to be uncorrelated, we can write: 
 \begin{equation}
 	J_{min} = E[|a_{k-D} (1 - \psi_D) - v_k|^2] = \sigma_a^2 |1-\psi_D|^2 + \sigma_v^2.
 \end{equation}
-
 Since we are interested in an expression for the noise variance at detection point in the DFE $\sigma_v^2$, we finally find that 
 \begin{equation}
 	v_k \sim \mathcal{CN}(0, J_{min}-\sigma_a^2|1-\psi_D|^2).
 \end{equation}
-
 In order to maintain the receiver QPSK constellation the same as that of the transmitter, we normalize the $y_k$ signal and use:
 \begin{equation}
  	 \bar{y}_k = \frac{y_k}{\psi_D} = a_{k-D} + \bar{v}_k, \quad \bar{v}_k \sim \mathcal{CN}\left(0, \frac{J_{min}-\sigma_a^2|1-\psi_D|^2}{|\psi_D|^2}\right).
