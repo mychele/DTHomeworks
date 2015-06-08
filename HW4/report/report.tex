@@ -213,7 +213,7 @@ In order to maintain the receiver QPSK constellation the same as that of the tra
  	 \label{eq:noisevar}
  \end{equation}
 
-If we set the DFE to use the actual impulse response of the channel and channel noise, we can assume that there is no much ISI left after the cancellation performed using the $b$ filter. Anyway there could be still some wrong decisions which result in erroneous cancellations. Thus, the variance of the noise component of the samples $y_k = y_{k,I} + j y_{k,Q}$ considered in the LLR formula is $\sigma_I^2 = 0.5 \sigma_v^2$, as the per component noise must be considered, with $\sigma_v^2$ as in~\eqref{eq:noisevar}. The LLR formula that is used in this case is then:
+If we set the DFE to use the actual impulse response of the channel and channel noise, we can assume that there is no much ISI left after the cancellation performed using the $b$ filter. Anyway there could be still some wrong decisions which yield erroneous cancellations. Thus, the variance of the noise per component of the samples $y_k = y_{k,I} + j y_{k,Q}$ considered in the LLR formula is $\sigma_I^2 = 0.5 \sigma_v^2$, as the per component noise must be considered, with $\sigma_v^2$ as in~\eqref{eq:noisevar}. The LLR formula that is used in this case is then:
 
 \begin{equation}
 	\ell'_p =
@@ -300,7 +300,7 @@ The receiver then performs the DFT using an $\ofdM \times \ofdM$ DFT matrix $\DF
 \begin{equation}
 	 \mathbf{x}_k = \DFTmat \mathbf{r}_k = \DFTmat \boldsymbol{\Xi} \DFTmat^{-1} \DFTmat \mathbf{g}_{c,\ofdM} + \DFTmat \mathbf{w}_k = \mathrm{diag}\{\mathbf{a}_k\} \mathbf{G}_c + \mathbf{W}_k.
 \end{equation}
-The vector $\mathbf{W}_k$ is a still composed of independent Gaussian random variables, each with variance $\sigma_W^2 = \ofdM \sigma_w^2$. 
+The vector $\mathbf{W}_k$ is a still composed of independent Gaussian random variables, each with variance $\sigma_W^2 = \ofdM \sigma_w^2$, and $\mathbf{G}_c $ is the DFT of the channel impulse response $\mathbf{g}_{c,\ofdM}$.
 
 This procedure removes the effects of ICI and ISI introduced by the non-ideal channel, and it is followed by a scaling of the received symbols on each channel in order to get the same constellation of the transmitter. More specifically, for each subchannel $i$ we have
 \begin{equation}
@@ -326,17 +326,17 @@ Then the log-likelihood ratios (LLR) of each subchannel for the pair of bits tha
 \subsection*{Channel and noise estimation for OFDM}
 In order to perform the operations described in the previous section, the receiver has to know the frequency response of the channel and the noise power of each subchannel. In this homework the simulation of the BER has been carried out both with an \textit{a priori} perfectly known channel and with an estimated channel. 
 
-The estimation of the channel has to be performed with $L_{ts} = 32$ pilot symbols, using one single block, for instance $k=0$. In \eqref{eq:snrOFDM} the power of the transmitted symbols is usually $\sigma_a^2 = 2$, but the pilot symbols have power $\sigma_{ts}^2 = 4$ as required. The pilot symbols $a_{ts}[i]$ are transmitted on the $L_{ts}$ subchannels with indices
+The estimation of the channel has to be performed with $L_{ts} = 32$ pilot symbols, which are the mapping into the symbols $\pm (1+j)$ of a QPSK constellation of a training sequence of length $L = 31$, partially repeated by 1. Note that the choice of the pilot symbols has no consequences on the channel estimation. They are sent using one single block, for instance $k=0$. In \eqref{eq:snrOFDM} the power of the transmitted symbols is usually $\sigma_a^2 = 2$, but the pilot symbols have power $\sigma_{ts}^2 = 4$ as required. The pilot symbols $a_{ts}[i]$ are transmitted on the $L_{ts}$ subchannels with indices
 \begin{equation}
 	i \in \mathcal{T}_{ind} = \left\{q \, \frac{\ofdM}{L_{ts}}, \ q = 0, 1, \ldots,L_{ts}-1 \right\}  = \left\{ 0, 16, 32, \dots, 496 \right\},
 	\label{eq:OFDMequallyspacedindices}
 \end{equation}
-i.e. with a spacing of $\ofdM/L_{ts}$ subchannels between each other. The other $\ofdM - L_{ts}$ symbols can be data or anything else, since they are not used for the estimation. At the receiver, after the DFT, each of the $L_{ts}$ symbols $x_0[i], i \in \mathcal{T}_{ind}$ is divided by the corresponding pilot symbol $a_{ts}[i]$ in order to get $\tilde{G}_c[i]$. Formally, the estimated frequency response of the $i$-th subchannel is
+i.e. with a spacing of $\ofdM/L_{ts}$ subchannels between each other. The other $\ofdM - L_{ts}$ symbols can be data or anything else, since they are not used for the estimation. At the receiver, after the DFT, each of the $L_{ts}$ received noisy symbols $x_0[i], i \in \mathcal{T}_{ind}$ is divided by the corresponding pilot symbol $a_{ts}[i]$ in order to get $\tilde{G}_c[i]$. Formally, a raw estimation of the frequency response of the $i$-th subchannel is
 \begin{equation}
 	\tilde{G}_c[i] = \dfrac{x_0[i]}{a_{ts}[i]} = \dfrac{a_{ts}[i] G_c[i] + W_0[i]}{a_{ts}[i]} = G_c[i] + \dfrac{W_0[i]}{a_{ts}[i]}, \qquad i \in \mathcal{T}_{ind}.
 \end{equation}
 
-Our estimation method exploits the fact that the channel impulse response can have at most $N_{px} + 1 = 8$ taps, so the uncorrelated samples of the frequency response $G_c[i]$ are at most 8. In the presence of noise, however, the estimated frequency response has more than 8 degrees of freedom, and we will try to determine a better estimate (more robust to noise), by using all 32 symbols, equally spaced apart as described above.
+Our estimation method then exploits the fact that the channel impulse response can have at most $N_{px} + 1 = 8$ taps, so the uncorrelated samples of the frequency response $G_c[i]$ are at most 8. In the presence of noise, however, the estimated frequency response has more than 8 degrees of freedom, and we will try to determine a better estimate (more robust to noise), by using all 32 symbols, equally spaced apart as described above.
 
 Let $\DFTmat$ be a $\ofdM \times \ofdM$ DFT matrix as before, and let $\DFTmat'$ be the result of keeping only the first $N_{px}+1$ columns of $\DFTmat$. Defining $\mathbf{G}_c = [ G_c[i] ]_{i = 0,\ldots,\ofdM-1}$ as the DFT of the channel impulse response, then
 \begin{equation}
@@ -353,7 +353,7 @@ be the vector of noise samples corresponding to the considered subchannels (i.e.
 	\label{eq:OFDMfreqresp}
 \end{equation}
 
-Given an observation of $\tilde{\mathbf{G}}_c $, the vector $\mathbf{g}_{c}$ can be finally computed by applying the LS method, formulated as
+Given an observation of $\tilde{\mathbf{G}}_c $, the vector $\mathbf{g}_{c}$ can be finally estimated by applying the LS method, formulated as
 \begin{equation}
 	\mathbf{\hat{g}}_c = \arg\min_{\mathbf{g}_c} \left|\left|\DFTreduced \cdot \mathbf{g}_{c} - \tilde{\mathbf{G}}_c\right|\right|^2.
 	\label{eq:OFDM_LS}
