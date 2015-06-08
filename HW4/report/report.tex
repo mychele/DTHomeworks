@@ -365,17 +365,21 @@ In matrix form, the solution is given by the following equations:
 	\hat{\mathbf{g}}_{c} &= \boldsymbol{\Phi}^{-1} \boldsymbol{\theta}.
 \end{align}
 Let $\hat{\mathbf{g}}_{c, \ofdM}$ be $\hat{\mathbf{g}}_{c}$ with a zero padding in order to make it $\ofdM$ samples long, as defined before. In order to estimate the frequency response at each subchannel, the DFT is applied on $\hat{\mathbf{g}}_{c, \ofdM}$, to obtain $\mathbf{\hat{G}}_c = \mathcal{F}[\mathbf{\hat{g}}_{c, \ofdM}]$. 
-Finally, the noise variance is estimated as 
+Finally, the noise variance of the channel is estimated as 
 \begin{equation}
 	\hat{\sigma}_w^2 = \frac{\hat{\sigma}_W^2}{\ofdM} = \frac{1}{\ofdM \: L_{ts}} \sum_{i \in \mathcal{T}_{ind}} \left| a_{ts}[i]\hat{G}_c[i] - x_0[i] \right| ^2,
 	\label{eq:OFDMestimerror_firstmethod}
 \end{equation}
-assuming that $a_{ts}[i]\hat{G}_c[i] \! - \! x_0[i]$ has zero mean.
+assuming that $a_{ts}[i]\hat{G}_c[i] \! - \! x_0[i]$ has zero mean. Therefore, for each subchannel, the noise variance will be
+\begin{equation}
+	\frac{\hat{\sigma}_W^2}{|\hat{G}_c[i]|^2} = \frac{\ofdM \hat{\sigma}_w^2}{|\hat{G}_c[i]|^2}.
+	\label{eq:persubchannel}
+\end{equation}
 
 
 \subsection*{Second method for channel and noise estimation}
 
-In absence of noise, \eqref{eq:OFDMfreqresp} can easily be inverted to obtain the exact value of $\mathbf{g}_c$. In fact, that equation represents a system of 32 equations in 8 unknowns, which is an overdetermined system with a unique solution. Actually, we could in principle use any 8 subchannels to get an estimated frequency response -- we tried different scenarios and the resulting estimate is as good as we want, provided a high enough SNR. The presence of noise affects the variance of the estimators: more precisely, the variance of the estimate $\hat{G}_c[i]$, that only depends on the noise, becomes very high for subchannel indices $i$ that are far from the nearest element of the set $\mathcal{T}_{ind}$. For instance, if we use as training subchannels the ones in the middle, i.e. $i = 241,\ldots,272$, then the estimated $\hat{G}_c[i]$ for very low and very high frequencies will be very unreliable. The solution with equally spaced subchannels for the estimation turns out to be the most robust to noise.
+In absence of noise, \eqref{eq:OFDMfreqresp} can easily be inverted to obtain the exact value of $\mathbf{g}_c$. In fact, that equation represents a system of 32 equations in 8 unknowns, which is an overdetermined system with a unique solution. Actually, we could in principle use any 8 subchannels to get an estimated frequency response -- we tried different scenarios and the resulting estimate is as good as we want, provided a \textit{high enough} SNR. The presence of noise affects the variance of the estimators: more precisely, the variance of the estimate $\hat{G}_c[i]$, that only depends on the noise, becomes very high for subchannel indices $i$ that are far from the nearest element of the set $\mathcal{T}_{ind}$. For instance, if we use as training subchannels the ones in the middle, i.e. $i = 241,\ldots,272$, then the estimated $\hat{G}_c[i]$ for very low and very high frequencies will be very unreliable. The solution with equally spaced subchannels for the estimation turns out to be the most robust to noise.
 
 As already mentioned, the frequency response we are estimating has only 8 degrees of freedom, therefore in principle we could use for instance 8 equally spaced subchannels to get a good result. Moreover, for the same reason, the 512 coefficients $G_c[i]$ are heavily correlated, therefore adjacent subchannels will have a similar frequency response. The latter observation suggests that a good solution for the estimation of the subchannel noise would be to transmit training symbols on adjacent subchannels, and measure the variance of the estimated frequency responses $\hat{G}_c[i]$, assuming in those subchannels $G_c[i]$ is approximately constant. Indeed, if the noise is powerful enough, the variability of the estimated $\hat{G}_c[i]$ in adjacent subchannels is almost completely due to noise. We chose to consider 8 equally spaced groups of 4 adjacent subchannels each, as explained in the following.
 
@@ -406,8 +410,9 @@ Since we have 32 allowed subchannels, and we used the scheme defined in \eqref{e
 	\hat{\sigma}_w^2 = \dfrac{\sigma_{ts}^2}{\ofdM} \left( \frac{1}{8} \sum_{q=0}^{7} v_q \right).
 	\label{eq:noisepwrest_newmethod}
 \end{equation}
+and the variance of the noise for each subchannel is as in~\eqref{eq:persubchannel}.
 
-The main tradeoff of this method is the following. Using larger groups of subchannels we are increasing the accuracy of the variance estimation, but there are two downsides. Firstly, the variability of the frequency response starts playing a major role in the estimated variance, yielding a worse estimation of the noise variance, which does not prevail anymore. Secondly, we are increasing the spacing between groups of subchannels, therefore the estimation of the frequency response itself gets worse. On the other hand, using small groups, the estimated variance would be mainly due to noise, and the frequeny response estimation would be more accurate, but we have too few samples in each group to compute the sample variance.
+The main tradeoff of this method is the following. A larger groups of subchannels increases the accuracy of the variance estimation, but there are two downsides. Firstly, the variability of the frequency response starts playing a major role in the estimated variance, yielding a worse estimation of the noise variance, which does not prevail anymore. Secondly, we are increasing the spacing between groups of subchannels, therefore the estimation of the frequency response itself gets worse. On the other hand, using small groups, the estimated variance would be mainly due to noise, and the frequeny response estimation would be more accurate, but we have too few samples in each group to compute the sample variance.
 
 Using 8 groups of 4 subsequent subchannels, the implementation is straightforward, we get a good estimate of the frequency response, and the estimate of the noise power is strongly improved with respect to our original method, up until SNR = 18 dB approximately. With high SNR instead, the estimated variance $v_q$ is given by the local variability of the frequency response $\mathbf{G}_c$ rather than the channel noise. In that case the frequency response estimate is almost perfect, whereas the subchannel noise power will be strongly overestimated since $v_q$ is lower bounded by the local variability of $\mathbf{G}_c$. Some of these performance results are discussed below.
 
@@ -442,7 +447,7 @@ The second method instead performs much better even with $L_{ts} \! = \! 32$. As
 
 The overestimation factor of the second method becomes larger than the underestimation factor of the first one when the SNR exceeds 18 dB approximately. Therefore, for the scenarios considered in this homework, the second method proves better than the first one with regards to the noise estimation, whereas the frequency response estimation error is the same, even though the estimated responses are different across the two methods. In conclusion, we chose to apply the second method to the OFDM simulations with estimated channel.
 
-Note that, while the formulation for the LLRs for the OFDM system which uses the channel estimation is the same as in~\eqref{eq:LLRofdm}, the variance of subchannel noise used in the log-likelihood ratios of each subchannel is the estimated one, computed from the estimate $\hat{\sigma}_w^2$ of the channel noise given in~\eqref{eq:noisepwrest_newmethod}. Therefore we have that 
+Note that, while the formulation for the LLRs for the OFDM system which uses the channel estimation is the same as in~\eqref{eq:LLRofdm}, the variance of subchannel noise used in the log-likelihood ratios of each subchannel is the estimated one, computed from the estimate $\hat{\sigma}_w^2$ of the channel noise given in~\eqref{eq:noisepwrest_newmethod}. Therefore we have that for each subchannel
 \begin{equation}
 	\hat{\sigma}_I^2  = \frac{\ofdM \hat{\sigma}_w^2}{2 |\hat{G}_c[i]|^2}
 \end{equation}
