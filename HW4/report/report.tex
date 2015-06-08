@@ -309,7 +309,7 @@ This procedure removes the effects of ICI and ISI introduced by the non-ideal ch
 \end{equation}
 Finally the receiver performs a decision. If the transmitted bits are uncoded, it uses a threshold detector on each subchannel and an inverse bitmap. Note that the performances of an uncoded OFDM system are negatively affected by the presence of subchannels with a small frequency response coefficient $G_c[i]$. In fact, in those subchannels the received symbols are below noise level, and the noisy term in $y_k[i]$ is amplified by a factor $(G_c[i])^{-1}$.
 
-Instead, if coding is used, the data that would be lost because of the attenuation of its subchannel can be recovered. In particular, given the observed symbol $y_k[i]$ defined in~\eqref{eq:yofdm}, let the variance per component of the noise affecting $y_k[i]$ be
+Instead, if coding is used, the data that would be lost because of the attenuation of its subchannel can be recovered. In particular, for each subchannel, given the observed symbol $y_k[i]$ defined in~\eqref{eq:yofdm}, let the variance per component of the noise affecting $y_k[i]$ be
 \begin{equation}
 	\sigma_I^2 = \frac{\sigma_W^2}{2 |G_c[i]|^2} = \frac{\ofdM \sigma_w^2}{2 |G_c[i]|^2}.
 \end{equation}
